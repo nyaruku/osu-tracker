@@ -27,10 +27,24 @@ include(FetchContent)
 
 option(CPR_BUILD_TESTS    "Build CPR test suite" OFF)
 option(CPR_BUILD_EXAMPLES "Build CPR examples"   OFF)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "Disable shared libs globally")
+
+# Ensure static CPR
+set(CPR_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(CPR_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(CPR_FORCE_USE_SYSTEM_CURL OFF CACHE BOOL "" FORCE)
+set(CPR_USE_SYSTEM_CURL OFF CACHE BOOL "" FORCE)
+
 
 # Windows doesn't have curl installed by default
 if (WIN32)
   set(CPR_USE_SYSTEM_CURL OFF CACHE BOOL "" FORCE)
+  # Tell CPR to build curl statically | IMPORTANT FOR WINDOWS
+  set(CURL_USE_STATIC_LIBS ON CACHE BOOL "" FORCE)
+  set(BUILD_CURL_EXE OFF CACHE BOOL "" FORCE)
+  set(ENABLE_CURL_STATIC ON CACHE BOOL "" FORCE)
+  set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+
 else()
   set(CPR_USE_SYSTEM_CURL ON  CACHE BOOL "" FORCE)
 endif()
@@ -84,15 +98,15 @@ set(PROJECT_SOURCES
 
 # Platform‑specific UI bridge
 if (WIN32)
-  list(APPEND ${PROJECT_SOURCES} header/ui/ui_windows.c includes/nuklear/nuklear_gdi.h)
+  list(APPEND PROJECT_SOURCES header/ui/ui_windows.c includes/nuklear/nuklear_gdi.h)
 else()
-  list(APPEND ${PROJECT_SOURCES} includes/nuklear/glfw3.h includes/nuklear/glfw3native.h header/ui/ui_linux.c includes/nuklear/nuklear_glfw_gl2.h)
+  list(APPEND PROJECT_SOURCES includes/nuklear/glfw3.h includes/nuklear/glfw3native.h header/ui/ui_linux.c includes/nuklear/nuklear_glfw_gl2.h)
 endif()
 
 
 if (WIN32)
   # Use the WIN32 keyword so the console window is hidden in Release builds.
-  add_executable(osu-tracker WIN32 ${PROJECT_SOURCES} res/resources.rc)
+  add_executable(osu-tracker ${PROJECT_SOURCES} res/resources.rc)
 else()
   add_executable(osu-tracker ${PROJECT_SOURCES})
 endif()
@@ -105,10 +119,10 @@ if (WIN32)
     _WIN32 
     CURL_STATICLIB 
     OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID="${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}")
-
-  target_link_libraries(osu-tracker PRIVATE  
-    cpr::cpr 
+    target_link_libraries(osu-tracker PRIVATE  
+    cpr::cpr
     zlib
+    ws2_32
     user32 gdi32 Msimg32 crypt32 advapi32)
 else()
   target_compile_definitions(osu-tracker PRIVATE 
