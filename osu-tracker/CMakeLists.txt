@@ -123,6 +123,7 @@ if (WIN32)
     ws2_32
     user32 gdi32 Msimg32 crypt32 advapi32)
 else()
+  find_package(ZLIB REQUIRED)  # Find zlib on Linux
   target_compile_definitions(osu-tracker PRIVATE 
     OSU_TRACKER_PLATFORM="linux" 
     __linux__ 
@@ -130,7 +131,7 @@ else()
 
   target_link_libraries(osu-tracker PRIVATE 
     cpr::cpr 
-    zlib
+    ZLIB::ZLIB
     glfw 
     OpenGL::GL 
     ${X11_LIBRARIES}
