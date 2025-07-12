@@ -9,6 +9,15 @@
 #include "console.h"
 #include <algorithm>
 
+constexpr uint32_t fnv1a(const char* str) {
+	uint32_t hash = 2166136261u;
+	while (*str) {
+		hash ^= static_cast<uint32_t>(*str++);
+		hash *= 16777619u;
+	}
+	return hash;
+}
+
 #define FOREACH_DATA_KEY(F) \
 	F(level) \
 	F(rankedScore) \

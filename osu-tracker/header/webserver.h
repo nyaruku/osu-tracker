@@ -275,7 +275,6 @@ public:
 						for (const auto& item : j["msg"]["trackerConfig"]) {
 							config::data::arr[config::data::getIndex(item["key"].get<std::string>().c_str())].display = item["value"];
 						}
-
 						if(resetSession)
 							api::fetch_api_data(true);
 						config::writeConfig();
