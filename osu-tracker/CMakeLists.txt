@@ -143,7 +143,11 @@ add_executable(update update.cpp lib/miniz.c)
 
 target_include_directories(update SYSTEM PRIVATE ${BASE_INCLUDE_PATH})
 
-target_link_libraries(update PRIVATE zlib)
+if (WIN32)
+  target_link_libraries(update PRIVATE zlib)
+else()
+  target_link_libraries(update PRIVATE z)
+endif()
 
 foreach(_t osu-tracker update)
   set_target_properties(${_t} PROPERTIES
