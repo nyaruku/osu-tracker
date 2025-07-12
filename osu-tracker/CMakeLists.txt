@@ -48,6 +48,8 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/libcpr/cpr.git
   GIT_TAG        1.12.0
 )
+set(CURL_DISABLE_LDIDN ON CACHE BOOL "" FORCE)
+set(CURL_DISABLE_IDN ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(cpr)
 
 
