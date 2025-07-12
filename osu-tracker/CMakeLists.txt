@@ -1,4 +1,4 @@
-# THIS IS A PILE OF JUNK
+# THIS IS A PILE OF JUNK test
 cmake_minimum_required(VERSION 3.15)
 project(osu-tracker LANGUAGES C CXX)
 
@@ -42,7 +42,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(cpr)
 
-# Unix like already have zlib most of the time
+# Unix like already have zlib most of the time 
 if (WIN32)
   FetchContent_Declare(
     zlib
