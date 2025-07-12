@@ -6,7 +6,7 @@ project(osu-tracker LANGUAGES C CXX)
 set(CMAKE_BUILD_PARALLEL_LEVEL 16) # got a new cpu :3
 
 set(CMAKE_CXX_STANDARD 20) # Set the C++ standard to C++20
-set(CMAKE_C_STANDARD 23) # Set the C standard to C23
+set(CMAKE_C_STANDARD 11) # Set the C standard to C11
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
@@ -14,130 +14,156 @@ set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 # Base directories
 set(BASE_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/includes")
 
-# Add the include directories for the project
+# Add the include directories
 include_directories(${BASE_INCLUDE_PATH})
 
-# CMAKE
+file(COPY ${CMAKE_SOURCE_DIR}/www         DESTINATION "${CMAKE_BINARY_DIR}/osu-tracker/")
+file(COPY ${CMAKE_SOURCE_DIR}/tracker_txt DESTINATION "${CMAKE_BINARY_DIR}/osu-tracker/")
+
+# Dependencies
 option(USE_STATIC_LIB "Use static library" ON)
 
-file(COPY ${CMAKE_SOURCE_DIR}/www DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/osu-tracker/")
-file(COPY ${CMAKE_SOURCE_DIR}/tracker_txt DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/osu-tracker/")
+include(FetchContent)
 
-# Sources
-file(GLOB_RECURSE CPR_SOURCES CONFIGURE_DEPENDS lib/cpr/*.cpp)
-file(GLOB_RECURSE ZLIB_SOURCES CONFIGURE_DEPENDS lib/zlib/*.c)
-file(GLOB_RECURSE MINIZ_SOURCES CONFIGURE_DEPENDS lib/miniz.c)
+option(CPR_BUILD_TESTS    "Build CPR test suite" OFF)
+option(CPR_BUILD_EXAMPLES "Build CPR examples"   OFF)
 
-# Headers
-file(GLOB_RECURSE CPR_HEADERS CONFIGURE_DEPENDS lib/cpr/*.h)
-file(GLOB_RECURSE CURL_HEADERS CONFIGURE_DEPENDS lib/curl/lib/*.h)
-file(GLOB_RECURSE ZLIB_HEADERS CONFIGURE_DEPENDS lib/zlib/*.h)
-file(GLOB_RECURSE MINIZ_HEADERS CONFIGURE_DEPENDS includes/miniz.h)
-file(GLOB_RECURSE NUKLEAR_HEADER CONFIGURE_DEPENDS includes/nuklear/nuklear.h)
-file(GLOB_RECURSE NUKLEAR_HEADER_WIN CONFIGURE_DEPENDS includes/nuklear/nuklear_gdi.h)
-file(GLOB_RECURSE NUKLEAR_HEADER_LINUX CONFIGURE_DEPENDS includes/nuklear/nuklear_glfw_gl2.h)
-file(GLOB_RECURSE NUKLEAR_HEADER_GLFW CONFIGURE_DEPENDS includes/nuklear/glfw3.h)
-file(GLOB_RECURSE NUKLEAR_HEADER_GLFW_NATIVE CONFIGURE_DEPENDS includes/nuklear/glfw3native.h)
-
-# No MacOS support, cant test
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-	add_compile_definitions(OSU_TRACKER_PLATFORM="windows")
-	add_compile_definitions(_WIN32)
-	add_compile_definitions(OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID="${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}")
-
-	# Static libcurl, libcrypto and libssl (windows only)
-	# Using system curl and zlib on linux
-	set(LIBCURL_LIBRARY "${CMAKE_SOURCE_DIR}/lib/static/libcurl.lib")
-	set(LIBCRYPTO_LIBRARY "${CMAKE_SOURCE_DIR}/lib/static/libcrypto_static.lib")
-	set(LIBSSL_LIBRARY "${CMAKE_SOURCE_DIR}/lib/static/libssl_static.lib")
-	add_executable(osu-tracker main.cpp
-		${CPR_SOURCES}
-		${CPR_HEADERS}
-		${CURL_HEADERS}
-		${ZLIB_SOURCES}
-		${ZLIB_HEADERS}
-		${NUKLEAR_HEADER}
-		${NUKLEAR_HEADER_WIN}
-		header/ui/ui_windows.c
-	)
-	target_sources(osu-tracker PRIVATE "${CMAKE_SOURCE_DIR}/res/resources.rc")
-	add_executable(update update.cpp
-		${ZLIB_SOURCES}
-		${ZLIB_HEADERS}
-		${MINIZ_SOURCES}
-		${MINIZ_HEADERS}
-	)
-	target_link_libraries(update)
-	# static libcurl
-	add_definitions(-DCURL_STATICLIB)
-	# static link for tracker
-	target_link_libraries(osu-tracker PRIVATE user32.lib gdi32.lib Msimg32.lib crypt32 advapi32 ${LIBCRYPTO_LIBRARY} ${LIBSSL_LIBRARY} ${LIBCURL_LIBRARY})
-
-	# Include bundled libraries
-	include_directories(
-		${CMAKE_SOURCE_DIR}/lib/cpr/cpr
-		${CMAKE_SOURCE_DIR}/lib/cpr/include
-		${CMAKE_SOURCE_DIR}/lib/curl/include
-		${CMAKE_SOURCE_DIR}/lib/zlib
-	)
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-	add_compile_definitions(OSU_TRACKER_PLATFORM="linux")
-	add_compile_definitions(__linux__)
-	set(LIBGLFW3 "${CMAKE_SOURCE_DIR}/lib/static/libglfw3.a")
-	add_compile_definitions(OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID="${CMAKE_SYSTEM_PROCESSOR}")
-	find_package(CURL REQUIRED)
-	find_package(ZLIB REQUIRED)
-	find_package(X11 REQUIRED)
-	add_executable(osu-tracker main.cpp
-		${CPR_SOURCES}
-		${CPR_HEADERS}
-		${NUKLEAR_HEADER}
-		${NUKLEAR_HEADER_LINUX}
-		header/ui/ui_linux.c
-	)
-	add_executable(update update.cpp
-		${MINIZ_SOURCES}
-		${MINIZ_HEADERS}
-	)
-	target_link_libraries(update PRIVATE ${ZLIB_LIBRARIES})
-	
-	# Include system headers
-	include_directories(${CURL_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS} ${X11_INCLUDE_DIR})
-	target_link_libraries(osu-tracker PRIVATE ${CURL_LIBRARIES} ${ZLIB_LIBRARIES} ${X11_LIBRARIES} ${LIBGLFW3} m GL)
-	include_directories(
-		${CMAKE_SOURCE_DIR}/lib/cpr/cpr
-		${CMAKE_SOURCE_DIR}/lib/cpr/include
-	)
+# Windows doesn't have curl installed by default
+if (WIN32)
+  set(CPR_USE_SYSTEM_CURL OFF CACHE BOOL "" FORCE)
+else()
+  set(CPR_USE_SYSTEM_CURL ON  CACHE BOOL "" FORCE)
 endif()
-	
-set_target_properties(osu-tracker PROPERTIES OUTPUT_NAME "osu-tracker" RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/osu-tracker")
-set_target_properties(update PROPERTIES OUTPUT_NAME "update" RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/osu-tracker")
-	
-# CMAKE BUILD AND COMPILER DEFINITIONS
+
+FetchContent_Declare(
+  cpr
+  GIT_REPOSITORY https://github.com/libcpr/cpr.git
+  GIT_TAG        1.12.0
+)
+FetchContent_MakeAvailable(cpr)
+
+# Unix like already have zlib most of the time
+if (WIN32)
+  FetchContent_Declare(
+    zlib
+    URL https://github.com/madler/zlib.git
+    GIT_TAG 1.3.1
+)
+FetchContent_MakeAvailable(zlib)
+endif()
+
+
+
+if (UNIX AND NOT APPLE)
+  FetchContent_Declare(
+    glfw
+    GIT_REPOSITORY https://github.com/glfw/glfw.git
+    GIT_TAG 3.4
+  )
+  set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+  set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+  set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+  FetchContent_MakeAvailable(glfw)
+  
+  find_package(OpenGL REQUIRED)
+  find_package(X11 REQUIRED)
+endif()
+
+
+set(PROJECT_SOURCES
+  main.cpp
+  includes/nuklear/nuklear.h
+  includes/nuklear/glfw3.h
+  includes/nuklear/glfw3native.h
+)
+
+
+# Platform‑specific UI bridge
+if (WIN32)
+  list(APPEND ${PROJECT_SOURCES} header/ui/ui_windows.c)
+else()
+  list(APPEND ${PROJECT_SOURCES} header/ui/ui_linux.c includes/nuklear/nuklear_glfw_gl2.h)
+endif()
+
+
+if (WIN32)
+  # Use the WIN32 keyword so the console window is hidden in Release builds.
+  add_executable(osu-tracker WIN32 ${PROJECT_SOURCES} res/resources.rc)
+else()
+  add_executable(osu-tracker ${PROJECT_SOURCES})
+endif()
+
+# Platform‑specific compile definitions & link libraries
+# No Mac-os lol
+if (WIN32)
+  target_compile_definitions(osu-tracker PRIVATE 
+    OSU_TRACKER_PLATFORM="windows" 
+    _WIN32 
+    CURL_STATICLIB 
+    OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID="${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}")
+
+  target_link_libraries(osu-tracker PRIVATE 
+    cpr::cpr 
+    zlibstatic
+    user32 gdi32 Msimg32 crypt32 advapi32)
+else()
+  target_compile_definitions(osu-tracker PRIVATE 
+    OSU_TRACKER_PLATFORM="linux" 
+    __linux__ 
+    OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID="${CMAKE_SYSTEM_PROCESSOR}")
+
+  target_link_libraries(osu-tracker PRIVATE 
+    cpr::cpr 
+    zlib
+    glfw 
+    OpenGL::GL 
+    ${X11_LIBRARIES}
+  )
+endif()
+
+target_include_directories(osu-tracker SYSTEM PRIVATE ${BASE_INCLUDE_PATH})
+
+add_executable(update update.cpp lib/miniz.c)
+
+target_include_directories(update SYSTEM PRIVATE ${BASE_INCLUDE_PATH})
+
+target_link_libraries(update PRIVATE zlib)
+
+foreach(_t osu-tracker update)
+  set_target_properties(${_t} PROPERTIES
+      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/osu-tracker"  # keep assets & exe together
+  )
+endforeach()
+
+# Build and compiler definitions
+# Could be simplified more, but cmake is clusterfuck
 add_compile_definitions(OSU_TRACKER_CMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}")
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-	add_compile_definitions(DEBUG_BUILD)
-	if(MSVC)
-	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-		# Linux (GCC/Clang) specific optimizations
-		#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wno-changes-meaning")
-		#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -Wno-unused-function -D_POSIX_C_SOURCE=200809L")
-	endif()
-elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-	add_compile_definitions(RELEASE_BUILD)
-	if(MSVC)
-		# Windows (MSVC) specific optimizations
-		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /GL")
-		set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /O2 /GL")
-		set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG")
-		set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /LTCG")
-	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-		# Linux (GCC/Clang) specific optimizations
-		#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wno-changes-meaning")
-		#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -Wno-unused-function -D_POSIX_C_SOURCE=200809L")
-	endif()
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  add_compile_definitions(DEBUG_BUILD)
+  
+  if (MSVC)
+    # Nothing yet
+  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wno-changes-meaning")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -Wno-unused-function")
+  endif()
+  
+elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
+  add_compile_definitions(RELEASE_BUILD)
+  
+  if (MSVC)
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /GL")
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /O2 /GL")
+    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG")
+    set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /LTCG")
+    
+  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wno-changes-meaning")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -Wno-unused-function")
+  endif()
+  
 endif()
-	
+
 # WEB SERVER DEFINITIONS 
 add_compile_definitions(OSU_TRACKER_ENABLE_WEBSERVER=1) # Legacy flag due to webserver was an optional feature
 add_compile_definitions(OSU_TRACKER_WEBSERVER_IP="127.0.0.1")
