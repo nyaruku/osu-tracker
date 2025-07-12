@@ -224,7 +224,7 @@ int ui_main(void)
         // ui
         nk_style_default(ctx);
         drawContent(ctx, fontDefault, fontSmall, fontHeader, w, h, _app, _user, _entries, _entry_count, show_debug_layout, data_debug_layout);
-
+	nk_end(ctx);
 
         /* Draw */
         glfwGetWindowSize(win, &width, &height);
