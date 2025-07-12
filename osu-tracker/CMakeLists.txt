@@ -25,16 +25,11 @@ option(USE_STATIC_LIB "Use static library" ON)
 
 include(FetchContent)
 
-option(CPR_BUILD_TESTS    "Build CPR test suite" OFF)
-option(CPR_BUILD_EXAMPLES "Build CPR examples"   OFF)
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "Disable shared libs globally")
-
 # Ensure static CPR
 set(CPR_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(CPR_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(CPR_FORCE_USE_SYSTEM_CURL OFF CACHE BOOL "" FORCE)
 set(CPR_USE_SYSTEM_CURL OFF CACHE BOOL "" FORCE)
-
 
 # Windows doesn't have curl installed by default
 if (WIN32)
@@ -44,7 +39,6 @@ if (WIN32)
   set(BUILD_CURL_EXE OFF CACHE BOOL "" FORCE)
   set(ENABLE_CURL_STATIC ON CACHE BOOL "" FORCE)
   set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-
 else()
   set(CPR_USE_SYSTEM_CURL ON  CACHE BOOL "" FORCE)
 endif()
