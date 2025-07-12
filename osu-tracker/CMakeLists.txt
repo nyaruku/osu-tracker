@@ -48,12 +48,18 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/libcpr/cpr.git
   GIT_TAG        1.12.0
 )
-set(CURL_DISABLE_LDIDN ON CACHE BOOL "" FORCE)
-set(ENABLE_IDN OFF CACHE BOOL "" FORCE)
-set(ENABLE_LDIDN OFF CACHE BOOL "" FORCE)
+# Forcefully disable IDN and libpsl (needed to avoid Meson)
 set(CURL_USE_LIBPSL OFF CACHE BOOL "" FORCE)
 set(USE_LIBPSL OFF CACHE BOOL "" FORCE)
+set(ENABLE_LIBPSL OFF CACHE BOOL "" FORCE)
+set(ENABLE_IDN OFF CACHE BOOL "" FORCE)
+set(CURL_DISABLE_IDN ON CACHE BOOL "" FORCE)
+set(CURL_DISABLE_LDIDN ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(cpr)
+message(STATUS "CURL_USE_LIBPSL=${CURL_USE_LIBPSL}")
+message(STATUS "ENABLE_IDN=${ENABLE_IDN}")
+message(STATUS "CURL_DISABLE_IDN=${CURL_DISABLE_IDN}")
+
 
 
 # Unix like already have zlib most of the time
