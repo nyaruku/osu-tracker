@@ -50,6 +50,7 @@ FetchContent_Declare(
 )
 set(CURL_DISABLE_LDIDN ON CACHE BOOL "" FORCE)
 set(CURL_DISABLE_IDN ON CACHE BOOL "" FORCE)
+set(CURL_USE_LIBPSL OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(cpr)
 
 
