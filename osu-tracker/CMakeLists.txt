@@ -27,6 +27,7 @@ include(FetchContent)
 
 option(CPR_BUILD_TESTS    "Build CPR test suite" OFF)
 option(CPR_BUILD_EXAMPLES "Build CPR examples"   OFF)
+option(CPR_BUI "Build CPR examples"   OFF)
 
 # Windows doesn't have curl installed by default
 if (WIN32)
@@ -42,8 +43,11 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(cpr)
 
+
 # Unix like already have zlib most of the time
 if (WIN32)
+  set(ZLIB_USE_STATIC_LIBS "ON")
+  #set(ZLIB_BUILD_STATIC ON CACHE BOOL "" FORCE)
   FetchContent_Declare(
     zlib
     URL https://github.com/madler/zlib.git
@@ -72,17 +76,19 @@ endif()
 
 set(PROJECT_SOURCES
   main.cpp
+  header/ui/ui.h
+  header/ui/extc.h
+  header/ui/draw.h
   includes/nuklear/nuklear.h
-  includes/nuklear/glfw3.h
-  includes/nuklear/glfw3native.h
+  includes/nuklear/stb_image.h
+  
 )
-
 
 # Platform‑specific UI bridge
 if (WIN32)
-  list(APPEND ${PROJECT_SOURCES} header/ui/ui_windows.c)
+  list(APPEND ${PROJECT_SOURCES} header/ui/ui_windows.c includes/nuklear/nuklear_gdi.h)
 else()
-  list(APPEND ${PROJECT_SOURCES} header/ui/ui_linux.c includes/nuklear/nuklear_glfw_gl2.h)
+  list(APPEND ${PROJECT_SOURCES} includes/nuklear/glfw3.h includes/nuklear/glfw3native.h header/ui/ui_linux.c includes/nuklear/nuklear_glfw_gl2.h)
 endif()
 
 
@@ -102,9 +108,9 @@ if (WIN32)
     CURL_STATICLIB 
     OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID="${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}")
 
-  target_link_libraries(osu-tracker PRIVATE 
+  target_link_libraries(osu-tracker PRIVATE  
     cpr::cpr 
-    zlibstatic
+    zlib
     user32 gdi32 Msimg32 crypt32 advapi32)
 else()
   target_compile_definitions(osu-tracker PRIVATE 
