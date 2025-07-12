@@ -1,4 +1,4 @@
-# THIS IS A PILE OF JUNK test
+# THIS IS A PILE OF JUNK
 cmake_minimum_required(VERSION 3.15)
 project(osu-tracker LANGUAGES C CXX)
 
