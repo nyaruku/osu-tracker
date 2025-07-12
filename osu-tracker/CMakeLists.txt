@@ -27,7 +27,6 @@ include(FetchContent)
 
 option(CPR_BUILD_TESTS    "Build CPR test suite" OFF)
 option(CPR_BUILD_EXAMPLES "Build CPR examples"   OFF)
-option(CPR_BUI "Build CPR examples"   OFF)
 
 # Windows doesn't have curl installed by default
 if (WIN32)
@@ -81,7 +80,6 @@ set(PROJECT_SOURCES
   header/ui/draw.h
   includes/nuklear/nuklear.h
   includes/nuklear/stb_image.h
-  
 )
 
 # Platform‑specific UI bridge
