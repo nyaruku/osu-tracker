@@ -277,29 +277,24 @@ public:
 		if (str == "[Sort]") return Sort;
 		return None;
 	}
-
-	// this is basically a csv generator with headers and comments
 	static void writeConfig() {
-		console::writeLog("Writing config file...");
-		std::string input;
-		input += "//PLEASE DONT MANUALLY EDIT THIS FILE\n"
-			"//(you still can,but you might break it)\n"
-			"//(If you want to reset all settings, just delete this file)\n\n";
-		input += "[Main]";
+		console::writeLog("Creating config file...");
+		nlohmann::json config;
 		for (const auto& [key, value] : config::application::instance().toArray()) {
-			input += "\n" + key + ";" + value;
+			if (value == "") {
+				config["Main"][key] = nullptr;
+				continue;
+			}
+			config["Main"][key] = value;
 		}
-		input += "\n\n[Display]";
 		for (const config::dataEntry _vecData : config::data::arr) {
-			input += "\n" + _vecData.key + ";" + ext::bool2str(_vecData.display);
+			config["Display"][_vecData.key]["visible"] = _vecData.display;
+			config["Display"][_vecData.key]["sort"] = _vecData.sort;
 		}
-		input += "\n\n[Sort]\n" + std::to_string(config::data::arr[0].sort);
-		for (size_t _idx = 1; _idx < config::data::arr.size(); _idx++) {
-			input += ";" + std::to_string(config::data::arr[_idx].sort);
-		}
+		console::writeLog("Writing Config...");
 		std::ofstream file;
-		file.open("config.txt");
-		file << input;
+		file.open("config.json");
+		file << config.dump(4);
 		file.close();
 		console::writeLog("Config written");
 	}
