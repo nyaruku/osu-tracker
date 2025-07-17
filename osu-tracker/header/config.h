@@ -265,21 +265,10 @@ public:
 		}
 	};
 
-	enum fileHeader {
-		None
-		,Main
-		,Display
-		,Sort
-	};
-	static fileHeader resolve(std::string str) {
-		if (str == "[Main]") return Main;
-		if (str == "[Display]") return Display;
-		if (str == "[Sort]") return Sort;
-		return None;
-	}
 	static void writeConfig() {
 		console::writeLog("Creating config file...");
-		nlohmann::json config;
+		// ordered_json bc it sorts alphabetically by default
+		nlohmann::ordered_json config;
 		for (const auto& [key, value] : config::application::instance().toArray()) {
 			if (value == "") {
 				config["Main"][key] = nullptr;
@@ -300,43 +289,17 @@ public:
 	}
 
 	static void readConfig() {
-		if (std::ifstream file{ "config.txt" }; file.is_open()) {
+		if (std::ifstream file{ "config.json" }; file.is_open()) {
 			console::writeLog("Reading config file...");
-			int configHeader = -1;
-			for (std::string line; std::getline(file, line); ){
-				if (line.starts_with("//") || line.empty())
-					continue;
-				if (line.starts_with("[")) {
-					switch (resolve(line)) {
-						case Main:
-							configHeader = 0;
-							break;
-						case Display:
-							configHeader = 1;
-							break;
-						case Sort:
-							configHeader = 2;
-							break;
-					}
-					continue;
-				}
-				std::string key, value;
-				switch (configHeader) {
-					case 0:
-						std::tie(key, value) = ext::split2tuple(line, ';');
-						config::application::set(key, value);
-						break;
-					case 1:
-						std::tie(key, value) = ext::split2tuple(line, ';');
-						config::data::arr[config::data::getIndex(key.c_str())].display = ext::str2bool(value);
-						break;
-					case 2:
-						std::vector<std::string> _arr = ext::split2vector(line, ';');
-						for (size_t _idx = 0; _idx < _arr.size(); _idx++) {
-							config::data::arr[_idx].sort = std::stoi(_arr[_idx]);
-						}
-						break;
-				}
+			nlohmann::ordered_json config = nlohmann::ordered_json::parse(file);
+			// the same code as range for
+			for (auto& main : config["Main"].items()) {
+				// explicit string conversion ?
+				config::application::set(main.key(), main.value().get<std::string>());
+			}
+			for (auto& display : config["Display"].items()) {
+				config::data::arr[config::data::getIndex(display.key().c_str())].display = display.value()["visible"].get<bool>();
+				config::data::arr[config::data::getIndex(display.key().c_str())].sort = display.value()["sort"].get<int>();
 			}
 			file.close();
 		}
