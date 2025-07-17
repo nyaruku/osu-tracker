@@ -294,8 +294,16 @@ public:
 			nlohmann::ordered_json config = nlohmann::ordered_json::parse(file);
 			// the same code as range for
 			for (auto& main : config["Main"].items()) {
-				// explicit string conversion ?
-				config::application::set(main.key(), main.value().get<std::string>());
+				if (main.value().is_null()) {
+					config::application::set(main.key(), "");
+				}
+				else if (main.value().is_string()) {
+					config::application::set(main.key(), main.value().get<std::string>());
+				}
+				else {
+					// fallback: dump to string
+					config::application::set(main.key(), main.value().dump());
+				}
 			}
 			for (auto& display : config["Display"].items()) {
 				config::data::arr[config::data::getIndex(display.key().c_str())].display = display.value()["visible"].get<bool>();
