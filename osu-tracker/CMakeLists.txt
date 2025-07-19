@@ -185,6 +185,12 @@ add_compile_definitions(OSU_TRACKER_ENABLE_WEBSERVER=1) # Legacy flag due to web
 add_compile_definitions(OSU_TRACKER_WEBSERVER_IP="127.0.0.1")
 add_compile_definitions(OSU_TRACKER_WEBSERVER_PORT=10727)
     
+# Settings
+add_compile_definitions(OSU_TRACKER_VERSION_SIGNED="40")
+add_compile_definitions(OSU_TRACKER_UPDATE_MASTER=0) # Debug flag to check master branch
+add_compile_definitions(OSU_TRACKER_UPDATE_EQUAL=0) # Debug flag to download update on same signed version
+add_compile_definitions(OSU_TRACKER_WRITE_RAW=0) # True(1): write unformatted stats to file
+
 # CMAKE Info
 add_compile_definitions(OSU_TRACKER_CMAKE_GENERATOR="${CMAKE_GENERATOR}")
 add_compile_definitions(OSU_TRACKER_CMAKE_CXX_STANDARD="C++ ${CMAKE_CXX_STANDARD}")
@@ -195,11 +201,6 @@ add_compile_definitions(OSU_TRACKER_CMAKE_CXX_COMPILER_VERSION="${CMAKE_CXX_COMP
 add_compile_definitions(OSU_TRACKER_CMAKE_CXX_COMPILER="${CMAKE_CXX_COMPILER}")
 add_compile_definitions(OSU_TRACKER_CMAKE_SYSTEM_NAME="${CMAKE_SYSTEM_NAME}")
 add_compile_definitions(OSU_TRACKER_CMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}")
-
-# Auto Update Control
-add_compile_definitions(OSU_TRACKER_VERSION_SIGNED="40")
-add_compile_definitions(OSU_TRACKER_UPDATE_EQUAL=0) # Debug flag to download update on same signed version
-add_compile_definitions(OSU_TRACKER_UPDATE_MASTER=0) # Debug flag to check master branch
 
 # OSU_TRACKER PROJECT STATIC STRINGS
 add_compile_definitions(OSU_TRACKER_NAME="osu! Tracker")

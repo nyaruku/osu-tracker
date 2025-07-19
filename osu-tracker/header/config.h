@@ -265,8 +265,55 @@ public:
 		}
 	};
 
+	static void writeStats() {
+		for (dataEntry row : config::data::arr) {
+			switch (config::application::instance().server) {
+				case config::server::bancho: {
+					if (row.banchoSupport == false)
+						continue;
+					break;
+				}
+				case config::server::titanic: {
+					if (row.titanicSupport == false)
+						continue;
+					break;
+				}
+			}
+			std::ofstream file;
+
+			// raw unformatted output, usually not needed,
+			// disabled by default, recompile with flag
+			#if OSU_TRACKER_WRITE_RAW==1
+				file.open(row.key + "_init_raw.txt");
+				file << row.init;
+				file.close();
+				file.clear();
+				file.open(row.key + "_change_raw.txt");
+				file << row.change;
+				file.close();
+				file.clear();
+				file.open(row.key + "_current_raw.txt");
+				file << row.current;
+				file.close();
+				file.clear();
+			#endif
+			// formatted output (for OBS Overlays)
+			file.open(row.key + "_init.txt");
+			file << config::data::arrFormatted[config::data::getIndex(row.key.c_str())].init;
+			file.close();
+			file.clear();
+			file.open(row.key + "_change.txt");
+			file << config::data::arrFormatted[config::data::getIndex(row.key.c_str())].change;
+			file.close();
+			file.clear();
+			file.open(row.key + "_current.txt");
+			file << config::data::arrFormatted[config::data::getIndex(row.key.c_str())].current;
+			file.close();
+			file.clear();
+		}
+	}
+
 	static void writeConfig() {
-		console::writeLog("Creating config file...");
 		// ordered_json bc it sorts alphabetically by default
 		nlohmann::ordered_json config;
 		for (const auto& [key, value] : config::application::instance().toArray()) {
@@ -280,19 +327,17 @@ public:
 			config["Display"][_vecData.key]["visible"] = _vecData.display;
 			config["Display"][_vecData.key]["sort"] = _vecData.sort;
 		}
-		console::writeLog("Writing Config...");
 		std::ofstream file;
 		file.open("config.json");
 		file << config.dump(4);
 		file.close();
-		console::writeLog("Config written");
 	}
 
 	static void readConfig() {
 		if (std::ifstream file{ "config.json" }; file.is_open()) {
-			console::writeLog("Reading config file...");
 			nlohmann::ordered_json config = nlohmann::ordered_json::parse(file);
 			// the same code as range for
+			// TODO: Test on Linux
 			for (auto& main : config["Main"].items()) {
 				if (main.value().is_null()) {
 					config::application::set(main.key(), "");

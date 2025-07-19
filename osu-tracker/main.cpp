@@ -48,7 +48,6 @@ int main()
 	bool run = true;
 	bool skipInit = false;	
 	while (run) {
-
 		if (!std::filesystem::exists("config.txt")) {
 			console::writeLog("Config file not found");
 			config::writeConfig();
