@@ -48,7 +48,7 @@ int main()
 	bool run = true;
 	bool skipInit = false;	
 	while (run) {
-		if (!std::filesystem::exists("config.txt")) {
+		if (!std::filesystem::exists("config.json")) {
 			console::writeLog("Config file not found");
 			config::writeConfig();
 			config::readConfig();

@@ -417,10 +417,10 @@ public:
 
 				// PROJECT
 				ctx["thread_count"] = std::to_string(app.concurrency());
-				ctx["github"] = OSU_TRACKER_GITHUB;
-				ctx["creator"] = OSU_TRACKER_CREATOR;
-				ctx["profile"] = OSU_TRACKER_PROFILE;
-				ctx["discord"] = OSU_TRACKER_DISCORD;
+				ctx["github"] = "https://github.com/nyaruku/osu-tracker";
+				ctx["creator"] = "Railgun";
+				ctx["profile"] = "https://osu.ppy.sh/users/13817114";
+				ctx["discord"] = "https://discord.gg/FN6vauFTGA";
 		
 				// BUILD INFO
 				ctx["build_type"] = OSU_TRACKER_CMAKE_BUILD_TYPE;
@@ -428,16 +428,16 @@ public:
 
 				// Libraries
 				ctx["crow_version"] = crow::VERSION;
-				ctx["crow_repo_url"] = CROW_REPOSITORY_URL;
+				ctx["crow_repo_url"] = "https://github.com/CrowCpp/Crow/tree/e8b125159ec5e61384187e36bbf6d14f1fad504f";
 
 				ctx["libcurl_version"] = LIBCURL_VERSION;
-				ctx["libcurl_repo_url"] = LIBCURL_REPOSITORY_URL;
+				ctx["libcurl_repo_url"] = "https://github.com/curl/curl";
 
 				ctx["asio_version"] = "10.30.02";
-				ctx["asio_repo_url"] = ASIO_REPOSITORY_URL;
+				ctx["asio_repo_url"] = "https://github.com/chriskohlhoff/asio";
 
 				ctx["cpr_version"] = CPR_VERSION;
-				ctx["cpr_repo_url"] = CPR_REPOSITORY_URL;
+				ctx["cpr_repo_url"] = "https://github.com/libcpr/cpr";
 
 
 				const char* ZLIB_VERSION;
@@ -454,10 +454,10 @@ public:
 
 
 				ctx["zlib_version"] = ZLIB_VERSION;
-				ctx["zlib_repo_url"] = ZLIB_REPOSITORY_URL;
+				ctx["zlib_repo_url"] = "https://github.com/madler/zlib";
 		
 				ctx["nlohmannJson_version"] = "3.11.2";
-				ctx["nlohmannJson_repo_url"] = NLOHMANNJSON_REPOSITORY_URL;
+				ctx["nlohmannJson_repo_url"] = "https://github.com/nlohmann/json";
 
 				// CMAKE INFO
 				ctx["OSU_TRACKER_CMAKE_GENERATOR"] = OSU_TRACKER_CMAKE_GENERATOR;

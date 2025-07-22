@@ -2,21 +2,12 @@
 #pragma GCC diagnostic ignored "-Wchanges-meaning"
 #pragma GCC diagnostic pop
 
-
 #pragma once
 #include <utility>
 #include <string>
 #include "console.h"
 #include <algorithm>
-
-constexpr uint32_t fnv1a(const char* str) {
-	uint32_t hash = 2166136261u;
-	while (*str) {
-		hash ^= static_cast<uint32_t>(*str++);
-		hash *= 16777619u;
-	}
-	return hash;
-}
+#include <crow/mustache.h>
 
 #define FOREACH_DATA_KEY(F) \
 	F(level) \
@@ -266,48 +257,44 @@ public:
 	};
 
 	static void writeStats() {
-		for (dataEntry row : config::data::arr) {
-			switch (config::application::instance().server) {
-				case config::server::bancho: {
-					if (row.banchoSupport == false)
-						continue;
-					break;
-				}
-				case config::server::titanic: {
-					if (row.titanicSupport == false)
-						continue;
-					break;
+		for (auto const& dir_entry : std::filesystem::directory_iterator{ "tracker_txt/template" }) {
+			std::string content;
+			if (std::ifstream file{ dir_entry.path() }; file.is_open()) {
+				for (std::string line; std::getline(file, line); ) {
+					for (dataEntry row : config::data::arr) {
+						switch (config::application::instance().server) {
+							// only write supported and displayed data
+							case config::server::bancho: {
+								if (row.banchoSupport == false && row.display)
+									continue;
+								break;
+							}
+							case config::server::titanic: {
+								if (row.titanicSupport == false && row.display)
+									continue;
+								break;
+							}
+						}
+
+						// raw
+						line = ext::replace(line, "{{" + row.key + "_init_raw}}", row.init);
+						line = ext::replace(line, "{{" + row.key + "_change_raw}}", row.change);
+						line = ext::replace(line, "{{" + row.key + "_current_raw}}", row.current);
+
+						// formatted
+						line = ext::replace(line, "{{" + row.key + "_init}}", config::data::arrFormatted[config::data::getIndex(row.key.c_str())].init);
+						line = ext::replace(line, "{{" + row.key + "_change}}", config::data::arrFormatted[config::data::getIndex(row.key.c_str())].change);
+						line = ext::replace(line, "{{" + row.key + "_current}}", config::data::arrFormatted[config::data::getIndex(row.key.c_str())].current);
+					}
+					content += line + "\n";
 				}
 			}
+			else {
+				console::writeLog("Error reading " + dir_entry.path().string(), true, 255, 0, 0);
+			}
 			std::ofstream file;
-
-			// raw unformatted output, usually not needed,
-			// disabled by default, recompile with flag
-			#if OSU_TRACKER_WRITE_RAW==1
-				file.open(row.key + "_init_raw.txt");
-				file << row.init;
-				file.close();
-				file.clear();
-				file.open(row.key + "_change_raw.txt");
-				file << row.change;
-				file.close();
-				file.clear();
-				file.open(row.key + "_current_raw.txt");
-				file << row.current;
-				file.close();
-				file.clear();
-			#endif
-			// formatted output (for OBS Overlays)
-			file.open(row.key + "_init.txt");
-			file << config::data::arrFormatted[config::data::getIndex(row.key.c_str())].init;
-			file.close();
-			file.clear();
-			file.open(row.key + "_change.txt");
-			file << config::data::arrFormatted[config::data::getIndex(row.key.c_str())].change;
-			file.close();
-			file.clear();
-			file.open(row.key + "_current.txt");
-			file << config::data::arrFormatted[config::data::getIndex(row.key.c_str())].current;
+			file.open("tracker_txt/" + dir_entry.path().filename().string());
+			file << content;
 			file.close();
 			file.clear();
 		}
@@ -360,8 +347,7 @@ public:
 			console::writeLog("Error reading config file", true, 255, 0, 0);
 		}
 	}
-
 	static void rmConfig() {
-		std::filesystem::remove("config.txt");
+		std::filesystem::remove("config.json");
 	}
 };

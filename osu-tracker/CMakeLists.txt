@@ -189,7 +189,12 @@ add_compile_definitions(OSU_TRACKER_WEBSERVER_PORT=10727)
 add_compile_definitions(OSU_TRACKER_VERSION_SIGNED="40")
 add_compile_definitions(OSU_TRACKER_UPDATE_MASTER=0) # Debug flag to check master branch
 add_compile_definitions(OSU_TRACKER_UPDATE_EQUAL=0) # Debug flag to download update on same signed version
-add_compile_definitions(OSU_TRACKER_WRITE_RAW=0) # True(1): write unformatted stats to file
+
+# OSU_TRACKER PROJECT STATIC STRINGS
+add_compile_definitions(OSU_TRACKER_NAME="osu! Tracker")
+add_compile_definitions(OSU_TRACKER_VERSION="v0.4.0")
+add_compile_definitions(OSU_TRACKER_TITLE="osu! Tracker v0.4.0")
+add_compile_definitions(OSU_TRACKER_RELEASE_TYPE="Beta")
 
 # CMAKE Info
 add_compile_definitions(OSU_TRACKER_CMAKE_GENERATOR="${CMAKE_GENERATOR}")
@@ -201,21 +206,3 @@ add_compile_definitions(OSU_TRACKER_CMAKE_CXX_COMPILER_VERSION="${CMAKE_CXX_COMP
 add_compile_definitions(OSU_TRACKER_CMAKE_CXX_COMPILER="${CMAKE_CXX_COMPILER}")
 add_compile_definitions(OSU_TRACKER_CMAKE_SYSTEM_NAME="${CMAKE_SYSTEM_NAME}")
 add_compile_definitions(OSU_TRACKER_CMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}")
-
-# OSU_TRACKER PROJECT STATIC STRINGS
-add_compile_definitions(OSU_TRACKER_NAME="osu! Tracker")
-add_compile_definitions(OSU_TRACKER_VERSION="v0.4.0")
-add_compile_definitions(OSU_TRACKER_TITLE="osu! Tracker v0.4.0")
-add_compile_definitions(OSU_TRACKER_RELEASE_TYPE="Beta")
-add_compile_definitions(OSU_TRACKER_CREATOR="Railgun")
-add_compile_definitions(OSU_TRACKER_PROFILE="https://osu.ppy.sh/users/13817114")
-add_compile_definitions(OSU_TRACKER_GITHUB="https://github.com/nyaruku/osu-tracker")
-add_compile_definitions(OSU_TRACKER_DISCORD="https://discord.gg/FN6vauFTGA")
-
-# LIBRARY INFO
-add_compile_definitions(CROW_REPOSITORY_URL="https://github.com/CrowCpp/Crow/tree/e8b125159ec5e61384187e36bbf6d14f1fad504f")
-add_compile_definitions(LIBCURL_REPOSITORY_URL="https://github.com/curl/curl")
-add_compile_definitions(ASIO_REPOSITORY_URL="https://github.com/chriskohlhoff/asio")
-add_compile_definitions(CPR_REPOSITORY_URL="https://github.com/libcpr/cpr")
-add_compile_definitions(ZLIB_REPOSITORY_URL="https://github.com/madler/zlib")
-add_compile_definitions(NLOHMANNJSON_REPOSITORY_URL="https://github.com/nlohmann/json")
