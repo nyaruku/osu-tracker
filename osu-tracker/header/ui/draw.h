@@ -219,8 +219,7 @@ void drawContent(struct nk_context* ctx, struct nk_font* font, struct nk_font* f
 	ctx->style.window.scrollbar_size.x = 8.0f;
 	ctx->style.window.padding.x = 10.0f;
 
-
-	if (nk_begin(ctx, "[color=#FFFFFF]Railgun[/color]", nk_rect(0, 0, w, h),NK_WINDOW_TITLE| NK_WINDOW_BACKGROUND))
+	if (nk_begin(ctx, custom_strcat_static(3, "[color=#FFFFFF]", user.username ? user.username : "", "[/color]"), nk_rect(0, 0, w, h),NK_WINDOW_TITLE| NK_WINDOW_BACKGROUND))
 	{
 		#ifdef _WIN32
 		nk_gdi_set_font(font);

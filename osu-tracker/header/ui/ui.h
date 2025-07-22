@@ -169,6 +169,7 @@ private:
 public:
 	static void copyDataOnly() {
 		updateFormat();
+		config::writeStats();
 
 		appC app = to_c_appC(config::application::instance());
 
