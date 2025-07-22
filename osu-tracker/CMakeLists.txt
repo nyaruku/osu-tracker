@@ -39,6 +39,11 @@ if (WIN32)
   set(BUILD_CURL_EXE OFF CACHE BOOL "" FORCE)
   set(ENABLE_CURL_STATIC ON CACHE BOOL "" FORCE)
   set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+  set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
+  set(ENABLE_MANUAL OFF CACHE BOOL "" FORCE)
+  set(ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
+  set(ENABLE_DOCS OFF CACHE BOOL "" FORCE)
+  set(ENABLE_TESTING OFF CACHE BOOL "" FORCE)
 else()
   set(CPR_USE_SYSTEM_CURL ON  CACHE BOOL "" FORCE)
 endif()
@@ -86,7 +91,6 @@ endif()
 
 
 set(PROJECT_SOURCES
-  main.cpp
   header/ui/ui.h
   header/ui/extc.h
   header/ui/draw.h
@@ -104,9 +108,11 @@ endif()
 
 if (WIN32)
   # Use the WIN32 keyword so the console window is hidden in Release builds.
-  add_executable(osu-tracker ${PROJECT_SOURCES} res/resources.rc)
+  add_executable(osu-tracker main.cpp ${PROJECT_SOURCES} res/resources.rc)
+  add_executable(tests test.cpp ${PROJECT_SOURCES} res/resources.rc)
 else()
-  add_executable(osu-tracker ${PROJECT_SOURCES})
+  add_executable(osu-tracker main.cpp ${PROJECT_SOURCES})
+  add_executable(tests test.cpp ${PROJECT_SOURCES})
 endif()
 
 # Platform‑specific compile definitions & link libraries
@@ -117,11 +123,24 @@ if (WIN32)
     _WIN32 
     CURL_STATICLIB 
     OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID="${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}")
-    target_link_libraries(osu-tracker PRIVATE  
+   target_link_libraries(osu-tracker PRIVATE  
     cpr::cpr
     zlib
     ws2_32
-    user32 gdi32 Msimg32 crypt32 advapi32)
+    user32 gdi32 Msimg32 crypt32 advapi32
+   )
+  target_compile_definitions(tests PRIVATE 
+    OSU_TRACKER_PLATFORM="windows" 
+    _WIN32 
+    CURL_STATICLIB 
+    OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID="${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}"
+  )
+  target_link_libraries(tests PRIVATE  
+    cpr::cpr
+    zlib
+    ws2_32
+    user32 gdi32 Msimg32 crypt32 advapi32
+  )
 else()
   find_package(ZLIB REQUIRED)  # Find zlib on Linux
   target_compile_definitions(osu-tracker PRIVATE 
@@ -130,6 +149,18 @@ else()
     OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID="${CMAKE_SYSTEM_PROCESSOR}")
 
   target_link_libraries(osu-tracker PRIVATE 
+    cpr::cpr 
+    ZLIB::ZLIB
+    glfw 
+    OpenGL::GL 
+    ${X11_LIBRARIES}
+  )
+  target_compile_definitions(tests PRIVATE 
+    OSU_TRACKER_PLATFORM="linux" 
+    __linux__ 
+    OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID="${CMAKE_SYSTEM_PROCESSOR}")
+
+  target_link_libraries(tests PRIVATE 
     cpr::cpr 
     ZLIB::ZLIB
     glfw 
@@ -179,6 +210,23 @@ elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -Wno-unused-function")
   endif()
 endif()
+
+# TESTS
+include(FetchContent)
+FetchContent_Declare(
+  Catch2
+  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+  GIT_TAG v3.5.2
+)
+FetchContent_MakeAvailable(Catch2)
+enable_testing()
+target_include_directories(tests SYSTEM PRIVATE ${BASE_INCLUDE_PATH})
+
+set_target_properties(tests PROPERTIES FOLDER "Tests")
+target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)
+include(Catch)
+catch_discover_tests(tests)
+set(CTEST_OUTPUT_ON_FAILURE ON)
 
 # WEB SERVER DEFINITIONS 
 add_compile_definitions(OSU_TRACKER_ENABLE_WEBSERVER=1) # Legacy flag due to webserver was an optional feature

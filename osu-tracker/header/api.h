@@ -461,28 +461,6 @@ private:
 			return 26931190827.0L + 99999999999.0L * (n - 100);
 		}
 	}
-
-	static long double getLevelFromScore(long double totalScore) {
-			int low = 1, high = 1500;
-			int level = 0;
-
-			while (low <= high) {
-				int mid = (low + high) / 2;
-				if (scoreNeeded(mid) <= totalScore) {
-					level = mid;
-					low = mid + 1;
-				}
-				else {
-					high = mid - 1;
-				}
-			}
-
-			long double baseScore = scoreNeeded(level);
-			long double nextScore = scoreNeeded(level + 1);
-			long double fraction = (totalScore - baseScore) / (nextScore - baseScore);
-
-			return std::round((level + fraction) * 1000.0L) / 1000.0L;
-		}
 	
 	static bool download(const nlohmann::json& releaseJson) {
 		std::string target_asset = "x86-release-" + std::string(OSU_TRACKER_PLATFORM) + ".zip";
@@ -515,6 +493,28 @@ private:
 	}
 
 public:
+	static long double getLevelFromScore(long double totalScore) {
+		int low = 1, high = 1500;
+		int level = 0;
+
+		while (low <= high) {
+			int mid = (low + high) / 2;
+			if (scoreNeeded(mid) <= totalScore) {
+				level = mid;
+				low = mid + 1;
+			}
+			else {
+				high = mid - 1;
+			}
+		}
+
+		long double baseScore = scoreNeeded(level);
+		long double nextScore = scoreNeeded(level + 1);
+		long double fraction = (totalScore - baseScore) / (nextScore - baseScore);
+
+		return std::round((level + fraction) * 1000.0L) / 1000.0L;
+	}
+
 	static void fetch_api_data(bool init) {
 		switch (config::application::instance().server) {
 			case config::server::bancho: {
