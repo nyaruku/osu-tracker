@@ -44,6 +44,7 @@ if (WIN32)
   set(ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
   set(ENABLE_DOCS OFF CACHE BOOL "" FORCE)
   set(ENABLE_TESTING OFF CACHE BOOL "" FORCE)
+  # idk how many of these actually do something
 else()
   set(CPR_USE_SYSTEM_CURL ON  CACHE BOOL "" FORCE)
 endif()
@@ -55,6 +56,12 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(cpr)
 
+FetchContent_Declare(
+  Catch2
+  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+  GIT_TAG v3.5.2
+)
+FetchContent_MakeAvailable(Catch2)
 
 # Unix like already have zlib most of the time
 if (WIN32)
@@ -67,7 +74,6 @@ if (WIN32)
 )
 FetchContent_MakeAvailable(zlib)
 endif()
-
 
 
 if (UNIX AND NOT APPLE)
@@ -106,48 +112,46 @@ else()
 endif()
 
 
+add_executable(update update.cpp lib/miniz.c)
 if (WIN32)
   # Use the WIN32 keyword so the console window is hidden in Release builds.
   add_executable(osu-tracker main.cpp ${PROJECT_SOURCES} res/resources.rc)
-  add_executable(tests test.cpp ${PROJECT_SOURCES} res/resources.rc)
-else()
-  add_executable(osu-tracker main.cpp ${PROJECT_SOURCES})
-  add_executable(tests test.cpp ${PROJECT_SOURCES})
-endif()
+  add_executable(osu-tracker-test test.cpp ${PROJECT_SOURCES} res/resources.rc)
 
-# Platform‑specific compile definitions & link libraries
-# No Mac-os lol
-if (WIN32)
   target_compile_definitions(osu-tracker PRIVATE 
-    OSU_TRACKER_PLATFORM="windows" 
-    _WIN32 
-    CURL_STATICLIB 
-    OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID="${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}")
-   target_link_libraries(osu-tracker PRIVATE  
-    cpr::cpr
-    zlib
-    ws2_32
-    user32 gdi32 Msimg32 crypt32 advapi32
-   )
-  target_compile_definitions(tests PRIVATE 
     OSU_TRACKER_PLATFORM="windows" 
     _WIN32 
     CURL_STATICLIB 
     OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID="${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}"
   )
-  target_link_libraries(tests PRIVATE  
+  target_link_libraries(osu-tracker PRIVATE  
+    cpr::cpr
+    zlib
+    ws2_32
+    user32 gdi32 Msimg32 crypt32 advapi32
+  )
+  target_compile_definitions(osu-tracker-test PRIVATE 
+    OSU_TRACKER_PLATFORM="windows" 
+    _WIN32 
+    CURL_STATICLIB 
+    OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID="${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}"
+  )
+  target_link_libraries(osu-tracker-test PRIVATE  
     cpr::cpr
     zlib
     ws2_32
     user32 gdi32 Msimg32 crypt32 advapi32
   )
 else()
+  add_executable(osu-tracker main.cpp ${PROJECT_SOURCES})
+  add_executable(osu-tracker-test test.cpp ${PROJECT_SOURCES})
+
   find_package(ZLIB REQUIRED)  # Find zlib on Linux
   target_compile_definitions(osu-tracker PRIVATE 
     OSU_TRACKER_PLATFORM="linux" 
     __linux__ 
-    OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID="${CMAKE_SYSTEM_PROCESSOR}")
-
+    OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID="${CMAKE_SYSTEM_PROCESSOR}"
+  )
   target_link_libraries(osu-tracker PRIVATE 
     cpr::cpr 
     ZLIB::ZLIB
@@ -155,12 +159,11 @@ else()
     OpenGL::GL 
     ${X11_LIBRARIES}
   )
-  target_compile_definitions(tests PRIVATE 
+  target_compile_definitions(osu-tracker-test PRIVATE 
     OSU_TRACKER_PLATFORM="linux" 
     __linux__ 
     OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID="${CMAKE_SYSTEM_PROCESSOR}")
-
-  target_link_libraries(tests PRIVATE 
+  target_link_libraries(osu-tracker-test PRIVATE 
     cpr::cpr 
     ZLIB::ZLIB
     glfw 
@@ -170,10 +173,8 @@ else()
 endif()
 
 target_include_directories(osu-tracker SYSTEM PRIVATE ${BASE_INCLUDE_PATH})
-
-add_executable(update update.cpp lib/miniz.c)
-
 target_include_directories(update SYSTEM PRIVATE ${BASE_INCLUDE_PATH})
+target_include_directories(osu-tracker-test SYSTEM PRIVATE ${BASE_INCLUDE_PATH})
 
 if (WIN32)
   target_link_libraries(update PRIVATE zlib)
@@ -181,7 +182,11 @@ else()
   target_link_libraries(update PRIVATE z)
 endif()
 
-foreach(_t osu-tracker update)
+# TESTS
+set_target_properties(osu-tracker-test PROPERTIES FOLDER "Tests")
+target_link_libraries(osu-tracker-test PRIVATE Catch2::Catch2WithMain)
+
+foreach(_t osu-tracker update osu-tracker-test)
   set_target_properties(${_t} PROPERTIES
       RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/osu-tracker"  # keep assets & exe together
   )
@@ -197,7 +202,6 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wno-changes-meaning")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -Wno-unused-function")
   endif()
-  
 elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
   add_compile_definitions(RELEASE_BUILD)
   if (MSVC)
@@ -210,23 +214,6 @@ elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -Wno-unused-function")
   endif()
 endif()
-
-# TESTS
-include(FetchContent)
-FetchContent_Declare(
-  Catch2
-  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-  GIT_TAG v3.5.2
-)
-FetchContent_MakeAvailable(Catch2)
-enable_testing()
-target_include_directories(tests SYSTEM PRIVATE ${BASE_INCLUDE_PATH})
-
-set_target_properties(tests PROPERTIES FOLDER "Tests")
-target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)
-include(Catch)
-catch_discover_tests(tests)
-set(CTEST_OUTPUT_ON_FAILURE ON)
 
 # WEB SERVER DEFINITIONS 
 add_compile_definitions(OSU_TRACKER_ENABLE_WEBSERVER=1) # Legacy flag due to webserver was an optional feature

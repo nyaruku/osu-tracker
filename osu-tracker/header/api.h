@@ -494,8 +494,11 @@ private:
 
 public:
 	static long double getLevelFromScore(long double totalScore) {
+		if (totalScore < 0)
+			return 1;
+
 		int low = 1, high = 1500;
-		int level = 0;
+		int level = 1;
 
 		while (low <= high) {
 			int mid = (low + high) / 2;
