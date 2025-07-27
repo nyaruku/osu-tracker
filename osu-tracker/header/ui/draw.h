@@ -130,36 +130,11 @@ void data_debug_style(struct nk_context* ctx, struct nk_font* fontSmall, int w, 
 			nk_label(ctx, custom_strcat_static(3,"[color=#FFFF00]\"[/color][color=#0000FF]current[/color][color=#FFFF00]\"[/color][color=#FFFFFF]:([/color][color=#FF0000]", entries[i].current, "[/color][color=#FFFFFF])[/color]"), NK_TEXT_ALIGN_LEFT);
 			nk_label(ctx, custom_strcat_static(3,"[color=#FFFF00]\"[/color][color=#0000FF]change[/color][color=#FFFF00]\"[/color][color=#FFFFFF]:([/color][color=#FF0000]", entries[i].change, "[/color][color=#FFFFFF])[/color]"), NK_TEXT_ALIGN_LEFT);
 			nk_label(ctx, custom_strcat_static(3,"[color=#FFFF00]\"[/color][color=#0000FF]sort[/color][color=#FFFF00]\"[/color][color=#FFFFFF]:([/color][color=#FF0000]", intToConst(entries[i].sort), "[/color][color=#FFFFFF])[/color]"), NK_TEXT_ALIGN_LEFT);
-			if (entries[i].positive) {
-				nk_label(ctx, custom_strcat_static(1, "[color=#FFFF00]\"[/color][color=#0000FF]positive[/color][color=#FFFF00]\"[/color][color=#FFFFFF]:([/color][color=#FF0000]true[/color][color=#FFFFFF])[/color]"), NK_TEXT_ALIGN_LEFT);
-			}
-			else {
-				nk_label(ctx, custom_strcat_static(1, "[color=#FFFF00]\"[/color][color=#0000FF]positive[/color][color=#FFFF00]\"[/color][color=#FFFFFF]:([/color][color=#FF0000]false[/color][color=#FFFFFF])[/color]"), NK_TEXT_ALIGN_LEFT);
-			}
-			if (entries[i].display) {
-				nk_label(ctx, custom_strcat_static(1, "[color=#FFFF00]\"[/color][color=#0000FF]display[/color][color=#FFFF00]\"[/color][color=#FFFFFF]:([/color][color=#FF0000]true[/color][color=#FFFFFF])[/color]"), NK_TEXT_ALIGN_LEFT);
-			}
-			else {
-				nk_label(ctx, custom_strcat_static(1, "[color=#FFFF00]\"[/color][color=#0000FF]display[/color][color=#FFFF00]\"[/color][color=#FFFFFF]:([/color][color=#FF0000]false[/color][color=#FFFFFF])[/color]"), NK_TEXT_ALIGN_LEFT);
-			}
-			if (entries[i].single) {
-				nk_label(ctx, custom_strcat_static(1, "[color=#FFFF00]\"[/color][color=#0000FF]single[/color][color=#FFFF00]\"[/color][color=#FFFFFF]:([/color][color=#FF0000]true[/color][color=#FFFFFF])[/color]"), NK_TEXT_ALIGN_LEFT);
-			}
-			else {
-				nk_label(ctx, custom_strcat_static(1, "[color=#FFFF00]\"[/color][color=#0000FF]single[/color][color=#FFFF00]\"[/color][color=#FFFFFF]:([/color][color=#FF0000]false[/color][color=#FFFFFF])[/color]"), NK_TEXT_ALIGN_LEFT);
-			}
-			if (entries[i].banchoSupport) {
-				nk_label(ctx, custom_strcat_static(1, "[color=#FFFF00]\"[/color][color=#0000FF]banchoSupport[/color][color=#FFFF00]\"[/color][color=#FFFFFF]:([/color][color=#FF0000]true[/color][color=#FFFFFF])[/color]"), NK_TEXT_ALIGN_LEFT);
-			}
-			else {
-				nk_label(ctx, custom_strcat_static(1, "[color=#FFFF00]\"[/color][color=#0000FF]banchoSupport[/color][color=#FFFF00]\"[/color][color=#FFFFFF]:([/color][color=#FF0000]false[/color][color=#FFFFFF])[/color]"), NK_TEXT_ALIGN_LEFT);
-			}
-			if (entries[i].titanicSupport) {
-				nk_label(ctx, custom_strcat_static(1, "[color=#FFFF00]\"[/color][color=#0000FF]titanicSupport[/color][color=#FFFF00]\"[/color][color=#FFFFFF]:([/color][color=#FF0000]true[/color][color=#FFFFFF])[/color]"), NK_TEXT_ALIGN_LEFT);
-			}
-			else {
-				nk_label(ctx, custom_strcat_static(1, "[color=#FFFF00]\"[/color][color=#0000FF]titanicSupport[/color][color=#FFFF00]\"[/color][color=#FFFFFF]:([/color][color=#FF0000]false[/color][color=#FFFFFF])[/color]"), NK_TEXT_ALIGN_LEFT);
-			}
+			nk_label(ctx, custom_strcat_static(3, "[color=#FFFF00]\"[/color][color=#0000FF]positive[/color][color=#FFFF00]\"[/color][color=#FFFFFF]:([/color][color=#FF0000]", bool2str(entries[i].positive), "[/color][color=#FFFFFF])[/color]"), NK_TEXT_ALIGN_LEFT);
+			nk_label(ctx, custom_strcat_static(3, "[color=#FFFF00]\"[/color][color=#0000FF]display[/color][color=#FFFF00]\"[/color][color=#FFFFFF]:([/color][color=#FF0000]", bool2str(entries[i].display), "[/color][color=#FFFFFF])[/color]"), NK_TEXT_ALIGN_LEFT);
+			nk_label(ctx, custom_strcat_static(3, "[color=#FFFF00]\"[/color][color=#0000FF]single[/color][color=#FFFF00]\"[/color][color=#FFFFFF]:([/color][color=#FF0000]", bool2str(entries[i].single), "[/color][color=#FFFFFF])[/color]"), NK_TEXT_ALIGN_LEFT);
+			nk_label(ctx, custom_strcat_static(3, "[color=#FFFF00]\"[/color][color=#0000FF]banchoSupport[/color][color=#FFFF00]\"[/color][color=#FFFFFF]:([/color][color=#FF0000]", bool2str(entries[i].banchoSupport), "[/color][color=#FFFFFF])[/color]"), NK_TEXT_ALIGN_LEFT);
+			nk_label(ctx, custom_strcat_static(3, "[color=#FFFF00]\"[/color][color=#0000FF]titanicSupport[/color][color=#FFFF00]\"[/color][color=#FFFFFF]:([/color][color=#FF0000]", bool2str(entries[i].titanicSupport), "[/color][color=#FFFFFF])[/color]"), NK_TEXT_ALIGN_LEFT);
 		}
 	}
 }

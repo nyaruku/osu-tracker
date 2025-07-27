@@ -126,3 +126,7 @@ void ext_BG(struct nk_context* ctx, int r, int g, int b) {
     ctx->style.window.fixed_background.data.color.g = g;
     ctx->style.window.fixed_background.data.color.b = b;
 }
+
+const char* bool2str(bool b) {
+    return b ? "true" : "false";
+}
