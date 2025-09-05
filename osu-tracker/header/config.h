@@ -282,9 +282,23 @@ public:
 						line = ext::replace(line, "{{" + row.key + "_current_raw}}", row.current);
 
 						// formatted
-						line = ext::replace(line, "{{" + row.key + "_init}}", config::data::arrFormatted[config::data::getIndex(row.key.c_str())].init);
-						line = ext::replace(line, "{{" + row.key + "_change}}", config::data::arrFormatted[config::data::getIndex(row.key.c_str())].change);
-						line = ext::replace(line, "{{" + row.key + "_current}}", config::data::arrFormatted[config::data::getIndex(row.key.c_str())].current);
+						line = ext::replace(
+              line,
+              "{{" + row.key + "_init}}",
+              config::data::arrFormatted[config::data::getIndex(row.key.c_str())].init
+            );
+						
+            line = ext::replace(
+              line,
+              "{{" + row.key + "_change}}",
+              config::data::arrFormatted[config::data::getIndex(row.key.c_str())].change
+            );
+						
+            line = ext::replace(
+              line,
+              "{{" + row.key + "_current}}",
+              config::data::arrFormatted[config::data::getIndex(row.key.c_str())].current
+            );
 					}
 					content += line + "\n";
 				}
@@ -347,7 +361,28 @@ public:
 			console::writeLog("Error reading config file", true, 255, 0, 0);
 		}
 	}
-	static void rmConfig() {
+	
+  static void rmConfig() {
 		std::filesystem::remove("config.json");
+  }
+
+	static void createTemplateExample() {
+    std::string content;
+    for (size_t i = 0; i < config::data::arr.size(); i++) {
+      content += config::data::arr[i].key + " (raw):\n";
+			content += "init: {{" + config::data::arr[i].key + "_init_raw}}\n";
+			content += "change: {{" + config::data::arr[i].key + "_change_raw}}\n";
+			content += "current: {{" + config::data::arr[i].key + "_current_raw}}\n";
+      content += config::data::arr[i].key + " (formatted):\n";
+			content += "init: {{" + config::data::arr[i].key + "_init}}\n";
+			content += "change: {{" + config::data::arr[i].key + "_change}}\n";
+			content += "current: {{" + config::data::arr[i].key + "_current}}\n";
+      content += "\n";
+    }
+    std::ofstream file;
+    file.open("tracker_txt/template/example.txt");
+    file << content;
+    file.close();
+    file.clear();
 	}
 };
