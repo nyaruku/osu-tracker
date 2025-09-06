@@ -338,35 +338,22 @@ public:
           std::lock_guard<std::mutex> _(ws_mutex);
 
           try {
-              nlohmann::json j = nlohmann::json::parse(data);
+              nlohmann::json stats;
+              for (const auto& row : config::data::arr) {
+                  stats[row.key + "_init_raw"] = row.init;
+                  stats[row.key + "_change_raw"] = row.change;
+                  stats[row.key + "_current_raw"] = row.current;
 
-              if (j.contains("cmd")) {
-                  std::string cmd = j["cmd"];
-                  console::writeLog("Overlay WS command received: " + cmd);
-
-                  if (cmd == "#refresh") {
-                      nlohmann::json stats;
-                      for (const auto& row : config::data::arr) {
-                          stats[row.key + "_init_raw"] = row.init;
-                          stats[row.key + "_change_raw"] = row.change;
-                          stats[row.key + "_current_raw"] = row.current;
-
-                          const auto& f = config::data::arrFormatted[config::data::getIndex(row.key.c_str())];
-                          stats[row.key + "_init"] = f.init;
-                          stats[row.key + "_change"] = f.change;
-                          stats[row.key + "_current"] = f.current;
-                      }
-                      conn.send_text(stats.dump());
-                  }
+                  const auto& f = config::data::arrFormatted[config::data::getIndex(row.key.c_str())];
+                  stats[row.key + "_init"] = f.init;
+                  stats[row.key + "_change"] = f.change;
+                  stats[row.key + "_current"] = f.current;
               }
-
+              conn.send_text(stats.dump());
           } catch (const std::exception& e) {
               console::writeLog("Overlay WS parse error: " + std::string(e.what()), true, 255, 0, 0);
           }
       });
-
-
-
 
 			// Page routing
 			CROW_ROUTE(app, "/")([]() {
@@ -537,12 +524,12 @@ public:
 			});
 
 
-			CROW_ROUTE(app, "/template")([](crow::SimpleApp app) {
+			CROW_ROUTE(app, "/template/default")([](crow::SimpleApp app) {
 				crow::mustache::context ctx;
 				ctx["hostname"] = OSU_TRACKER_WEBSERVER_IP;
 				ctx["port"] = OSU_TRACKER_WEBSERVER_PORT;
 
-				auto page = crow::mustache::load("template/example.html").render(ctx);
+				auto page = crow::mustache::load("template/default.html").render(ctx);
 				return page;
 			});
 

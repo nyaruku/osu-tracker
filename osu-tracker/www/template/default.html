@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark">
+<head>
+    <title>osu! Tracker Overlay</title>
+    <link rel="icon" type="image/x-icon" href="../static/favicon.ico">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap Includes -->
+    <link rel="stylesheet" href="../static/bootstrap/bootstrap.min.css">
+    <script src="../static/bootstrap/jquery-3.7.1.min.js"></script>
+    <script src="../static/bootstrap/bootstrap.min.js"></script>
+
+    <!-- Personal Includes -->
+    <link rel="stylesheet" href="../static/index.css">
+    <script type="text/javascript" src="../static/index.js"></script>
+
+    <style>
+        body, html {
+            margin: 0; padding: 0;
+            width: 1920px; height: 1080px;
+            background: transparent; color: #fff;
+            font-family: sans-serif;
+						font-size: 1.2rem;
+						font-weight: bold;
+        }
+				.current {
+						color: rgb(100,255,100);
+				}
+				.change {
+						color: rgb(150,150,255);
+				}				
+
+				/* sidebar */
+        #sidebar {
+						background-color: #0d0d10;
+            position: absolute;
+            top: 0; right: 0;
+            width: 400px;
+						height: 100%;
+        }
+        #sidebar .stat {
+            margin-bottom: 6px;
+        }
+
+				/* bottom-bar */
+        #bottom-bar {
+            height: 225px;
+            background-color: #0d0d10;
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        #bottom-bar .ranks-row {
+            display: flex;
+        }
+        #bottom-bar .ranks-row img {
+            width: auto; height: 68px;
+        }
+        #bottom-bar .next {
+            text-align: right;
+        }
+
+				/* RANKS */
+        .rankss, .ranks {
+          filter: drop-shadow(0px 0px 6px rgba(255,255,0,0.66));
+        }
+        .rankssh, .ranksh {
+        	filter: drop-shadow(0px 0px 6px rgba(255,255,255,0.66));
+        }
+        .ranka {
+          filter: drop-shadow(0px 0px 6px rgba(0,255,0,0.66));
+        }
+	      .rankb {
+          filter: drop-shadow(0px 0px 6px rgba(50,50,255,0.66));
+        }
+			  .rankc {
+          filter: drop-shadow(0px 0px 6px rgba(255,50,255,0.66));
+        }
+        .rankd {
+          filter: drop-shadow(0px 0px 6px rgba(255,50,50,0.66));
+        }
+    </style>
+
+    <script>
+        let socket;
+
+        function connectWebSocket() {
+            socket = new WebSocket("ws://{{hostname}}:{{port}}/ws/overlay-data/");
+          
+            socket.onopen = () => {
+                console.log("WebSocket connected");
+
+                // Send request every second
+                setInterval(() => {
+                    if (socket.readyState === WebSocket.OPEN) {
+                        socket.send("");
+                    }
+                }, 3000);
+            };
+            
+            socket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+
+                // Iterate all key-value pairs from server
+                for (const key in data) {
+                    // Update elements with class name matching key
+                    const elements = document.getElementsByClassName(key);
+                    for (const el of elements) {
+                        el.textContent = data[key];
+                    }
+                }
+            };
+
+            socket.onclose = () => {
+                console.log("WebSocket disconnected. Retrying...");
+                setTimeout(connectWebSocket, 1000);
+            };
+        }
+
+        window.onload = connectWebSocket;
+    </script>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <div id="sidebar" class="rounded-0 p-2">
+        <div class="stat">
+            <span class="label">Score Rank: </span><span class="scoreRank_current current"></span>
+        </div>
+        <div class="stat">
+            <span class="label">Ranked Score: </span><span class="rankedScore_current current"></span>
+            <br>
+            <span class="rankedScore_change change"></span>
+        </div>
+        <div class="stat">
+            <span class="label">Total Score: </span><span class="totalScore_current current"></span>
+            <br>
+            <span class="totalScore_change change"></span>
+        </div>
+        <div class="stat">
+            <span class="label">Clears: </span><span class="clears_current current"></span>
+            <br>
+            <span class="clears_change change"></span>
+        </div>
+    </div>
+
+    <!-- Bottom bar -->
+    <div id="bottom-bar" class="rounded-0 p-2">
+        <div class="ranks-row gap-2">
+						<!-- Gold SS -->  
+						<div class="rank-container d-flex align-items-center gap-2">
+								<img class="rankss" src="../static/images/gold_ss.png">
+								<div class="d-flex flex-column">
+										<span class="goldSS_current">100.000</span>
+										<span class="goldSS_change change">+100.000</span>
+								</div>
+						</div>
+
+						<!-- Silver SS -->
+						<div class="rank-container d-flex align-items-center gap-2">
+								<img class="rankssh" src="../static/images/silver_ss.png">
+								<div class="d-flex flex-column">
+										<span class="silverSS_current">100.000</span>
+										<span class="silverSS_change change">+100.000</span>
+								</div>
+						</div>
+
+						<!-- Gold S -->
+						<div class="rank-container d-flex align-items-center gap-2">
+								<img class="ranks" src="../static/images/gold_s.png">
+								<div class="d-flex flex-column">
+										<span class="goldS_current">100.000</span>
+										<span class="goldS_change change">+100.000</span>
+								</div>
+						</div>
+
+						<!-- Silver S -->
+						<div class="rank-container d-flex align-items-center gap-2">
+								<img class="ranksh" src="../static/images/silver_s.png">
+								<div class="d-flex flex-column">
+										<span class="silverS_current">100.000</span>
+										<span class="silverS_change change">+100.000</span>
+								</div>
+						</div>
+
+						<!-- A -->
+						<div class="rank-container d-flex align-items-center gap-2">
+								<img class="ranka" src="../static/images/a.png">
+								<div class="d-flex flex-column">
+										<span class="a_current">100.000</span>
+										<span class="a_change change">+100.000</span>
+								</div>
+						</div>
+
+						<!-- B -->
+						<div class="rank-container d-flex align-items-center gap-2">
+								<img class="rankb" src="../static/images/b.png">
+								<div class="d-flex flex-column">
+										<span class="b_current">100.000</span>
+										<span class="b_change change">+100.000</span>
+								</div>
+						</div>
+
+						<!-- C -->
+						<div class="rank-container d-flex align-items-center gap-2">
+								<img class="rankc" src="../static/images/c.png">
+								<div class="d-flex flex-column">
+										<span class="c_current">100.000</span>
+										<span class="c_change change">+100.000</span>
+								</div>
+						</div>
+
+						<!-- D -->
+						<div class="rank-container d-flex align-items-center gap-2">
+								<img class="rankd" src="../static/images/d.png">
+								<div class="d-flex flex-column">
+										<span class="d_current">100.000</span>
+										<span class="d_change change">+100.000</span>
+								</div>
+						</div>
+				</div>
+
+        <div class="next">
+            <div>
+                <span class="label">Next Rank: </span>
+                <span class="targetRank_current current"></span> ~ <span class="targetScore_current current">5.000.000</span>
+            </div>
+            <div>
+                <span class="label">Next Player: </span><span class="targetUser_current current">Username</span>
+            </div>
+						<div>
+                <span class="label">Completion: </span>
+                <span class="completion_current current">10,000%</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
