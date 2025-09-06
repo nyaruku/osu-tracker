@@ -223,9 +223,9 @@ public:
 			,{"pp",			"PP",				5, "", "",	"", dataType::_float,	formatType::f_decimal,	true,	true,	false,	true,	true}
 			,{"ppv1",		"PPv1",				6, "", "",	"", dataType::_float,	formatType::f_decimal,	true,	true,	false,	false,	true}
 			,{"acc",		"Accuracy",			7, "", "",	"", dataType::_float,	formatType::f_percent,	true,	true,	false,	true,	true}
-			,{"playtime",	"Play Time",		8, "", "",	"", dataType::_longLong,formatType::f_time,		true,	true,	false,	true,	true} //long long just in case
+			,{"playtime",	"Play Time",		8, "", "",	"", dataType::_longLong,formatType::f_time,		true,	true,	false,	true,	true}
 			,{"playcount",	"Play Count",		9, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
-			,{"totalHits",	"Total Hits",		10, "", "",	"", dataType::_longLong,formatType::f_int,		true,	true,	false,	false,	true} //long long just in	case
+			,{"totalHits",	"Total Hits",		10, "", "",	"", dataType::_longLong,formatType::f_int,		true,	true,	false,	false,	true}
 
 			,{"silverSS",	"Rank SSH",			11, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
 			,{"goldSS",		"Rank SS",			12, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
@@ -362,27 +362,27 @@ public:
 		}
 	}
 	
-  static void rmConfig() {
-		std::filesystem::remove("config.json");
-  }
+	static void rmConfig() {
+			std::filesystem::remove("config.json");
+	}
 
 	static void createTemplateExample() {
-    std::string content;
-    for (size_t i = 0; i < config::data::arr.size(); i++) {
-      content += config::data::arr[i].key + " (raw):\n";
-			content += "init: {{" + config::data::arr[i].key + "_init_raw}}\n";
-			content += "change: {{" + config::data::arr[i].key + "_change_raw}}\n";
-			content += "current: {{" + config::data::arr[i].key + "_current_raw}}\n";
-      content += config::data::arr[i].key + " (formatted):\n";
-			content += "init: {{" + config::data::arr[i].key + "_init}}\n";
-			content += "change: {{" + config::data::arr[i].key + "_change}}\n";
-			content += "current: {{" + config::data::arr[i].key + "_current}}\n";
-      content += "\n";
-    }
-    std::ofstream file;
-    file.open("tracker_txt/template/example.txt");
-    file << content;
-    file.close();
-    file.clear();
+		std::string content;
+		for (size_t i = 0; i < config::data::arr.size(); i++) {
+			content += config::data::arr[i].key + " (raw):\n";
+	 		content += "init: {{" + config::data::arr[i].key + "_init_raw}}\n";
+   			content += "change: {{" + config::data::arr[i].key + "_change_raw}}\n";
+   			content += "current: {{" + config::data::arr[i].key + "_current_raw}}\n";
+			content += config::data::arr[i].key + " (formatted):\n";
+    			content += "init: {{" + config::data::arr[i].key + "_init}}\n";
+    			content += "change: {{" + config::data::arr[i].key + "_change}}\n";
+    			content += "current: {{" + config::data::arr[i].key + "_current}}\n";
+			content += "\n";
+		}
+		std::ofstream file;
+		file.open("tracker_txt/template/example.txt");
+		file << content;
+		file.close();
+		file.clear();
 	}
 };

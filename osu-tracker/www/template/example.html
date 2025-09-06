@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark">
+<head>
+    <title>osu! Tracker Overlay</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap Includes -->
+    <link rel="stylesheet" href="static/bootstrap/bootstrap.min.css">
+    <script src="static/bootstrap/jquery-3.7.1.min.js"></script>
+    <script src="static/bootstrap/bootstrap.min.js"></script>
+
+    <!-- Personal Includes -->
+    <link rel="stylesheet" href="static/index.css">
+    <script type="text/javascript" src="static/index.js"></script>
+
+    <style>
+        /* OBS overlay styling */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 1280px;
+            height: 720px;
+            background: transparent;
+            color: #fff;
+            font-family: sans-serif;
+        }
+
+        #live-stats-card {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.6);
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        #live-stats-card table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        #live-stats-card th, #live-stats-card td {
+            padding: 4px 8px;
+            text-align: left;
+        }
+
+        #live-stats-card th {
+            color: #aaa;
+        }
+
+        #live-stats-card td {
+            color: #0af;
+        }
+
+        #live-stats-card td.gained {
+            color: #0f0;
+        }
+    </style>
+
+    <script>
+        let socket;
+
+        function connectWebSocket() {
+            socket = new WebSocket("ws://{{hostname}}:{{port}}/ws/overlay-data/");
+
+            socket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+
+                // Iterate all key-value pairs from server
+                for (const key in data) {
+                    // Update elements with class name matching key
+                    const elements = document.getElementsByClassName(key);
+                    for (const el of elements) {
+                        el.textContent = data[key];
+                    }
+
+                    // Optional: also update element with id="{key}-display" if it exists
+                    const elById = document.getElementById(`${key}-display`);
+                    if (elById) elById.textContent = data[key];
+                }
+            };
+
+            socket.onclose = () => {
+                console.log("WebSocket disconnected. Retrying...");
+                setTimeout(connectWebSocket, 1000);
+            };
+        }
+
+        window.onload = connectWebSocket;
+    </script>
+</head>
+
+<body>
+    <!-- Live Stats Overlay Card -->
+    <div id="live-stats-card" class="card rounded-0">
+        <h5 class="card-header bg-success rounded-0">Live Stats</h5>
+        <div class="card-body rounded-0 p-2">
+            <table class="table table-sm table-dark mb-0">
+                <thead>
+                    <tr><th>Stat</th><th>Gained</th><th>Current</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Rank SS</td><td class="goldSS_change"></td><td class="goldSS_current"></td></tr>
+                    <tr><td>Rank SSH</td><td class="silverSS_change"></td><td class="silverSS_current"></td></tr>
+                    <tr><td>Rank S</td><td class="goldS_change"></td><td class="goldS_current"></td></tr>
+                    <tr><td>Rank SH</td><td class="silverS_change"></td><td class="silverS_current"></td></tr>
+                    <tr><td>Rank A</td><td class="a_change"></td><td class="a_current"></td></tr>
+                    <tr><td>Rank B</td><td class="b_change"></td><td class="b_current"></td></tr>
+                    <tr><td>Rank C</td><td class="c_change"></td><td class="c_current"></td></tr>
+                    <tr><td>Rank D</td><td class="d_change"></td><td class="d_current"></td></tr>
+                    <tr><td>Ranked Score</td><td class="rankedScore_change"></td><td class="rankedScore_current"></td></tr>
+                    <tr><td>Total Score</td><td class="totalScore_change"></td><td class="totalScore_current"></td></tr>
+                    <tr><td>Clears</td><td class="clears_change"></td><td class="clears_current"></td></tr>
+                    <tr><td>Score Rank</td><td class="scoreRank_change"></td><td class="scoreRank_current"></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
+
+

@@ -306,6 +306,68 @@ public:
 				clients_settings.erase(&conn);
 			});
 
+      CROW_WEBSOCKET_ROUTE(app, "/ws/overlay-data/")
+      .onopen([&](crow::websocket::connection& conn) {
+          // Add & Open WS Connection
+          std::lock_guard<std::mutex> _(ws_mutex);
+          clients.insert(&conn);
+
+          // Send current overlay stats immediately
+          nlohmann::json j;
+          for (const auto& row : config::data::arr) {
+              // raw
+              j[row.key + "_init_raw"] = row.init;
+              j[row.key + "_change_raw"] = row.change;
+              j[row.key + "_current_raw"] = row.current;
+
+              // formatted
+              const auto& f = config::data::arrFormatted[config::data::getIndex(row.key.c_str())];
+              j[row.key + "_init"] = f.init;
+              j[row.key + "_change"] = f.change;
+              j[row.key + "_current"] = f.current;
+          }
+
+          conn.send_text(j.dump());
+      })
+      .onclose([&](crow::websocket::connection& conn, const std::string& reason, uint16_t) {
+          // Remove client
+          std::lock_guard<std::mutex> _(ws_mutex);
+          clients.erase(&conn);
+      })
+      .onmessage([&](crow::websocket::connection& conn, const std::string& data, bool is_binary) {
+          std::lock_guard<std::mutex> _(ws_mutex);
+
+          try {
+              nlohmann::json j = nlohmann::json::parse(data);
+
+              if (j.contains("cmd")) {
+                  std::string cmd = j["cmd"];
+                  console::writeLog("Overlay WS command received: " + cmd);
+
+                  if (cmd == "#refresh") {
+                      nlohmann::json stats;
+                      for (const auto& row : config::data::arr) {
+                          stats[row.key + "_init_raw"] = row.init;
+                          stats[row.key + "_change_raw"] = row.change;
+                          stats[row.key + "_current_raw"] = row.current;
+
+                          const auto& f = config::data::arrFormatted[config::data::getIndex(row.key.c_str())];
+                          stats[row.key + "_init"] = f.init;
+                          stats[row.key + "_change"] = f.change;
+                          stats[row.key + "_current"] = f.current;
+                      }
+                      conn.send_text(stats.dump());
+                  }
+              }
+
+          } catch (const std::exception& e) {
+              console::writeLog("Overlay WS parse error: " + std::string(e.what()), true, 255, 0, 0);
+          }
+      });
+
+
+
+
 			// Page routing
 			CROW_ROUTE(app, "/")([]() {
 				crow::mustache::context ctx;
@@ -470,8 +532,17 @@ public:
 				ctx["OSU_TRACKER_CMAKE_CXX_COMPILER"] = OSU_TRACKER_CMAKE_CXX_COMPILER;
 				ctx["OSU_TRACKER_CMAKE_SYSTEM_NAME"] = OSU_TRACKER_CMAKE_SYSTEM_NAME;
 
-		
 				auto page = crow::mustache::load("info.html").render(ctx);
+				return page;
+			});
+
+
+			CROW_ROUTE(app, "/template")([](crow::SimpleApp app) {
+				crow::mustache::context ctx;
+				ctx["hostname"] = OSU_TRACKER_WEBSERVER_IP;
+				ctx["port"] = OSU_TRACKER_WEBSERVER_PORT;
+
+				auto page = crow::mustache::load("template/example.html").render(ctx);
 				return page;
 			});
 
