@@ -16,27 +16,64 @@
     <script type="text/javascript" src="../static/index.js"></script>
 
     <style>
+        :root {
+          /* Size of viewport in %*/
+          --viewportWidth: 1920px;
+          --viewportHeight: 1080px;
+          --resScale: 80;
+          
+          --fontScale: 1.2rem;
+          --fontWeight: bold;
+          
+          /* Font Colors */
+          --colorBase: rgb(255,255,255);
+          --colorLabel: var(--colorBase);
+          --colorCurrent: rgb(100,255,100);
+          --colorChange: rgb(150,150,255);
+          
+          /* Background Color of Overlay*/
+          --backgroundOverlay: #0d0d10;
+          --backgroundSidebar: var(--backgroundOverlay);
+          --backgroundBottomBar: var(--backgroundOverlay);
+          
+          --ranksImageHeight: 68px;
+
+          /* Glow (drop-shadow) for Rank Images*/
+          --glowOpacity: 0.66;
+          --glowSize: 6px;
+          --glowSSH:  rgba(255,255,255,var(--glowOpacity));
+          --glowSS:   rgba(255,255,0,var(--glowOpacity));
+          --glowSH:   rgba(255,255,255,var(--glowOpacity));
+          --glowS:    rgba(255,255,0,var(--glowOpacity));
+          --glowA:    rgba(0,255,0,var(--glowOpacity));
+          --glowB:    rgba(50,50,255,var(--glowOpacity));
+          --glowC:    rgba(255,50,255,var(--glowOpacity));
+          --glowD:    rgba(255,50,50,var(--glowOpacity));
+        }
+
         body, html {
             margin: 0; padding: 0;
-            width: 1920px; height: 1080px;
-            background: transparent; color: #fff;
+            width: var(--viewportWidth);
+            height: var(--viewportHeight);
+            background: transparent;
+            color: var(--colorBase);
             font-family: sans-serif;
-						font-size: 1.2rem;
-						font-weight: bold;
+						font-size: var(--fontScale);
+						font-weight: var(--fontWeight);
         }
 				.current {
-						color: rgb(100,255,100);
+						color: var(--colorCurrent);
 				}
 				.change {
-						color: rgb(150,150,255);
+						color: var(--colorChange);
 				}				
 
 				/* sidebar */
         #sidebar {
-						background-color: #0d0d10;
+						background-color: var(--backgroundSidebar);
             position: absolute;
             top: 0; right: 0;
-            width: 400px;
+            width: calc(1920px - (19.20px * var(--resScale)));
 						height: 100%;
         }
         #sidebar .stat {
@@ -45,8 +82,8 @@
 
 				/* bottom-bar */
         #bottom-bar {
-            height: 225px;
-            background-color: #0d0d10;
+            height: calc(1080px - (10.80px * var(--resScale)));
+            background-color: var(--backgroundBottomBar);
             position: absolute;
             bottom: 0; left: 0; right: 0;
             display: flex; justify-content: space-between; align-items: center;
@@ -55,7 +92,8 @@
             display: flex;
         }
         #bottom-bar .ranks-row img {
-            width: auto; height: 68px;
+            width: auto;
+            height: var(--ranksImageHeight);
         }
         #bottom-bar .next {
             text-align: right;
@@ -63,22 +101,22 @@
 
 				/* RANKS */
         .rankss, .ranks {
-          filter: drop-shadow(0px 0px 6px rgba(255,255,0,0.66));
+          filter: drop-shadow(0px 0px 6px var(--glowSS));
         }
         .rankssh, .ranksh {
-        	filter: drop-shadow(0px 0px 6px rgba(255,255,255,0.66));
+        	filter: drop-shadow(0px 0px 6px var(--glowSSH));
         }
         .ranka {
-          filter: drop-shadow(0px 0px 6px rgba(0,255,0,0.66));
+          filter: drop-shadow(0px 0px 6px var(--glowA));
         }
 	      .rankb {
-          filter: drop-shadow(0px 0px 6px rgba(50,50,255,0.66));
+          filter: drop-shadow(0px 0px 6px var(--glowB));
         }
 			  .rankc {
-          filter: drop-shadow(0px 0px 6px rgba(255,50,255,0.66));
+          filter: drop-shadow(0px 0px 6px var(--glowC));
         }
         .rankd {
-          filter: drop-shadow(0px 0px 6px rgba(255,50,50,0.66));
+          filter: drop-shadow(0px 0px 6px var(--glowD));
         }
     </style>
 
