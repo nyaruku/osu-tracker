@@ -41,9 +41,7 @@ A web server based osu! stats/session tracker
       ```
 
 ## TODO:
-- Overlay (Browser/Text based)
 - Save Sessions
 - Compare overall stats between sessions
 - Custom Config Settings
-- Auto updater
 - Local Database of Clears/Maps/Stats ?????
