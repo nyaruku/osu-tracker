@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
 	console::writeLog(" / __ \\/ ___/ / / / /    / / / ___/ __ `/ ___/ //_/ _ \\/ ___/", true, 122, 103, 245);
 	console::writeLog("/ /_/ (__  ) /_/ /_/    / / / /  / /_/ / /__/ ,< /  __/ /    ", true, 246, 12, 250);
 	console::writeLog("\\____/____/\\__,_(_)    /_/ /_/   \\__,_/\\___/_/|_|\\___/_/     ", true, 246, 12, 250);
-  console::writeLog("                                                             ", true, 246, 12, 250);
+	console::writeLog("                                                             ", true, 246, 12, 250);
 	console::writeLog("-------------------------------------------------------------", true, 255, 255, 255);
 	console::writeLog((std::string)"Version Number: " + (OSU_TRACKER_VERSION), true, 111, 163, 247);
 	console::writeLog((std::string)"Signed Update Version: " + (OSU_TRACKER_VERSION_SIGNED), true, 111, 163, 247);
@@ -57,10 +57,17 @@ int main(int argc, char* argv[]) {
 			config::readConfig();
 			config::writeConfig();
 		}
+		if (!std::filesystem::exists("tracker_txt/template")) {
+	        if (std::filesystem::create_directory("tracker_txt/template")) {
+				// no output
+			} else {
+				console::writeLog("Failed to create tracker_txt/template", true, 255, 0, 0);
+			}
+		}
 		api::fetch_api_data(true);
 		ui::startFetchThread();
 		ui::copyDataOnly();
-    config::createTemplateExample();
+	    config::createTemplateExample();
 		webserver::startUiThread();
 		#if OSU_TRACKER_ENABLE_WEBSERVER == 1
 			run = !webserver::start(skipInit); // blocking
