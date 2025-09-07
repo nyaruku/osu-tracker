@@ -469,7 +469,7 @@ public:
 				ctx["github"] = "https://github.com/nyaruku/osu-tracker";
 				ctx["creator"] = "Railgun";
 				ctx["profile"] = "https://osu.ppy.sh/users/13817114";
-				ctx["discord"] = "https://discord.gg/FN6vauFTGA";
+				ctx["discord"] = "https://discord.gg/amj5vBjTQU";
 		
 				// BUILD INFO
 				ctx["build_type"] = OSU_TRACKER_CMAKE_BUILD_TYPE;
