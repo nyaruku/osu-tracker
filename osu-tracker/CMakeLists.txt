@@ -196,12 +196,6 @@ endforeach()
 # Could be simplified more, but cmake is clusterfuck
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_compile_definitions(DEBUG_BUILD)
-  if (MSVC)
-    # Nothing yet
-  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wno-changes-meaning")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -Wno-unused-function")
-  endif()
 elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
   add_compile_definitions(RELEASE_BUILD)
   if (MSVC)

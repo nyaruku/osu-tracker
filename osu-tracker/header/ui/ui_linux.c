@@ -201,9 +201,10 @@ int ui_main(void)
 
     bg.r = 0.10f, bg.g = 0.18f, bg.b = 0.24f, bg.a = 1.0f;
 
+    nk_font_atlas_add_default(atlas, 20.0f, 0);
+
     while (!glfwWindowShouldClose(win))
     {
-        nk_font_atlas_add_default(atlas, 20.0f, 0);
         /* Input */
         glfwPollEvents();
         nk_glfw3_new_frame();
@@ -224,7 +225,7 @@ int ui_main(void)
         // ui
         nk_style_default(ctx);
         drawContent(ctx, fontDefault, fontSmall, fontHeader, w, h, _app, _user, _entries, _entry_count, show_debug_layout, data_debug_layout);
-	    nk_end(ctx);
+	      nk_end(ctx);
 
         /* Draw */
         glfwGetWindowSize(win, &width, &height);
@@ -235,7 +236,7 @@ int ui_main(void)
          * with blending, scissor, face culling and depth test and defaults everything
          * back into a default state. Make sure to either save and restore or
          * reset your own state after drawing rendering the UI. */
-        nk_glfw3_render(NK_ANTI_ALIASING_ON);
+        nk_glfw3_render(NK_ANTI_ALIASING_OFF);
         glfwSwapBuffers(win);
     }
     nk_glfw3_shutdown();

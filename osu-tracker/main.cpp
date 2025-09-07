@@ -14,6 +14,7 @@
 #include "../header/webserver.h"
 #include "../header/ui/ui.h"
 
+
 #ifdef _WIN32
 	void enableVirtualTerminalProcessing() {
 		HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);

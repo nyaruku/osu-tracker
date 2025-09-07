@@ -524,6 +524,35 @@ public:
 			});
 
 
+CROW_ROUTE(app, "/help")([](){
+    crow::mustache::context ctx;
+    ctx["title"] = OSU_TRACKER_NAME;
+    ctx["version"] = OSU_TRACKER_VERSION;
+
+    ctx["tracker_config_name"] = "Help";
+
+    std::vector<crow::json::wvalue> fields;
+
+    for (const auto& row : config::data::arr) {
+        crow::json::wvalue el;
+        el["name"] = row.name;
+        el["key"] = row.key;
+        std::string servers;
+        if (row.banchoSupport) servers += "Bancho";
+        if (row.titanicSupport) {
+            if (!servers.empty()) servers += ", ";
+            servers += "Titanic";
+        }
+        el["server"] = servers;
+        fields.push_back(std::move(el));
+    }
+
+    ctx["fields"] = std::move(fields);
+
+    auto page = crow::mustache::load("help.html").render(ctx);
+    return page;
+});
+
 			CROW_ROUTE(app, "/template/default")([](crow::SimpleApp app) {
 				crow::mustache::context ctx;
 				ctx["hostname"] = OSU_TRACKER_WEBSERVER_IP;

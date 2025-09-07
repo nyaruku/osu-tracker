@@ -53,7 +53,8 @@ private:
 				t2.join();
 				nlohmann::json _j = nlohmann::json::parse(r_titanicUsers.text);
 				nlohmann::json _j2 = nlohmann::json::parse(r_titanicStats.text);
-				static const std::string _mode = std::to_string(static_cast<int>(config::application::instance().gameMode));
+				static const int mode = static_cast<int>(config::application::instance().gameMode);
+				static const std::string _mode = std::to_string(mode);
 				//static const int count_graveyard = _j2["beatmap_modes"][_mode]["count_graveyard"].get<int>();
 				//static const int count_wip = _j2["beatmap_modes"][_mode]["count_wip"].get<int>();
 				//static const int count_pending = _j2["beatmap_modes"][_mode]["count_pending"].get<int>();
@@ -61,14 +62,6 @@ private:
 				static const int count_approved = _j2["beatmap_modes"][_mode]["count_approved"].get<int>();
 				static const int count_qualified = _j2["beatmap_modes"][_mode]["count_qualified"].get<int>();
 				static const int count_loved = _j2["beatmap_modes"][_mode]["count_loved"].get<int>();
-
-				char mode = 0;
-				for (size_t i = 0; i < 4; i++) {
-					if (_mode == std::to_string(_j["stats"][i]["mode"].get<int>())) {
-						mode = i;
-						break;
-					}
-				}
 
 				config::user::instance().username = _j["name"].get<std::string>();
 
@@ -138,7 +131,7 @@ private:
 					std::stoi(config::data::arr[config::data::getIndex("silverS")].current)
 					+ std::stoi(config::data::arr[config::data::getIndex("goldS")].current)
 				);
-				config::data::arr[config::data::getIndex("clears")].init = std::to_string(
+				config::data::arr[config::data::getIndex("clears")].current = std::to_string(
 					std::stoi(config::data::arr[config::data::getIndex("totalSS")].current)
 					+ std::stoi(config::data::arr[config::data::getIndex("totalS")].current)
 					+ std::stoi(config::data::arr[config::data::getIndex("a")].current)
@@ -152,8 +145,8 @@ private:
 					+ std::stoi(config::data::arr[config::data::getIndex("c")].current)
 					+ std::stoi(config::data::arr[config::data::getIndex("d")].current)
 				);
-				config::data::arr[config::data::getIndex("completion")].init = std::to_string(
-					(static_cast<float>(std::stoi(config::data::arr[config::data::getIndex("totalClears")].init)) / static_cast<float>(count_ranked + count_approved + count_loved + count_qualified)) * 100
+				config::data::arr[config::data::getIndex("completion")].current = std::to_string(
+					(static_cast<float>(std::stoi(config::data::arr[config::data::getIndex("totalClears")].current)) / static_cast<float>(count_ranked + count_approved + count_loved + count_qualified)) * 100
 				);
 
 				calcDifference();
@@ -259,7 +252,6 @@ private:
 				config::user::instance().username = _j["username"].get<std::string>();
 
 				if (init) {
-					//config::data::arr[config::data::getIndex("level")].init = std::to_string(_j["statistics"]["level"]["current"].get<int>()) + "." + std::to_string(_j["statistics"]["level"]["progress"].get<int>());
 					// more accurate approach -> calculates level from total score
 					config::data::arr[config::data::getIndex("level")].init = std::to_string(getLevelFromScore(_j["statistics"]["total_score"].get<long long>()));
 					config::data::arr[config::data::getIndex("rankedScore")].init = std::to_string(_j["statistics"]["ranked_score"].get<long long>());
@@ -274,12 +266,21 @@ private:
 					config::data::arr[config::data::getIndex("silverS")].init = std::to_string(_j["statistics"]["grade_counts"]["sh"].get<int>());
 					config::data::arr[config::data::getIndex("goldS")].init = std::to_string(_j["statistics"]["grade_counts"]["s"].get<int>());
 					config::data::arr[config::data::getIndex("a")].init = std::to_string(_j["statistics"]["grade_counts"]["a"].get<int>());
-					config::data::arr[config::data::getIndex("totalSS")].init = std::to_string(std::stoi(config::data::arr[config::data::getIndex("silverSS")].init) + std::stoi(config::data::arr[config::data::getIndex("goldSS")].init));
-					config::data::arr[config::data::getIndex("totalS")].init = std::to_string(std::stoi(config::data::arr[config::data::getIndex("silverS")].init) + std::stoi(config::data::arr[config::data::getIndex("goldS")].init));
-					config::data::arr[config::data::getIndex("clears")].init = std::to_string(std::stoi(config::data::arr[config::data::getIndex("totalSS")].init) + std::stoi(config::data::arr[config::data::getIndex("totalS")].init) + std::stoi(config::data::arr[config::data::getIndex("a")].init));
+					
+					config::data::arr[config::data::getIndex("totalSS")].init = 
+						std::to_string(std::stoi(config::data::arr[config::data::getIndex("silverSS")].init)
+						+ std::stoi(config::data::arr[config::data::getIndex("goldSS")].init));
+					
+					config::data::arr[config::data::getIndex("totalS")].init = 
+						std::to_string(std::stoi(config::data::arr[config::data::getIndex("silverS")].init)
+						+ std::stoi(config::data::arr[config::data::getIndex("goldS")].init));
+					
+					config::data::arr[config::data::getIndex("clears")].init =
+						std::to_string(std::stoi(config::data::arr[config::data::getIndex("totalSS")].init)
+						+ std::stoi(config::data::arr[config::data::getIndex("totalS")].init)
+						+ std::stoi(config::data::arr[config::data::getIndex("a")].init));
 				}
 
-				//config::data::arr[config::data::getIndex("level")].current = std::to_string(_j["statistics"]["level"]["current"].get<int>()) + "." + std::to_string(_j["statistics"]["level"]["progress"].get<int>());
 				config::data::arr[config::data::getIndex("level")].current = std::to_string(getLevelFromScore(_j["statistics"]["total_score"].get<long long>()));
 				config::data::arr[config::data::getIndex("rankedScore")].current = std::to_string(_j["statistics"]["ranked_score"].get<long long>());
 				config::data::arr[config::data::getIndex("totalScore")].current = std::to_string(_j["statistics"]["total_score"].get<long long>());
@@ -293,9 +294,22 @@ private:
 				config::data::arr[config::data::getIndex("silverS")].current = std::to_string(_j["statistics"]["grade_counts"]["sh"].get<int>());
 				config::data::arr[config::data::getIndex("goldS")].current = std::to_string(_j["statistics"]["grade_counts"]["s"].get<int>());
 				config::data::arr[config::data::getIndex("a")].current = std::to_string(_j["statistics"]["grade_counts"]["a"].get<int>());
-				config::data::arr[config::data::getIndex("totalSS")].current = std::to_string(std::stoi(config::data::arr[config::data::getIndex("silverSS")].current) + std::stoi(config::data::arr[config::data::getIndex("goldSS")].current));
-				config::data::arr[config::data::getIndex("totalS")].current = std::to_string(std::stoi(config::data::arr[config::data::getIndex("silverS")].current) + std::stoi(config::data::arr[config::data::getIndex("goldS")].current));
-				config::data::arr[config::data::getIndex("clears")].current = std::to_string(std::stoi(config::data::arr[config::data::getIndex("totalSS")].current) + std::stoi(config::data::arr[config::data::getIndex("totalS")].current) + std::stoi(config::data::arr[config::data::getIndex("a")].current));
+
+				config::data::arr[config::data::getIndex("totalSS")].current =
+					std::to_string(std::stoi(config::data::arr[config::data::getIndex("silverSS")].current)
+					+ std::stoi(config::data::arr[config::data::getIndex("goldSS")].current));
+
+				config::data::arr[config::data::getIndex("totalS")].current =
+					std::to_string(
+						std::stoi(config::data::arr[config::data::getIndex("silverS")].current)
+						+ std::stoi(config::data::arr[config::data::getIndex("goldS")].current)
+					);
+				
+				config::data::arr[config::data::getIndex("clears")].current =
+					std::to_string(std::stoi(config::data::arr[config::data::getIndex("totalSS")].current)
+						+ std::stoi(config::data::arr[config::data::getIndex("totalS")].current)
+						+ std::stoi(config::data::arr[config::data::getIndex("a")].current)
+					);
 
 				calcDifference();
 				return r.status_code;
@@ -578,11 +592,8 @@ public:
 			}
 			nlohmann::json request = nlohmann::json::parse(r.text);
 			std::string _signedVersion = ext::replace(ext::replace(request["tag_name"],"v",""),".","");
-			for (size_t i = 0; i < _signedVersion.length(); i++) {
-				if (_signedVersion[0] != '0')
-					break;
-				_signedVersion = _signedVersion.substr(1, std::string::npos);
-			}
+			if (!_signedVersion.empty() && _signedVersion[0] == '0')
+				_signedVersion = _signedVersion.substr(1);
 			console::writeLog("Signed Version found : " + _signedVersion + " (" + std::string(request["tag_name"]) + ")", true, 111, 163, 247);
 			const int signedVersion = std::stoi(_signedVersion);
 			#if OSU_TRACKER_UPDATE_EQUAL==1

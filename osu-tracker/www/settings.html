@@ -136,6 +136,7 @@
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
                     <li class="nav-item"><a class="nav-link active" aria-current="page" href="/settings">Settings</a></li>
+					<li class="nav-item"><a class="nav-link" href="/help">Help</a></li>
                     <li class="nav-item"><a class="nav-link" href="/info">Info</a></li>
                     <li class="nav-item"><a class="nav-link" href="/log">Log</a></li>
                 </ul>
@@ -145,7 +146,7 @@
     <div id="ws-conn-lost" class="alert alert-warning rounded-0" role="alert" hidden>
         <span>Websocket connection got closed, reconnecting...</span>
     </div>
-    <div class="container" style="margin-top:50px">
+    <div class="container mt-5">
         <h1 class="mb-2">Settings</h1>
 
         <button type="button" class="btn btn-primary" onclick="saveSettings()">Save All Settings</button>
@@ -180,41 +181,41 @@
         <h5>Application Config</h5>
         <div class="was-validated">
             <div class="mb-2">
-                <div class="input-group input-group-sm">
-                    <span class="input-group-text" id="inputGroup-sizing-sm">{{osu_id_name}}</span>
-                    <input id="osu_id_key" type="number" class="form-control" aria-describedby="inputGroup-sizing-sm" value="{{osu_id_val}}" required>
+                <div class="input-group input-group-sm rounded-0">
+                    <span class="input-group-text rounded-0" id="inputGroup-sizing-sm">{{osu_id_name}}</span>
+                    <input id="osu_id_key" type="number" class="form-control rounded-0" aria-describedby="inputGroup-sizing-sm" value="{{osu_id_val}}" required>
                     <div class="invalid-feedback">Please enter your osu! ID</div>
                 </div>
                 <div class="form-text">{{osu_id_desc}}</div>
             </div>
-            <div class="mb-2 {{hide_on_privateServer}}">
-                <div class="input-group input-group-sm">
-                    <span class="input-group-text" id="inputGroup-sizing-sm">{{client_id_name}}</span>
-                    <input id="client_id_key" type="number" class="form-control" aria-describedby="inputGroup-sizing-sm" value="{{client_id_val}}" required>
+            <div class="mb-2 rounded-0 {{hide_on_privateServer}}">
+                <div class="input-group input-group-sm rounded-0">
+                    <span class="input-group-text rounded-0" id="inputGroup-sizing-sm">{{client_id_name}}</span>
+                    <input id="client_id_key" type="number" class="form-control rounded-0" aria-describedby="inputGroup-sizing-sm" value="{{client_id_val}}" required>
                     <div class="invalid-feedback">Please enter a Client ID.</div>
                 </div>
                 <div class="form-text">{{client_id_desc}}</div>
             </div>
-            <div class="mb-2 {{hide_on_privateServer}}">
-                <div class="input-group input-group-sm">
-                    <span class="input-group-text" id="inputGroup-sizing-sm">{{client_secret_name}}</span>
-                    <input id="client_secret_key" type="password" class="form-control" aria-describedby="inputGroup-sizing-sm" value="{{client_secret_val}}" required>
+            <div class="mb-2 rounded-0 {{hide_on_privateServer}}">
+                <div class="input-group input-group-sm rounded-0">
+                    <span class="input-group-text rounded-0" id="inputGroup-sizing-sm">{{client_secret_name}}</span>
+                    <input id="client_secret_key" type="password" class="form-control rounded-0" aria-describedby="inputGroup-sizing-sm" value="{{client_secret_val}}" required>
                     <div class="invalid-feedback">Please enter a Client Secret.</div>
                 </div>
                 <div class="form-text">{{client_secret_desc}}</div>
             </div>
             <div class="mb-2">
-                <div class="input-group input-group-sm">
-                    <span class="input-group-text" id="inputGroup-sizing-sm">{{api_refreshInterval_name}}</span>
-                    <input id="api_refreshInterval_key" type="number" class="form-control" aria-describedby="inputGroup-sizing-sm" min="5000" value="{{api_refreshInterval_val}}" required>
+                <div class="input-group input-group-sm rounded-0">
+                    <span class="input-group-text rounded-0" id="inputGroup-sizing-sm">{{api_refreshInterval_name}}</span>
+                    <input id="api_refreshInterval_key" type="number" class="form-control rounded-0" aria-describedby="inputGroup-sizing-sm" min="5000" value="{{api_refreshInterval_val}}" required>
                     <div class="invalid-feedback">Please enter a Refresh Interval in (ms).</div>
                 </div>
                 <div class="form-text">{{api_refreshInterval_desc}}</div>
             </div>
             <div class="mb-2">
-                <div class="input-group input-group-sm">
-                    <span class="input-group-text" id="inputGroup-sizing-sm">{{gameMode_name}}</span>
-                    <select id="gameMode_key" class="form-select form-select-sm">
+                <div class="input-group input-group-sm rounded-0">
+                    <span class="input-group-text rounded-0" id="inputGroup-sizing-sm">{{gameMode_name}}</span>
+                    <select id="gameMode_key" class="form-select form-select-sm rounded-0">
                         <option value="0" {{gameMode_val_0}}>Standard</option>
                         <option value="1" {{gameMode_val_1}}>Taiko</option>
                         <option value="2" {{gameMode_val_2}}>Catch</option>
@@ -224,9 +225,9 @@
                 <div class="form-text">{{gameMode_desc}}</div>
             </div>
             <div class="mb-2">
-                <div class="input-group input-group-sm">
-                    <span class="input-group-text" id="inputGroup-sizing-sm">{{server_name}}</span>
-                    <select id="server_key" class="form-select form-select-sm">
+                <div class="input-group input-group-sm rounded-0">
+                    <span class="input-group-text rounded-0" id="inputGroup-sizing-sm">{{server_name}}</span>
+                    <select id="server_key" class="form-select form-select-sm rounded-0">
                         <option value="0" {{server_val_0}}>Bancho</option>
                         <option value="1" {{server_val_1}}>Titanic</option>
                     </select>
@@ -241,11 +242,11 @@
         <!-- Tracker Config-->
         <h5 class="mt-5">{{tracker_config_name}}</h5>
         <h6>Refresh the page if you don't see config for your server.</h6>
-        <div id="tracker-config-container" class="mb-5">
+        <div id="tracker-config-container" class="d-flex flex-wrap gap-1 mb-5">
             {{#trackerConfig}}
-            <div class="form-check form-switch">
-                <input id="{{id}}" class="form-check-input" type="checkbox" {{checked}}>
-                <label class="form-check-label" for="{{id}}">{{label}}</label>
+            <div class="col-auto flex-fill trackerToggle">
+                <input id="{{id}}" class="btn-check" type="checkbox" {{checked}}>
+                <label class="btn btn-outline-primary text-nowrap w-100" for="{{id}}">{{label}}</label>
             </div>
             {{/trackerConfig}}
         </div>

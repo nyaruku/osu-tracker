@@ -243,9 +243,9 @@ public:
 			,{"completion",	"Completion%",		23, "", "",	"", dataType::_float,	formatType::f_percent,	true,	true,	false,	true,	true}
 			,{"scoreRank",	"Score Rank",		24, "", "",	"", dataType::_int,		formatType::f_rank,		true,	true,	false,	true,	false}
 
-			,{"targetRank",	"Target Rank",		25, "", "",	"", dataType::_int,		formatType::f_rank,		false,	true,	true,	true,	true}
-			,{"targetUser",	"Target Player",	26, "", "",	"", dataType::_string,	formatType::f_string,	false,	true,	true,	true,	true}
-			,{"targetScore","Target Score",		27, "", "",	"", dataType::_longLong,formatType::f_int,		false,	true,	true,	true,	true}
+			,{"targetRank",	"Target Rank",		25, "", "",	"", dataType::_int,		formatType::f_rank,		false,	true,	true,	true,	false}
+			,{"targetUser",	"Target Player",	26, "", "",	"", dataType::_string,	formatType::f_string,	false,	true,	true,	true,	false}
+			,{"targetScore","Target Score",		27, "", "",	"", dataType::_longLong,formatType::f_int,		false,	true,	true,	true,	false}
 		};
 		static inline std::vector<dataEntry> arrFormatted;
 
@@ -262,20 +262,6 @@ public:
 			if (std::ifstream file{ dir_entry.path() }; file.is_open()) {
 				for (std::string line; std::getline(file, line); ) {
 					for (dataEntry row : config::data::arr) {
-						switch (config::application::instance().server) {
-							// only write supported and displayed data
-							case config::server::bancho: {
-								if (row.banchoSupport == false && row.display)
-									continue;
-								break;
-							}
-							case config::server::titanic: {
-								if (row.titanicSupport == false && row.display)
-									continue;
-								break;
-							}
-						}
-
 						// raw
 						line = ext::replace(line, "{{" + row.key + "_init_raw}}", row.init);
 						line = ext::replace(line, "{{" + row.key + "_change_raw}}", row.change);
@@ -374,9 +360,9 @@ public:
    			content += "change: {{" + config::data::arr[i].key + "_change_raw}}\n";
    			content += "current: {{" + config::data::arr[i].key + "_current_raw}}\n";
 			content += config::data::arr[i].key + " (formatted):\n";
-    			content += "init: {{" + config::data::arr[i].key + "_init}}\n";
-    			content += "change: {{" + config::data::arr[i].key + "_change}}\n";
-    			content += "current: {{" + config::data::arr[i].key + "_current}}\n";
+    		content += "init: {{" + config::data::arr[i].key + "_init}}\n";
+    		content += "change: {{" + config::data::arr[i].key + "_change}}\n";
+    		content += "current: {{" + config::data::arr[i].key + "_current}}\n";
 			content += "\n";
 		}
 		std::ofstream file;
