@@ -3,4 +3,4 @@ if you want to change/add text to the stats,
 change the files in the underlying template directory,
 you can also add more stats to a single or multiple template file's.
 
-variables:
+See the help page for more info.
