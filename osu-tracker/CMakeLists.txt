@@ -215,14 +215,14 @@ add_compile_definitions(OSU_TRACKER_WEBSERVER_IP="127.0.0.1")
 add_compile_definitions(OSU_TRACKER_WEBSERVER_PORT=10727)
     
 # Settings
-add_compile_definitions(OSU_TRACKER_VERSION_SIGNED="40")
+add_compile_definitions(OSU_TRACKER_VERSION_SIGNED="50")
 add_compile_definitions(OSU_TRACKER_UPDATE_MASTER=0) # Debug flag to check master branch
 add_compile_definitions(OSU_TRACKER_UPDATE_EQUAL=0) # Debug flag to download update on same signed version
 
 # OSU_TRACKER PROJECT STATIC STRINGS
 add_compile_definitions(OSU_TRACKER_NAME="osu! Tracker")
-add_compile_definitions(OSU_TRACKER_VERSION="v0.4.0")
-add_compile_definitions(OSU_TRACKER_TITLE="osu! Tracker v0.4.0")
+add_compile_definitions(OSU_TRACKER_VERSION="v0.5.0")
+add_compile_definitions(OSU_TRACKER_TITLE="osu! Tracker v0.5.0")
 add_compile_definitions(OSU_TRACKER_RELEASE_TYPE="Beta")
 
 # CMAKE Info
