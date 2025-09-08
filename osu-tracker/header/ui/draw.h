@@ -195,11 +195,14 @@ void drawContent(struct nk_context* ctx, struct nk_font* font, struct nk_font* f
 	ctx->style.window.padding.x = 10.0f;
 
 	if (nk_begin(ctx, custom_strcat_static(3, "[color=#FFFFFF]", user.username ? user.username : "", "[/color]"), nk_rect(0, 0, w, h),NK_WINDOW_TITLE| NK_WINDOW_BACKGROUND))
-	{
+	{	
+		int nkEditHeight = 0;
 		#ifdef _WIN32
-		nk_gdi_set_font(font);
+			nk_gdi_set_font(font);
+			nkEditHeight = 20;
 		#elif __linux__
-		nk_style_set_font(ctx, &font->handle);
+			nk_style_set_font(ctx, &font->handle);
+			nkEditHeight = 25;
 		#endif
 
 		for (size_t i = 0; i < count; i++) {
@@ -219,10 +222,10 @@ void drawContent(struct nk_context* ctx, struct nk_font* font, struct nk_font* f
 			}
 
 			if (entries[i].single) {
-				nk_layout_row(ctx, NK_DYNAMIC, 20, 2, ratioSingle);
+				nk_layout_row(ctx, NK_DYNAMIC, nkEditHeight, 2, ratioSingle);
 			}
 			else {
-				nk_layout_row(ctx, NK_DYNAMIC, 20, 3, ratio);
+				nk_layout_row(ctx, NK_DYNAMIC, nkEditHeight, 3, ratio);
 			}
 
 			nk_label(ctx, entries[i].name, NK_TEXT_ALIGN_LEFT);

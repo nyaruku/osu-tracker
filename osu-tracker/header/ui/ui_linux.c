@@ -9,7 +9,7 @@
 #include <assert.h>
 #include <limits.h>
 #include <time.h>
-#include <nuklear/glfw3.h>
+//#include <nuklear/glfw3.h>
 
 #define MAX_ENTRIES 100
 #define WINDOW_WIDTH 400
@@ -141,6 +141,7 @@ bool data_debug_layout = false;
 
 #include <nuklear/nuklear.h>
 #include <nuklear/nuklear_glfw_gl2.h>
+#include "droid_sans.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <nuklear/stb_image.h>
@@ -162,14 +163,15 @@ int ui_main(void)
 {
     /* Platform */
     int width = 0, height = 0;
-
+	int fb_width = 0, fb_height = 0;
+	
     /* GUI */
     struct nk_context *ctx;
     struct nk_colorf bg;
 
     #ifdef INCLUDE_CONFIGURATOR
-    static struct nk_color color_table[NK_COLOR_COUNT];
-    memcpy(color_table, nk_default_color_style, sizeof(color_table));
+		static struct nk_color color_table[NK_COLOR_COUNT];
+		memcpy(color_table, nk_default_color_style, sizeof(color_table));
     #endif
 
     /* GLFW */
@@ -182,6 +184,8 @@ int ui_main(void)
     win = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, OSU_TRACKER_TITLE, NULL, NULL);
     glfwMakeContextCurrent(win);
     glfwGetWindowSize(win, &width, &height);
+	
+	glfwGetFramebufferSize(win, &fb_width, &fb_height);
 
     /* GUI */
     ctx = nk_glfw3_init(win, NK_GLFW3_INSTALL_CALLBACKS);
@@ -189,23 +193,39 @@ int ui_main(void)
     // Fonts
     struct nk_font_atlas *atlas;
     nk_glfw3_font_stash_begin(&atlas);
-    struct nk_font *fontDefault;
-    struct nk_font *fontHeader;
-    struct nk_font *fontSmall;
-    // Load fonts with different sizes
-    fontHeader  = nk_font_atlas_add_default(atlas, 22.0f, 0);
-    fontDefault = nk_font_atlas_add_default(atlas, 16.0f, 0);
-    fontSmall   = nk_font_atlas_add_default(atlas, 16.0f, 0);
 
-    nk_glfw3_font_stash_end();    
+	struct nk_font *fontDefault = nk_font_atlas_add_from_memory(
+		atlas,
+		DroidSans_ttf,          // pointer to embedded array
+		DroidSans_ttf_len,      // length of the array
+		18.0f,                  // font size
+		0                       // optional nk_font_config*
+	);
+	
+	struct nk_font *fontHeader = nk_font_atlas_add_from_memory(
+		atlas,
+		DroidSans_ttf,          // pointer to embedded array
+		DroidSans_ttf_len,      // length of the array
+		24.0f,                  // font size
+		0                       // optional nk_font_config*
+	);
+	
+	struct nk_font *fontSmall = nk_font_atlas_add_from_memory(
+		atlas,
+		DroidSans_ttf,          // pointer to embedded array
+		DroidSans_ttf_len,      // length of the array
+		18.0f,                  // font size
+		0                       // optional nk_font_config*
+	);
+	
+	nk_glfw3_font_stash_end();
+	nk_style_set_font(ctx, &fontDefault->handle);
 
     bg.r = 0.10f, bg.g = 0.18f, bg.b = 0.24f, bg.a = 1.0f;
 
-    nk_font_atlas_add_default(atlas, 20.0f, 0);
-
     while (!glfwWindowShouldClose(win))
     {
-        /* Input */
+		/* Input */
         glfwPollEvents();
         nk_glfw3_new_frame();
         static int f10_was_down = 0;
@@ -228,8 +248,10 @@ int ui_main(void)
 	      nk_end(ctx);
 
         /* Draw */
+		/* Update framebuffer size each frame */
         glfwGetWindowSize(win, &width, &height);
-        glViewport(0, 0, width, height);
+		glfwGetFramebufferSize(win, &fb_width, &fb_height);
+		glViewport(0, 0, fb_width, fb_height);
         glClear(GL_COLOR_BUFFER_BIT);
         glClearColor(bg.r, bg.g, bg.b, bg.a);
         /* IMPORTANT: `nk_glfw_render` modifies some global OpenGL state

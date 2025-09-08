@@ -14,7 +14,6 @@
 #include "../header/webserver.h"
 #include "../header/ui/ui.h"
 
-
 #ifdef _WIN32
 	void enableVirtualTerminalProcessing() {
 		HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -26,7 +25,13 @@
 #endif
 
 int main(int argc, char* argv[]) {
-	#ifdef _WIN32 
+	if (argv[1] == "dfc") {
+		#define DEBUG_FUNCTION_CALLS
+	}
+	#ifdef DEBUG_FUNCTION_CALLS
+		std::cout << "CALL main()\n";;
+	#endif
+	#ifdef _WIN32
 		enableVirtualTerminalProcessing(); //poopoo cmd.exe 
 	#endif
 	console::writeLog("-------------------------------------------------------------", true, 255, 255, 255);
@@ -78,6 +83,9 @@ int main(int argc, char* argv[]) {
 		webserver::stopUiThread();
 		console::writeLog("Stopping Fetch Thread...", true, 255, 0, 0);
 		ui::stopFetchThread();
+		#ifdef DEBUG_FUNCTION_CALLS
+			std::cout << "EXIT main()\n";;
+		#endif
 	}
 	return 0;
 }
