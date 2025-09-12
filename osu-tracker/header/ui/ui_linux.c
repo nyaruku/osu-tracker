@@ -94,6 +94,10 @@ static void free_internal_copies() {
 }
 
 static void copy_data_entry_deep(const struct dataEntryC* src, struct dataEntryC* dst) {
+    if (!src || !dst) return;
+
+    *dst = (struct dataEntryC){0}; // zero all fields
+
     dst->sort = src->sort;
     dst->positive = src->positive;
     dst->display = src->display;
@@ -101,11 +105,14 @@ static void copy_data_entry_deep(const struct dataEntryC* src, struct dataEntryC
     dst->banchoSupport = src->banchoSupport;
     dst->titanicSupport = src->titanicSupport;
 
-    // List of string fields to copy
     const char* src_fields[] = { src->key, src->name, src->init, src->current, src->change };
     const char** dst_fields[] = { &dst->key, &dst->name, &dst->init, &dst->current, &dst->change };
 
     for (int i = 0; i < 5; i++) {
+        if (_entries_str_copies_count >= MAX_ENTRIES * 5) {
+            fprintf(stderr, "Too many entries for internal copy buffer\n");
+            exit(1);
+        }
         char* copy = strdup_safe(src_fields[i]);
         if (!copy) {
             fprintf(stderr, "Out of memory copying string field\n");

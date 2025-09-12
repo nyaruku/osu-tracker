@@ -13,6 +13,9 @@ class CustomLogger : public crow::ILogHandler {
 public:
 	CustomLogger() {}
 	void log(std::string message, crow::LogLevel level) {
+		#ifdef DEBUG_FUNCTION_CALLS
+			std::cout << "CALL CustomLogger->log()()\n";;
+		#endif
 		auto currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 		std::tm* timeInfo = localtime(&currentTime);;
 		char dateBuffer[20];
@@ -103,6 +106,9 @@ public:
 		std::stringstream ss;
 		ss << (std::string)dateBuffer + " " + timeBuffer << " [" << logLevel <<"] " << message;
 		console::instance().vec_log.push_back(ss.str());
+		#ifdef DEBUG_FUNCTION_CALLS
+			std::cout << "EXIT CustomLogger->log()\n";;
+		#endif
 	}
 };
 
@@ -275,8 +281,11 @@ public:
 						for (const auto& item : j["msg"]["trackerConfig"]) {
 							config::data::arr[config::data::getIndex(item["key"].get<std::string>().c_str())].display = item["value"];
 						}
-						if(resetSession)
-							api::fetch_api_data(true);
+						if (resetSession) {
+							console::writeLog("Stopping API Fetch Thread (may take some seconds, depending on interval)", true, 255, 255, 0);
+							ui::stopFetchThread();
+							ui::startFetchThread(true);	
+						}
 						config::writeConfig();
 					}
 					if (cmd == "#resetSettings") {
@@ -284,7 +293,10 @@ public:
 						shutdown(true); //restart web server
 					}
 					if (cmd == "#resetSession") {
-						api::fetch_api_data(true);
+						//api::fetch_api_data(true);
+						console::writeLog("Stopping API Fetch Thread (may take some seconds, depending on interval)", true, 255, 255, 0);
+						ui::stopFetchThread();
+						ui::startFetchThread(true);
 					}
 				}
 			});

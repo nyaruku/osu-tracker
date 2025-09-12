@@ -31,6 +31,7 @@ int main(int argc, char* argv[]) {
 	#ifdef DEBUG_FUNCTION_CALLS
 		std::cout << "CALL main()\n";;
 	#endif
+
 	#ifdef _WIN32
 		enableVirtualTerminalProcessing(); //poopoo cmd.exe 
 	#endif
@@ -87,5 +88,8 @@ int main(int argc, char* argv[]) {
 			std::cout << "EXIT main()\n";;
 		#endif
 	}
+	#ifdef DEBUG_FUNCTION_CALLS
+		std::cout << "EXIT main()\n";;
+	#endif
 	return 0;
 }

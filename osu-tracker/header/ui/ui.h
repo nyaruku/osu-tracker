@@ -1,4 +1,7 @@
 #pragma once
+#include <mutex> 
+static std::mutex ui_copy_mutex;
+
 enum gameMode {
 	osu = 0
 	, taiko = 1
@@ -160,48 +163,79 @@ std::string formatPlaytime(const std::string& secondsStr, bool showPlus = false)
 class ui {
 private:
 	static void fetchApiData(bool init) {
-		while (fetch) {
+		while (fetch) {	
 			api::fetch_api_data(init);
+			updateFormat();
+			config::writeStats();
 			copyDataOnly();
-			std::this_thread::sleep_for(std::chrono::milliseconds(config::application::instance().apiInterval));
+			
+			std::this_thread::sleep_for(
+				std::chrono::milliseconds(config::application::instance().apiInterval)
+			);
 		}
 	}
+
 public:
 	static void copyDataOnly() {
-		updateFormat();
-		config::writeStats();
+    // Temporary holders
+    char* tmp_username = nullptr;
+    char* tmp_avatar  = nullptr;
+    std::vector<dataEntryC> entriesC;
+    appC app;
 
-		appC app = to_c_appC(config::application::instance());
+    // Scope the lock so we only hold it while reading/formatting C++ data.
+    {
+        std::lock_guard<std::mutex> lock(ui_copy_mutex);
 
-		userC user = {
-			config::user::instance().username.c_str(),
-			config::user::instance().avatar.c_str()
-		};
+        // Do format/update while holding the lock so no other thread mutates arrFormatted mid-update.
 
-		std::vector<dataEntryC> entriesC;
-		entriesC.reserve(config::data::arrFormatted.size());
+        // Convert app while locked (cheap)
+        app = to_c_appC(config::application::instance());
 
-		for (const config::dataEntry& d : config::data::arrFormatted) {
-			dataEntryC c{
-				d.key.c_str(),
-				d.name.c_str(),
-				d.sort,
-				d.init.c_str(),
-				d.current.c_str(),
-				d.change.c_str(),
-				d.positive,
-				d.display,
-				d.single,
-				d.banchoSupport,
-				d.titanicSupport
-			};
-			entriesC.push_back(c);
-		}
+        // Copy user strings to C heap while still under lock
+        tmp_username = strdup(config::user::instance().username.c_str());
+        tmp_avatar   = strdup(config::user::instance().avatar.c_str());
 
-		copyArrayData(&app, &user, entriesC.data(), entriesC.size());
+        // Prepare entries vector and deep-copy all strings while locked
+        entriesC.reserve(config::data::arrFormatted.size());
+        for (const config::dataEntry& d : config::data::arrFormatted) {
+            dataEntryC c{};
+            c.sort = d.sort;
+            c.positive = d.positive;
+            c.display = d.display;
+            c.single = d.single;
+            c.banchoSupport = d.banchoSupport;
+            c.titanicSupport = d.titanicSupport;
 
-	}
-	static void updateFormat() {
+            c.key     = strdup(d.key.c_str());
+            c.name    = strdup(d.name.c_str());
+            c.init    = strdup(d.init.c_str());
+            c.current = strdup(d.current.c_str());
+            c.change  = strdup(d.change.c_str());
+
+            entriesC.push_back(c);
+        }
+    } // <-- lock released here
+
+    // Build userC from our C-owned strings
+    userC user = { tmp_username, tmp_avatar };
+
+    // Call into the C UI code (it may make its own copies)
+    copyArrayData(&app, &user, entriesC.data(), entriesC.size());
+
+    // Cleanup temporary C copies we created here
+    for (auto& e : entriesC) {
+        free((void*)e.key);
+        free((void*)e.name);
+        free((void*)e.init);
+        free((void*)e.current);
+        free((void*)e.change);
+    }
+    if (tmp_username) free(tmp_username);
+    if (tmp_avatar)  free(tmp_avatar);
+}
+
+static void updateFormat() {
 		config::data::arrFormatted = config::data::arr;
 
 		for (config::dataEntry& data : config::data::arrFormatted) {
@@ -242,6 +276,7 @@ public:
 							std::string str = formatNumber(data.change, true);
 							if (str[0] == '-') {
 								data.positive = false;
+							api::fetch_api_data(true);
 							}
 							data.change = str;
 							break;
@@ -339,9 +374,9 @@ public:
 		}
 	}
 	static inline std::atomic<bool> isOpen;
-	static void startFetchThread() {
+	static void startFetchThread(bool _init = false) {
 		fetch = true;
-		fetchThread = std::thread(fetchApiData, false);
+		fetchThread = std::thread(fetchApiData, _init);
 	}
 	static int stopFetchThread() {
 		fetch = false;
