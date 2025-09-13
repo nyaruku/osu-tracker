@@ -122,12 +122,12 @@ jobs:
       - name: Zip Linux Release Artifact
         if: runner.os == 'Linux'
         run: |
-          cd /home/runner/work/osu-tracker/osu-tracker/out/build/x86-release-linux
-          zip -r /home/runner/work/osu-tracker/osu-tracker/out/x86-release-linux.zip osu-tracker
+          cd /home/runner/work/osu-tracker/osu-tracker/osu-tracker/out/build/x86-release-linux
+          zip -r /home/runner/work/osu-tracker/osu-tracker/osu-tracker/out/x86-release-linux.zip osu-tracker
 
       - name: Zip Windows Release Artifact
         if: runner.os == 'Windows'
-        run: powershell -Command "Compress-Archive -Path 'D:\a\osu-tracker\osu-tracker\out\build\x86-release-windows\*' -DestinationPath 'D:\a\osu-tracker\osu-tracker\out\x86-release-windows.zip'"
+        run: powershell -Command "Compress-Archive -Path 'D:\a\osu-tracker\osu-tracker\osu-tracker\out\build\x86-release-windows\*' -DestinationPath 'D:\a\osu-tracker\osu-tracker\osu-tracker\out\x86-release-windows.zip'"
 
       - name: Upload Linux Release Artifact
         if: runner.os == 'Linux'
