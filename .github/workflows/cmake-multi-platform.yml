@@ -155,13 +155,13 @@ jobs:
       - name: Download Linux zip
         uses: actions/download-artifact@v4
         with:
-          name: release-artifact
+          name: x86-release-linux
           path: ./release-artifacts/linux
 
       - name: Download Windows zip
         uses: actions/download-artifact@v4
         with:
-          name: release-artifact
+          name: x86-release-windows
           path: ./release-artifacts/windows
 
       - name: Create GitHub Release
