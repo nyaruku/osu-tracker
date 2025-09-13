@@ -144,7 +144,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: x86-release-windows
-          path: 'D:\a\osu-tracker\osu-tracker\out\x86-release-windows.zip'
+          path: 'D:/a/osu-tracker/osu-tracker/out/x86-release-windows.zip'
 
   release:
     name: Create Release
