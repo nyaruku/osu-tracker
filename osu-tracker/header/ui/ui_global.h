@@ -86,35 +86,23 @@ static void copy_data_entry_deep(const struct dataEntryC* src, struct dataEntryC
     dst->banchoSupport = src->banchoSupport;
     dst->titanicSupport = src->titanicSupport;
 
-    const char* src_fields[] = { src->key, src->name, src->init, src->current, src->change };
-    const char** dst_fields[] = { &dst->key, &dst->name, &dst->init, &dst->current, &dst->change };
-
-    for (int i = 0; i < 5; i++) {
-        if (_entries_str_copies_count >= MAX_ENTRIES * 5) {
-            fprintf(stderr, "Too many entries for internal copy buffer\n");
-            exit(1);
-        }
-        char* copy = strdup_safe(src_fields[i]);
-        if (!copy) {
-            fprintf(stderr, "Out of memory copying string field\n");
-            exit(1);
-        }
-        _entries_str_copies[_entries_str_copies_count++] = copy;
-        *dst_fields[i] = copy;
-    }
+    dst->key     = strdup_safe(src->key);
+    dst->name    = strdup_safe(src->name);
+    dst->init    = strdup_safe(src->init);
+    dst->current = strdup_safe(src->current);
+    dst->change  = strdup_safe(src->change);
 }
 
 void copyArrayData(const struct appC* app, const struct userC* user, const struct dataEntryC* entries, size_t count) {
-    if (count > MAX_ENTRIES) count = MAX_ENTRIES;
+	if (!app || !user || !entries) return;
+	if (count > MAX_ENTRIES) count = MAX_ENTRIES;
 
     free_internal_copies();
 
     _app = *app;
 
-    _user_str_copies[0] = strdup_safe(user->username);
-    _user_str_copies[1] = strdup_safe(user->avatar);
-    _user.username = _user_str_copies[0];
-    _user.avatar = _user_str_copies[1];
+	_user.username = strdup_safe(user->username);
+    _user.avatar = strdup_safe(user->avatar);
 
     _entry_count = count;
 
