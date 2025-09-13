@@ -127,7 +127,8 @@ jobs:
 
       - name: Zip Windows Release Artifact
         if: runner.os == 'Windows'
-        run: powershell -Command "
+        run: |
+          powershell -Command "
           Compress-Archive -Path 'D:\a\osu-tracker\osu-tracker\out\build\x86-release-windows\*' `
                            -DestinationPath 'D:\a\osu-tracker\osu-tracker\out\x86-release-windows.zip'
         "
