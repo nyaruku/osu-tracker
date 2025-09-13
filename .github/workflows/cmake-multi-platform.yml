@@ -119,14 +119,18 @@ jobs:
         env:
           VCPKG_ROOT:
 
-      - name: Zip Release Artifact
+      - name: Zip Linux Release Artifact
+        if: runner.os == 'Linux'
         run: |
-          if [ "${{ runner.os }}" == "Linux" ]; then
-            cd /home/runner/work/osu-tracker/osu-tracker/out/build/x86-release-linux
-            zip -r /home/runner/work/osu-tracker/osu-tracker/out/x86-release-linux.zip osu-tracker
-          else
-            cd D:\a\osu-tracker\osu-tracker\out\build\x86-release-windows
-            powershell Compress-Archive -Path osu-tracker\* -DestinationPath D:\a\osu-tracker\osu-tracker\out\x86-release-windows.zip
+          cd /home/runner/work/osu-tracker/osu-tracker/out/build/x86-release-linux
+          zip -r /home/runner/work/osu-tracker/osu-tracker/out/x86-release-linux.zip osu-tracker
+
+      - name: Zip Windows Release Artifact
+        if: runner.os == 'Windows'
+        run: powershell -Command "
+          Compress-Archive -Path 'D:\a\osu-tracker\osu-tracker\out\build\x86-release-windows\*' `
+                           -DestinationPath 'D:\a\osu-tracker\osu-tracker\out\x86-release-windows.zip'
+        "
 
       - name: Upload Release Artifact
         uses: actions/upload-artifact@v4
