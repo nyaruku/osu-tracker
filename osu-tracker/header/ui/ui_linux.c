@@ -1,4 +1,3 @@
-/* nuklear - v1.32.0 - public domain */
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -9,7 +8,6 @@
 #include <assert.h>
 #include <limits.h>
 #include <time.h>
-//#include <nuklear/glfw3.h>
 
 #define MAX_ENTRIES 100
 #define WINDOW_WIDTH 400
@@ -24,123 +22,7 @@
 #define NK_IMPLEMENTATION
 #define NK_GLFW_GL2_IMPLEMENTATION
 
-
-enum gameMode {
-    osu = 0
-    , taiko = 1
-    , fruits = 2
-    , mania = 3
-};
-
-enum server {
-    bancho = 0
-    , titanic = 1
-};
-
-
-struct appC {
-    int osuId;
-    enum gameMode gameMode;
-    enum server server;
-};
-
-struct userC {
-    const char* username;
-    const char* avatar;
-};
-
-struct dataEntryC {
-    const char* key;
-    const char* name;
-    int sort;
-    const char* init;
-    const char* current;
-    const char* change;
-    bool positive;
-    bool display;
-    bool single;
-    bool banchoSupport;
-    bool titanicSupport;
-};
-
-// Internal storage
-static struct appC _app;
-static struct userC _user;
-static struct dataEntryC _entries[MAX_ENTRIES];
-static size_t _entry_count = 0;
-
-// Track allocated strings for cleanup
-static char* _user_str_copies[2] = { NULL, NULL }; // username, avatar
-static char* _entries_str_copies[MAX_ENTRIES * 5]; // 5 strings per entry
-static size_t _entries_str_copies_count = 0;
-
-static char* strdup_safe(const char* src) {
-    if (!src) return NULL;
-    size_t len = strlen(src);
-    char* dst = malloc(len + 1);
-    if (!dst) return NULL;
-    memcpy(dst, src, len + 1);
-    return dst;
-}
-
-static void free_internal_copies() {
-    for (size_t i = 0; i < _entries_str_copies_count; i++) {
-        free(_entries_str_copies[i]);
-    }
-    _entries_str_copies_count = 0;
-
-    if (_user_str_copies[0]) { free(_user_str_copies[0]); _user_str_copies[0] = NULL; }
-    if (_user_str_copies[1]) { free(_user_str_copies[1]); _user_str_copies[1] = NULL; }
-}
-
-static void copy_data_entry_deep(const struct dataEntryC* src, struct dataEntryC* dst) {
-    if (!src || !dst) return;
-
-    *dst = (struct dataEntryC){0}; // zero all fields
-
-    dst->sort = src->sort;
-    dst->positive = src->positive;
-    dst->display = src->display;
-    dst->single = src->single;
-    dst->banchoSupport = src->banchoSupport;
-    dst->titanicSupport = src->titanicSupport;
-
-    const char* src_fields[] = { src->key, src->name, src->init, src->current, src->change };
-    const char** dst_fields[] = { &dst->key, &dst->name, &dst->init, &dst->current, &dst->change };
-
-    for (int i = 0; i < 5; i++) {
-        if (_entries_str_copies_count >= MAX_ENTRIES * 5) {
-            fprintf(stderr, "Too many entries for internal copy buffer\n");
-            exit(1);
-        }
-        char* copy = strdup_safe(src_fields[i]);
-        if (!copy) {
-            fprintf(stderr, "Out of memory copying string field\n");
-            exit(1);
-        }
-        _entries_str_copies[_entries_str_copies_count++] = copy;
-        *dst_fields[i] = copy;
-    }
-}
-
-void copyArrayData(const struct appC* app, const struct userC* user, const struct dataEntryC* entries, size_t count) {
-    if (count > MAX_ENTRIES) count = MAX_ENTRIES;
-
-    free_internal_copies();
-
-    _app = *app;
-
-    _user_str_copies[0] = strdup_safe(user->username);
-    _user_str_copies[1] = strdup_safe(user->avatar);
-    _user.username = _user_str_copies[0];
-    _user.avatar = _user_str_copies[1];
-
-    _entry_count = count;
-
-    for (size_t i = 0; i < count; i++) {
-        copy_data_entry_deep(&entries[i], &_entries[i]);
-    }
-}
+#include "ui_global.h"
 
 bool show_debug_layout = false;
 bool data_debug_layout = false;
@@ -153,8 +35,10 @@ bool data_debug_layout = false;
 #define STB_IMAGE_IMPLEMENTATION
 #include <nuklear/stb_image.h>
 
-static void error_callback(int e, const char *d)
-{printf("Error %d: %s\n", e, d);}
+static void error_callback(int e, const char* d)
+{
+    printf("Error %d: %s\n", e, d);
+}
 int w = WINDOW_WIDTH;
 int h = WINDOW_HEIGHT;
 
@@ -170,16 +54,16 @@ int ui_main(void)
 {
     /* Platform */
     int width = 0, height = 0;
-	int fb_width = 0, fb_height = 0;
-	
+    int fb_width = 0, fb_height = 0;
+
     /* GUI */
-    struct nk_context *ctx;
+    struct nk_context* ctx;
     struct nk_colorf bg;
 
-    #ifdef INCLUDE_CONFIGURATOR
-		static struct nk_color color_table[NK_COLOR_COUNT];
-		memcpy(color_table, nk_default_color_style, sizeof(color_table));
-    #endif
+#ifdef INCLUDE_CONFIGURATOR
+    static struct nk_color color_table[NK_COLOR_COUNT];
+    memcpy(color_table, nk_default_color_style, sizeof(color_table));
+#endif
 
     /* GLFW */
     glfwSetErrorCallback(error_callback);
@@ -191,48 +75,48 @@ int ui_main(void)
     win = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, OSU_TRACKER_TITLE, NULL, NULL);
     glfwMakeContextCurrent(win);
     glfwGetWindowSize(win, &width, &height);
-	
-	glfwGetFramebufferSize(win, &fb_width, &fb_height);
+
+    glfwGetFramebufferSize(win, &fb_width, &fb_height);
 
     /* GUI */
     ctx = nk_glfw3_init(win, NK_GLFW3_INSTALL_CALLBACKS);
-    
+
     // Fonts
-    struct nk_font_atlas *atlas;
+    struct nk_font_atlas* atlas;
     nk_glfw3_font_stash_begin(&atlas);
 
-	struct nk_font *fontDefault = nk_font_atlas_add_from_memory(
-		atlas,
-		DroidSans_ttf,          // pointer to embedded array
-		DroidSans_ttf_len,      // length of the array
-		18.0f,                  // font size
-		0                       // optional nk_font_config*
-	);
-	
-	struct nk_font *fontHeader = nk_font_atlas_add_from_memory(
-		atlas,
-		DroidSans_ttf,          // pointer to embedded array
-		DroidSans_ttf_len,      // length of the array
-		24.0f,                  // font size
-		0                       // optional nk_font_config*
-	);
-	
-	struct nk_font *fontSmall = nk_font_atlas_add_from_memory(
-		atlas,
-		DroidSans_ttf,          // pointer to embedded array
-		DroidSans_ttf_len,      // length of the array
-		18.0f,                  // font size
-		0                       // optional nk_font_config*
-	);
-	
-	nk_glfw3_font_stash_end();
-	nk_style_set_font(ctx, &fontDefault->handle);
+    struct nk_font* fontDefault = nk_font_atlas_add_from_memory(
+        atlas,
+        DroidSans_ttf,          // pointer to embedded array
+        DroidSans_ttf_len,      // length of the array
+        18.0f,                  // font size
+        0                       // optional nk_font_config*
+    );
+
+    struct nk_font* fontHeader = nk_font_atlas_add_from_memory(
+        atlas,
+        DroidSans_ttf,          // pointer to embedded array
+        DroidSans_ttf_len,      // length of the array
+        24.0f,                  // font size
+        0                       // optional nk_font_config*
+    );
+
+    struct nk_font* fontSmall = nk_font_atlas_add_from_memory(
+        atlas,
+        DroidSans_ttf,          // pointer to embedded array
+        DroidSans_ttf_len,      // length of the array
+        18.0f,                  // font size
+        0                       // optional nk_font_config*
+    );
+
+    nk_glfw3_font_stash_end();
+    nk_style_set_font(ctx, &fontDefault->handle);
 
     bg.r = 0.10f, bg.g = 0.18f, bg.b = 0.24f, bg.a = 1.0f;
 
     while (!glfwWindowShouldClose(win))
     {
-		/* Input */
+        /* Input */
         glfwPollEvents();
         nk_glfw3_new_frame();
         static int f10_was_down = 0;
@@ -252,13 +136,13 @@ int ui_main(void)
         // ui
         nk_style_default(ctx);
         drawContent(ctx, fontDefault, fontSmall, fontHeader, w, h, _app, _user, _entries, _entry_count, show_debug_layout, data_debug_layout);
-	      nk_end(ctx);
+        nk_end(ctx);
 
         /* Draw */
-		/* Update framebuffer size each frame */
+        /* Update framebuffer size each frame */
         glfwGetWindowSize(win, &width, &height);
-		glfwGetFramebufferSize(win, &fb_width, &fb_height);
-		glViewport(0, 0, fb_width, fb_height);
+        glfwGetFramebufferSize(win, &fb_width, &fb_height);
+        glViewport(0, 0, fb_width, fb_height);
         glClear(GL_COLOR_BUFFER_BIT);
         glClearColor(bg.r, bg.g, bg.b, bg.a);
         /* IMPORTANT: `nk_glfw_render` modifies some global OpenGL state

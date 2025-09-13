@@ -21,40 +21,9 @@ typedef struct nk_user_font PlatformFont;
 // fixed ratio layout 
 float ratio[] = { 0.3, 0.40, 0.3 };
 float ratioSingle[] = { 0.3, 0.7 };
+float ratioEqual[] = { 0.5, 0.5 };
 float ratioFull[] = { 1.0 };
 
-void debug_style(struct nk_context* ctx) {
-	struct nk_color border = nk_rgb(255, 0, 255);
-	struct nk_color bg = nk_rgb(255, 0, 255);
-	struct nk_color textColor = nk_rgb(150, 0, 150);
-	ext_BG(ctx, 200, 0, 200);
-
-	// Buttons
-	ctx->style.button.normal = nk_style_item_color(bg);
-	ctx->style.button.hover = nk_style_item_color(bg);
-	ctx->style.button.active = nk_style_item_color(bg);
-	ctx->style.button.border_color = border;
-	ctx->style.button.text_normal = textColor;
-	ctx->style.button.text_hover = textColor;
-	ctx->style.button.text_active = textColor;
-
-	// Edit fields
-	ctx->style.edit.normal = nk_style_item_color(bg);
-	ctx->style.edit.hover = nk_style_item_color(bg);
-	ctx->style.edit.active = nk_style_item_color(bg);
-	ctx->style.edit.border_color = border;
-	ctx->style.edit.text_normal = textColor;
-	ctx->style.edit.text_hover = textColor;
-	ctx->style.edit.text_active = textColor;
-
-	// Label text
-	ctx->style.text.color = textColor;
-
-	// Window
-	ctx->style.window.background = nk_rgba(35, 35, 35, 255);
-	ctx->style.window.border_color = border;
-
-}
 #ifdef _WIN32
 void data_debug_style(struct nk_context* ctx, GdiFont* fontSmall, int w, int h, struct appC app, struct userC user, struct dataEntryC* entries, size_t count)
 #elif __linux__
@@ -151,39 +120,58 @@ void drawContent(struct nk_context* ctx, struct nk_font* font, struct nk_font* f
 	nk_style_set_font(ctx, &fontHeader->handle);
 	#endif
 	if (!data_debug) {
-		if (!debug) {
-			nk_draw_set_color_inline(ctx, NK_COLOR_INLINE_TAG);
+		nk_draw_set_color_inline(ctx, NK_COLOR_INLINE_TAG);
 
-			ctx->style.window.header.active = nk_style_item_color(nk_rgb(21, 133, 181));
+		ctx->style.window.header.active = nk_style_item_color(nk_rgb(21, 133, 181));
 
-			ext_TextColor(ctx, 255, 255, 255);
-			ext_BG(ctx, 35, 35, 35);
+		ext_TextColor(ctx, 255, 255, 255);
+		ext_BG(ctx, 35, 35, 35);
 
-			// scrollbar bg
-			ctx->style.scrollv.hover.data.color = nk_rgb(0, 0, 0);
-			ctx->style.scrollv.normal.data.color = nk_rgb(0, 0, 0);
-			ctx->style.scrollv.active.data.color = nk_rgb(0, 0, 0);
+		// scrollbar bg
+		ctx->style.scrollv.hover.data.color = nk_rgb(0, 0, 0);
+		ctx->style.scrollv.normal.data.color = nk_rgb(0, 0, 0);
+		ctx->style.scrollv.active.data.color = nk_rgb(0, 0, 0);
 
-			// scrollbar fg
-			ctx->style.scrollv.cursor_hover.data.color = nk_rgb(255, 255, 255);
-			ctx->style.scrollv.cursor_active.data.color = nk_rgb(255, 255, 255);
+		// scrollbar fg
+		ctx->style.scrollv.cursor_hover.data.color = nk_rgb(255, 255, 255);
+		ctx->style.scrollv.cursor_active.data.color = nk_rgb(255, 255, 255);
 
-			//border
-			ctx->style.edit.border_color = nk_rgb(200, 200, 200);
+		//border
+		ctx->style.edit.border_color = nk_rgb(200, 200, 200);
 
-			// text box
-			ctx->style.edit.text_normal = nk_rgb(255, 255, 255);
-			ctx->style.edit.text_hover = nk_rgb(0, 0, 0);
-			ctx->style.edit.text_active = nk_rgb(0, 0, 0);
+		// text box
+		ctx->style.edit.text_normal = nk_rgb(255, 255, 255);
+		ctx->style.edit.text_hover = nk_rgb(0, 0, 0);
+		ctx->style.edit.text_active = nk_rgb(0, 0, 0);
 
-			// body
-			ctx->style.edit.normal.data.color = nk_rgb(13, 13, 13);
-			ctx->style.edit.hover.data.color = nk_rgb(255, 255, 255);
-			ctx->style.edit.active.data.color = nk_rgb(255, 255, 255);
-		}
-		else {
-			debug_style(ctx);
-		}
+		// body
+		ctx->style.edit.normal.data.color = nk_rgb(13, 13, 13);
+		ctx->style.edit.hover.data.color = nk_rgb(255, 255, 255);
+		ctx->style.edit.active.data.color = nk_rgb(255, 255, 255);
+
+		// tab
+		ctx->style.tab.background.data.color = nk_rgb(0, 0, 0);
+		ctx->style.tab.text = nk_rgb(255, 255, 255);
+
+		ctx->style.tab.tab_minimize_button.active.data.color = nk_rgb(0, 0, 0);
+		ctx->style.tab.tab_minimize_button.hover.data.color = nk_rgb(0, 0, 0);
+		ctx->style.tab.tab_minimize_button.normal.data.color = nk_rgb(0, 0, 0);
+		
+		ctx->style.tab.tab_minimize_button.text_normal = nk_rgb(255, 255, 255);
+		ctx->style.tab.tab_minimize_button.text_normal = nk_rgb(255, 255, 255);
+		ctx->style.tab.tab_minimize_button.text_normal = nk_rgb(255, 255, 255);
+
+		ctx->style.tab.tab_maximize_button.active.data.color = nk_rgb(0, 0, 0);
+		ctx->style.tab.tab_maximize_button.hover.data.color = nk_rgb(0, 0, 0);
+		ctx->style.tab.tab_maximize_button.normal.data.color = nk_rgb(0, 0, 0);
+		
+		ctx->style.tab.tab_maximize_button.text_normal = nk_rgb(255, 255, 255);
+		ctx->style.tab.tab_maximize_button.text_normal = nk_rgb(255, 255, 255);
+		ctx->style.tab.tab_maximize_button.text_normal = nk_rgb(255, 255, 255);
+
+		ctx->style.tab.indent = 0;
+		ctx->style.tab.border = 0;
+
 	}
 	else {
 		data_debug_style(ctx, fontSmall, w,h, app, user, entries, count);
@@ -204,6 +192,31 @@ void drawContent(struct nk_context* ctx, struct nk_font* font, struct nk_font* f
 			nk_style_set_font(ctx, &font->handle);
 			nkEditHeight = 25;
 		#endif
+			if (debug) {
+				//border
+				ctx->style.edit.border_color = nk_rgb(0, 0, 0);
+
+				// text box
+				ctx->style.edit.text_normal = nk_rgb(255, 255, 255);
+				ctx->style.edit.text_hover = nk_rgb(0, 0, 0);
+				ctx->style.edit.text_active = nk_rgb(0, 0, 0);
+
+				if (nk_tree_push(ctx, NK_TREE_TAB, "Info Debug", NK_MINIMIZED)) {
+					nk_layout_row(ctx, NK_DYNAMIC, nkEditHeight, 2, ratioEqual);
+					nk_edit_string_zero_terminated(ctx, NK_EDIT_READ_ONLY, "WIDTH", 30, nk_filter_default);
+					nk_edit_string_zero_terminated(ctx, NK_EDIT_READ_ONLY, intToConst(width), 30, nk_filter_default);
+					nk_edit_string_zero_terminated(ctx, NK_EDIT_READ_ONLY, "HEIGHT", 30, nk_filter_default);
+					nk_edit_string_zero_terminated(ctx, NK_EDIT_READ_ONLY, intToConst(height), 30, nk_filter_default);
+					nk_tree_pop(ctx);
+				}
+				//border
+				ctx->style.edit.border_color = nk_rgb(200, 200, 200);
+
+				// text box
+				ctx->style.edit.text_normal = nk_rgb(255, 255, 255);
+				ctx->style.edit.text_hover = nk_rgb(0, 0, 0);
+				ctx->style.edit.text_active = nk_rgb(0, 0, 0);
+			}
 
 		for (size_t i = 0; i < count; i++) {
 

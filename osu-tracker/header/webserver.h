@@ -13,9 +13,6 @@ class CustomLogger : public crow::ILogHandler {
 public:
 	CustomLogger() {}
 	void log(std::string message, crow::LogLevel level) {
-		#ifdef DEBUG_FUNCTION_CALLS
-			std::cout << "CALL CustomLogger->log()()\n";;
-		#endif
 		auto currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 		std::tm* timeInfo = localtime(&currentTime);;
 		char dateBuffer[20];
@@ -106,9 +103,6 @@ public:
 		std::stringstream ss;
 		ss << (std::string)dateBuffer + " " + timeBuffer << " [" << logLevel <<"] " << message;
 		console::instance().vec_log.push_back(ss.str());
-		#ifdef DEBUG_FUNCTION_CALLS
-			std::cout << "EXIT CustomLogger->log()\n";;
-		#endif
 	}
 };
 
@@ -318,54 +312,64 @@ public:
 				clients_settings.erase(&conn);
 			});
 
-      CROW_WEBSOCKET_ROUTE(app, "/ws/overlay-data/")
-      .onopen([&](crow::websocket::connection& conn) {
-          // Add & Open WS Connection
-          std::lock_guard<std::mutex> _(ws_mutex);
-          clients.insert(&conn);
+			CROW_WEBSOCKET_ROUTE(app, "/ws/overlay-data/")
+			.onopen([&](crow::websocket::connection& conn) {
+				// Add & Open WS Connection
+				std::lock_guard<std::mutex> _(ws_mutex);
+				clients.insert(&conn);
 
-          // Send current overlay stats immediately
-          nlohmann::json j;
-          for (const auto& row : config::data::arr) {
-              // raw
-              j[row.key + "_init_raw"] = row.init;
-              j[row.key + "_change_raw"] = row.change;
-              j[row.key + "_current_raw"] = row.current;
+				// Send current overlay stats immediately
+				nlohmann::json j;
+				for (const auto& row : config::data::arr) {
+					// raw
+					j[row.key + "_init_raw"] = row.init;
+					j[row.key + "_change_raw"] = row.change;
+					j[row.key + "_current_raw"] = row.current;
 
-              // formatted
-              const auto& f = config::data::arrFormatted[config::data::getIndex(row.key.c_str())];
-              j[row.key + "_init"] = f.init;
-              j[row.key + "_change"] = f.change;
-              j[row.key + "_current"] = f.current;
-          }
+					// formatted
+					int idx = config::data::getIndex(row.key.c_str());
+					if (idx >= 0 && idx < static_cast<int>(config::data::arrFormatted.size()) &&
+						config::data::arrFormatted[idx].key == row.key)
+					{
+						const auto& f = config::data::arrFormatted[idx];
+						j[row.key + "_init"] = f.init;
+						j[row.key + "_change"] = f.change;
+						j[row.key + "_current"] = f.current;
+					}
+					else
+					{	// happens on launch if fetch thread has not started fast enough and has not filled arrFormatted fast enough
+						// somehow was unnoticed on linux
+						console::writeLog("Vector missmatch [IGNORE THIS ERROR]", false, 255, 0, 0);
+					}
+				}
 
-          conn.send_text(j.dump());
-      })
-      .onclose([&](crow::websocket::connection& conn, const std::string& reason, uint16_t) {
-          // Remove client
-          std::lock_guard<std::mutex> _(ws_mutex);
-          clients.erase(&conn);
-      })
-      .onmessage([&](crow::websocket::connection& conn, const std::string& data, bool is_binary) {
-          std::lock_guard<std::mutex> _(ws_mutex);
+				conn.send_text(j.dump());
+			})
+			.onclose([&](crow::websocket::connection& conn, const std::string& reason, uint16_t) {
+				// Remove client
+				std::lock_guard<std::mutex> _(ws_mutex);
+				clients.erase(&conn);
+			})
+			.onmessage([&](crow::websocket::connection& conn, const std::string& data, bool is_binary) {
+				std::lock_guard<std::mutex> _(ws_mutex);
 
-          try {
-              nlohmann::json stats;
-              for (const auto& row : config::data::arr) {
-                  stats[row.key + "_init_raw"] = row.init;
-                  stats[row.key + "_change_raw"] = row.change;
-                  stats[row.key + "_current_raw"] = row.current;
+				try {
+					nlohmann::json stats;
+					for (const auto& row : config::data::arr) {
+						stats[row.key + "_init_raw"] = row.init;
+						stats[row.key + "_change_raw"] = row.change;
+						stats[row.key + "_current_raw"] = row.current;
 
-                  const auto& f = config::data::arrFormatted[config::data::getIndex(row.key.c_str())];
-                  stats[row.key + "_init"] = f.init;
-                  stats[row.key + "_change"] = f.change;
-                  stats[row.key + "_current"] = f.current;
-              }
-              conn.send_text(stats.dump());
-          } catch (const std::exception& e) {
-              console::writeLog("Overlay WS parse error: " + std::string(e.what()), true, 255, 0, 0);
-          }
-      });
+						const auto& f = config::data::arrFormatted[config::data::getIndex(row.key.c_str())];
+						stats[row.key + "_init"] = f.init;
+						stats[row.key + "_change"] = f.change;
+						stats[row.key + "_current"] = f.current;
+					}
+					conn.send_text(stats.dump());
+				} catch (const std::exception& e) {
+					console::writeLog("Overlay WS parse error: " + std::string(e.what()), true, 255, 0, 0);
+				}
+			});
 
 			// Page routing
 			CROW_ROUTE(app, "/")([]() {
@@ -378,7 +382,6 @@ public:
 				auto page = crow::mustache::load("index.html").render(ctx);
 				return page;
 			});
-
 
 			CROW_ROUTE(app, "/settings")([]() {
 				crow::mustache::context ctx;

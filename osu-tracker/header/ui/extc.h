@@ -80,6 +80,12 @@ const char* intToConst(int i) {
     return buf;
 }
 
+const char* floatToConst(float f) {
+    static char buf[32];
+    snprintf(buf, sizeof(buf), "%f", f);
+    return buf;
+}
+
 // Function to remove a substring from a string and return it as const char*
 const char* removeSubstring(const char* inputString, const char* substringToRemove) {
     const char* startPos = strstr(inputString, substringToRemove);

@@ -25,13 +25,6 @@
 #endif
 
 int main(int argc, char* argv[]) {
-	if (argv[1] == "dfc") {
-		#define DEBUG_FUNCTION_CALLS
-	}
-	#ifdef DEBUG_FUNCTION_CALLS
-		std::cout << "CALL main()\n";;
-	#endif
-
 	#ifdef _WIN32
 		enableVirtualTerminalProcessing(); //poopoo cmd.exe 
 	#endif
@@ -84,12 +77,6 @@ int main(int argc, char* argv[]) {
 		webserver::stopUiThread();
 		console::writeLog("Stopping Fetch Thread...", true, 255, 0, 0);
 		ui::stopFetchThread();
-		#ifdef DEBUG_FUNCTION_CALLS
-			std::cout << "EXIT main()\n";;
-		#endif
 	}
-	#ifdef DEBUG_FUNCTION_CALLS
-		std::cout << "EXIT main()\n";;
-	#endif
 	return 0;
 }
