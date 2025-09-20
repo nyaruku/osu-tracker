@@ -85,13 +85,12 @@ set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
-FetchContent_MakeAvailable(glfw)
-
 if (UNIX AND NOT APPLE)
-  set(GLFW_BUILD_WAYLAND OFF CACHE BOOL "Disable Wayland" FORCE)
+  set(GLFW_BUILD_WAYLAND OFF CACHE BOOL "" FORCE)
   set(GLFW_BUILD_X11 ON CACHE BOOL "" FORCE)
   find_package(X11 REQUIRED)
 endif()
+FetchContent_MakeAvailable(glfw)
 
 find_package(OpenGL REQUIRED)
 
