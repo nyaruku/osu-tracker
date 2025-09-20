@@ -71,7 +71,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libcurl4-openssl-dev zlib1g-dev libx11-dev mesa-common-dev libgl1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev build-essential wayland-protocols
+          sudo apt-get install -y libcurl4-openssl-dev zlib1g-dev libx11-dev mesa-common-dev libgl1-mesa-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev build-essential xorg-dev libglu1-mesa-dev wayland-protocols
 
       - name: Install CMake
         uses: lukka/get-cmake@v4.0.1
