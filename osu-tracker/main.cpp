@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
 		}
 		api::fetch_api_data(true);
 		ui::startFetchThread();
-		ui::copyDataOnly();
+		//ui::copyDataOnly();
 	    config::createTemplateExample();
 		webserver::startUiThread();
 		#if OSU_TRACKER_ENABLE_WEBSERVER == 1

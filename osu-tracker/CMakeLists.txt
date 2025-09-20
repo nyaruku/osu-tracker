@@ -88,7 +88,7 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(glfw)
 
 if (UNIX AND NOT APPLE)
-  set(GLFW_BUILD_WAYLAND ON CACHE BOOL "" FORCE)
+  set(GLFW_BUILD_WAYLAND OFF CACHE BOOL "" FORCE)
   set(GLFW_BUILD_X11 ON CACHE BOOL "" FORCE)
   find_package(X11 REQUIRED)
 endif()
@@ -97,21 +97,11 @@ find_package(OpenGL REQUIRED)
 
 set(PROJECT_SOURCES
   header/ui/ui.h
-  header/ui/extc.h
-  header/ui/draw.h
-  includes/nuklear/nuklear.h
-  includes/nuklear/stb_image.h
+        header/ui/draw.h
   includes/imgui/imgui_single_file.h
   includes/imgui/imgui_impl_glfw.cpp
   includes/imgui/imgui_impl_opengl2.cpp
 )
-
-# Platform‑specific UI bridge
-if (WIN32)
-  list(APPEND PROJECT_SOURCES header/ui/ui_windows.c includes/nuklear/nuklear_gdi.h)
-else()
-  list(APPEND PROJECT_SOURCES includes/nuklear/glfw3.h includes/nuklear/glfw3native.h header/ui/ui_linux.c includes/nuklear/nuklear_glfw_gl2.h)
-endif()
 
 add_executable(update update.cpp lib/miniz.c)
 if (WIN32)
