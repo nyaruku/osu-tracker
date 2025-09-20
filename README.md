@@ -1,5 +1,5 @@
 [![Build osu-tracker](https://github.com/nyaruku/osu-tracker/actions/workflows/cmake-multi-platform.yml/badge.svg?branch=master&style=flat)](https://github.com/nyaruku/osu-tracker/actions/workflows/cmake-multi-platform.yml)
-[![CodeQL Advanced](https://github.com/nyaruku/osu-tracker/actions/workflows/codeql.yml/badge.svg?branch=master)](https://github.com/nyaruku/osu-tracker/actions/workflows/codeql.yml)
+
 # osu-tracker
 A web server based osu! stats/session tracker
 
