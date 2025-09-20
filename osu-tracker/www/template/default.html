@@ -61,16 +61,16 @@
 						font-size: var(--fontScale);
 						font-weight: var(--fontWeight);
         }
-				.current {
-						color: var(--colorCurrent);
-				}
-				.change {
-						color: var(--colorChange);
-				}				
+		.current {
+			color: var(--colorCurrent);
+		}
+		.change {
+			color: var(--colorChange);
+		}
 
-				/* sidebar */
+		/* sidebar */
         #sidebar {
-						background-color: var(--backgroundSidebar);
+			background-color: var(--backgroundSidebar);
             position: absolute;
             top: 0; right: 0;
             width: calc(1920px - (19.20px * var(--resScale)));
@@ -180,6 +180,11 @@
             <span class="label">Clears: </span><span class="clears_current current"></span>
             <br>
             <span class="clears_change change"></span>
+        </div>
+        <div class="stat">
+            <span class="label">Playcount: </span><span class="playcount_current current"></span>
+            <br>
+            <span class="playcount_change change"></span>
         </div>
     </div>
 

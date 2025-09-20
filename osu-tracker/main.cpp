@@ -14,6 +14,8 @@
 #include "../header/webserver.h"
 #include "../header/ui/ui.h"
 
+#include "../header/ui/ui_imgui.h"
+
 #ifdef _WIN32
 	void enableVirtualTerminalProcessing() {
 		HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -25,6 +27,7 @@
 #endif
 
 int main(int argc, char* argv[]) {
+	imgui_main();
 	#ifdef _WIN32
 		enableVirtualTerminalProcessing(); //poopoo cmd.exe 
 	#endif

@@ -71,30 +71,29 @@ if (WIN32)
     zlib
     URL https://github.com/madler/zlib.git
     GIT_TAG 1.3.1
-)
-FetchContent_MakeAvailable(zlib)
+  )
+  FetchContent_MakeAvailable(zlib)
 endif()
 
+FetchContent_Declare(
+  glfw
+  GIT_REPOSITORY https://github.com/glfw/glfw.git
+  GIT_TAG 3.4
+)
+
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+
+FetchContent_MakeAvailable(glfw)
 
 if (UNIX AND NOT APPLE)
-  FetchContent_Declare(
-    glfw
-    GIT_REPOSITORY https://github.com/glfw/glfw.git
-    GIT_TAG 3.4
-  )
-  set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-  set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-  set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-  # Disable Wayland
-  set(GLFW_BUILD_WAYLAND OFF CACHE BOOL "" FORCE)
+  set(GLFW_BUILD_WAYLAND ON CACHE BOOL "" FORCE)
   set(GLFW_BUILD_X11 ON CACHE BOOL "" FORCE)
-
-  FetchContent_MakeAvailable(glfw)
-  
-  find_package(OpenGL REQUIRED)
   find_package(X11 REQUIRED)
 endif()
 
+find_package(OpenGL REQUIRED)
 
 set(PROJECT_SOURCES
   header/ui/ui.h
@@ -102,6 +101,9 @@ set(PROJECT_SOURCES
   header/ui/draw.h
   includes/nuklear/nuklear.h
   includes/nuklear/stb_image.h
+  includes/imgui/imgui_single_file.h
+  includes/imgui/imgui_impl_glfw.cpp
+  includes/imgui/imgui_impl_opengl2.cpp
 )
 
 # Platform‑specific UI bridge
@@ -110,7 +112,6 @@ if (WIN32)
 else()
   list(APPEND PROJECT_SOURCES includes/nuklear/glfw3.h includes/nuklear/glfw3native.h header/ui/ui_linux.c includes/nuklear/nuklear_glfw_gl2.h)
 endif()
-
 
 add_executable(update update.cpp lib/miniz.c)
 if (WIN32)
@@ -128,6 +129,8 @@ if (WIN32)
     cpr::cpr
     zlib
     ws2_32
+    glfw
+    OpenGL::GL
     user32 gdi32 Msimg32 crypt32 advapi32
   )
   target_compile_definitions(osu-tracker-test PRIVATE 
@@ -140,6 +143,8 @@ if (WIN32)
     cpr::cpr
     zlib
     ws2_32
+    glfw
+    OpenGL::GL
     user32 gdi32 Msimg32 crypt32 advapi32
   )
 else()
