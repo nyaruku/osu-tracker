@@ -95,16 +95,16 @@ FetchContent_MakeAvailable(glfw)
 find_package(OpenGL REQUIRED)
 
 set(PROJECT_SOURCES
-  header/ui/ui.h
-        header/ui/draw.h
-  includes/imgui/imgui_single_file.h
+  includes/imgui/imgui.cpp
+  includes/imgui/imgui_draw.cpp
+  includes/imgui/imgui_widgets.cpp
+  includes/imgui/imgui_tables.cpp
   includes/imgui/imgui_impl_glfw.cpp
   includes/imgui/imgui_impl_opengl2.cpp
 )
 
 add_executable(update update.cpp lib/miniz.c)
 if (WIN32)
-  # Use the WIN32 keyword so the console window is hidden in Release builds.
   add_executable(osu-tracker main.cpp ${PROJECT_SOURCES} res/resources.rc)
   add_executable(osu-tracker-test test.cpp ${PROJECT_SOURCES} res/resources.rc)
 
