@@ -99,6 +99,7 @@ set(PROJECT_SOURCES
   includes/imgui/imgui_draw.cpp
   includes/imgui/imgui_widgets.cpp
   includes/imgui/imgui_tables.cpp
+  includes/imgui/imgui_stdlib.cpp
   includes/imgui/imgui_impl_glfw.cpp
   includes/imgui/imgui_impl_opengl2.cpp
 )

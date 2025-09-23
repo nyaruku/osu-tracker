@@ -14,8 +14,6 @@
 #include "../header/webserver.h"
 #include "../header/ui/ui.h"
 
-#include "../header/ui/ui_imgui.h"
-
 #ifdef _WIN32
 	void enableVirtualTerminalProcessing() {
 		HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -27,7 +25,6 @@
 #endif
 
 int main(int argc, char* argv[]) {
-	imgui_main();
 	#ifdef _WIN32
 		enableVirtualTerminalProcessing(); //poopoo cmd.exe 
 	#endif
@@ -44,8 +41,9 @@ int main(int argc, char* argv[]) {
 	console::writeLog((std::string)"Release Type: " + (OSU_TRACKER_RELEASE_TYPE), true, 111, 163, 247);
 	console::writeLog((std::string)"Build: " + OSU_TRACKER_CMAKE_BUILD_TYPE, true, 111, 163, 247);
 	
-	if (webserver::instance().performUpdateCheck() == 0)
+	if (webserver::instance().performUpdateCheck() == 0) {
 		return 0;
+	}
 	bool run = true;
 	bool skipInit = false;	
 	while (run) {
@@ -57,18 +55,14 @@ int main(int argc, char* argv[]) {
 		else {
 			console::writeLog("Config file found");
 			config::readConfig();
-			config::writeConfig();
 		}
 		if (!std::filesystem::exists("tracker_txt/template")) {
-	        if (std::filesystem::create_directory("tracker_txt/template")) {
-				// no output
-			} else {
+	        if (!std::filesystem::create_directory("tracker_txt/template")) {
 				console::writeLog("Failed to create tracker_txt/template", true, 255, 0, 0);
 			}
 		}
 		api::fetch_api_data(true);
 		ui::startFetchThread();
-		//ui::copyDataOnly();
 	    config::createTemplateExample();
 		webserver::startUiThread();
 		#if OSU_TRACKER_ENABLE_WEBSERVER == 1

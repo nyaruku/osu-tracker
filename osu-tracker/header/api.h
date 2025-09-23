@@ -562,7 +562,7 @@ public:
 			}
 			case config::server::titanic: {
 				// titanic
-				int result = api::pServer::titanic(init); // only one call to pull data
+				int result = api::pServer::titanic(init);
 				if (result != 200) {
 					if (init) {
 						api::instance().init_api_failed = true;
@@ -571,7 +571,6 @@ public:
 				}
 
 				if (api::instance().init_api_failed && !init) {
-					// The first init failed earlier, but now it worked � re-run with init = true
 					api::instance().init_api_failed = false;
 					api::pServer::titanic(true); // intentionally re-pull with full init
 				}
@@ -579,9 +578,6 @@ public:
 			}
 		}
 	}
-	// to do parse and compare
-	// update program
-	// replace current and web files
 
 	static bool update() {
 		try {

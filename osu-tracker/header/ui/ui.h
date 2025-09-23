@@ -1,71 +1,5 @@
 #pragma once
-#include <mutex> 
-static std::mutex ui_copy_mutex;
-
-enum gameMode {
-	osu = 0
-	, taiko = 1
-	, fruits = 2
-	, mania = 3
-};
-
-enum server {
-	bancho = 0
-	, titanic = 1
-};
-
-struct appC {
-	int osuId;
-	enum gameMode gameMode;
-	enum server server;
-};
-
-// Convert C++ config::gameMode to C enum gameMode
-enum gameMode to_c_gameMode(config::gameMode gm) {
-	switch (gm) {
-	case config::gameMode::osu: return osu;
-	case config::gameMode::taiko: return taiko;
-	case config::gameMode::fruits: return fruits;
-	case config::gameMode::mania: return mania;
-	default: return osu; // fallback default
-	}
-}
-
-// Convert C++ config::server to C enum server
-enum server to_c_server(config::server sv) {
-	switch (sv) {
-	case config::server::bancho: return bancho;
-	case config::server::titanic: return titanic;
-	default: return bancho; // fallback default
-	}
-}
-
-struct appC to_c_appC(const config::application& app) {
-	struct appC c_app;
-	c_app.osuId = app.osuId;
-	c_app.gameMode = to_c_gameMode(app.gameMode);
-	c_app.server = to_c_server(app.server);
-	return c_app;
-}
-
-struct userC {
-	const char* username;
-	const char* avatar;
-};
-
-struct dataEntryC {
-	const char* key;
-	const char* name;
-	int sort;
-	const char* init;
-	const char* current;
-	const char* change;
-	bool positive;
-	bool display;
-	bool single;
-	bool banchoSupport;
-	bool titanicSupport;
-};
+#include "../header/ui/ui_imgui.h"
 
 std::atomic<bool> fetch;
 static std::thread fetchThread;
@@ -166,7 +100,7 @@ private:
 	}
 
 public:
-static void updateFormat() {
+	static void updateFormat() {
 		config::data::arrFormatted = config::data::arr;
 
 		for (config::dataEntry& data : config::data::arrFormatted) {
@@ -200,6 +134,7 @@ static void updateFormat() {
 				case config::dataType::_int: {
 					switch (data.formatType) {
 						case config::formatType::f_int: {
+							data.init = formatNumber(data.init);
 							if(!noCurrent)
 								data.current = formatNumber(data.current);
 							if (noDiff)
@@ -207,17 +142,18 @@ static void updateFormat() {
 							std::string str = formatNumber(data.change, true);
 							if (str[0] == '-') {
 								data.positive = false;
-							api::fetch_api_data(true);
+								api::fetch_api_data(true);
 							}
 							data.change = str;
 							break;
 						}
 						case config::formatType::f_rank: {
+							data.init = formatNumber(data.init, false, "#");
 							if (!noCurrent)
 								data.current = formatNumber(data.current, false, "#");
 							if (noDiff)
 								break;
-							std::string str = formatNumber(data.change, true, "#");
+							std::string str = formatNumber(data.change, true);
 							if (str[0] == '-') {
 								data.positive = false;
 							}
@@ -225,6 +161,7 @@ static void updateFormat() {
 							break;
 						}
 						case config::formatType::f_time: {
+							data.init = formatPlaytime(data.init);
 							if (!noCurrent)
 								data.current = formatPlaytime(data.current);
 							if (noDiff)
@@ -238,6 +175,7 @@ static void updateFormat() {
 				case config::dataType::_longLong: {
 					switch (data.formatType) {
 						case config::formatType::f_int: {
+							data.init = formatNumber(data.init);
 							if (!noCurrent)
 								data.current = formatNumber(data.current);
 							if (noDiff)
@@ -250,11 +188,12 @@ static void updateFormat() {
 							break;
 						}
 						case config::formatType::f_rank: {
+							data.init = formatNumber(data.init, false, "#");
 							if (!noCurrent)
 								data.current = formatNumber(data.current, false, "#");
 							if (noDiff)
 								break;
-							std::string str = formatNumber(data.change, true, "#");
+							std::string str = formatNumber(data.change, true);
 							if (str[0] == '-') {
 								data.positive = false;
 							}
@@ -262,6 +201,7 @@ static void updateFormat() {
 							break;
 						}
 						case config::formatType::f_time: {
+							data.init = formatPlaytime(data.init);
 							if (!noCurrent)
 								data.current = formatPlaytime(data.current);
 							if (noDiff)
@@ -275,6 +215,7 @@ static void updateFormat() {
 				case config::dataType::_float: {
 					switch (data.formatType) {
 						case config::formatType::f_decimal: {
+							data.init = formatFloat(data.init);
 							if (!noCurrent)
 								data.current = formatFloat(data.current);
 							if (noDiff)
@@ -287,6 +228,7 @@ static void updateFormat() {
 							break;
 						}
 						case config::formatType::f_percent: {
+							data.init = formatFloat(data.init) + "%";
 							if (!noCurrent)
 								data.current = formatFloat(data.current) + "%";
 							if (noDiff)
@@ -317,13 +259,12 @@ static void updateFormat() {
 		return 1;
 	}
 	static void close() {
-		//ui_mainTerminate();
+		ui_mainTerminate();
 		isOpen = false;
 	}
 	static int open() {
 		isOpen = true;
-		//int result = ui_main();
-		int result = 0;
+		int result = ui_main();
 		isOpen = false;
 		return result;
 	}
