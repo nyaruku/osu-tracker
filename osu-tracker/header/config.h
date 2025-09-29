@@ -249,6 +249,7 @@ public:
 		};
 		static inline std::vector<dataEntry> arrFormatted;
 
+
 		static constexpr int getIndex(const char* key) {
 		#define INDEX_CASE(name) GEN_CASE(name, __COUNTER__)
 			FOREACH_DATA_KEY(INDEX_CASE)
@@ -323,8 +324,6 @@ public:
 	static void readConfig() {
 		if (std::ifstream file{ "config.json" }; file.is_open()) {
 			nlohmann::ordered_json config = nlohmann::ordered_json::parse(file);
-			// the same code as range for
-			// TODO: Test on Linux
 			for (auto& main : config["Main"].items()) {
 				if (main.value().is_null()) {
 					config::application::set(main.key(), "");
@@ -349,7 +348,7 @@ public:
 	}
 	
 	static void rmConfig() {
-			std::filesystem::remove("config.json");
+		std::filesystem::remove("config.json");
 	}
 
 	static void createTemplateExample() {
