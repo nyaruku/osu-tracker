@@ -15,135 +15,130 @@
 	<script type="text/javascript" src="static/index.js"></script>
 
 	<script>
-			let socket;
+		let socket;
 
-			function connectWebSocket() {
-				socket = new WebSocket("ws://{{hostname}}:{{port}}/ws/main/");
+		function connectWebSocket() {
+			socket = new WebSocket("ws://{{hostname}}:{{port}}/ws/main/");
 
-				socket.onmessage = (event) => {
-					const el = document.getElementById(`ws-conn-lost`);
-					el.hidden = true;
-					const data = JSON.parse(event.data);
-					if (data["cmd"]) {
-						if (data["cmd"] == "toast"){
-							sendNotif(data["msg"]);
-						}
-                        if (data["cmd"] == "reload") {
-                            reload();
-                        }
-					}else{
-						for (const key in data) {
-							const el = document.getElementById(`${key}-display`);
-							if (el) el.textContent = data[key];
-						}
+			socket.onmessage = (event) => {
+				const el = document.getElementById(`ws-conn-lost`);
+				el.hidden = true;
+				const data = JSON.parse(event.data);
+				if (data["cmd"]) {
+					if (data["cmd"] == "toast"){
+						sendNotif(data["msg"]);
 					}
-				};
-				socket.onopen = () => {
-					const el = document.getElementById(`ws-conn-lost`);
-					el.hidden = true;
+					if (data["cmd"] == "reload") {
+						reload();
+					}
+				}else{
+					for (const key in data) {
+						const el = document.getElementById(`${key}-display`);
+						if (el) el.textContent = data[key];
+					}
 				}
-				socket.onclose = () => {
-					const el = document.getElementById(`ws-conn-lost`);
-					el.hidden = false;
-					console.log("WebSocket disconnected. Retrying...");
-					setTimeout(connectWebSocket, 1000);
-				};
+			};
+			socket.onopen = () => {
+				const el = document.getElementById(`ws-conn-lost`);
+				el.hidden = true;
 			}
+			socket.onclose = () => {
+				const el = document.getElementById(`ws-conn-lost`);
+				el.hidden = false;
+				console.log("WebSocket disconnected. Retrying...");
+				setTimeout(connectWebSocket, 1000);
+			};
+		}
 
-			function sendMessage(cmd) {
-				// Object created
-				let array = {};
-				array["cmd"] = cmd;
+		function sendMessage(cmd) {
+			// Object created
+			let array = {};
+			array["cmd"] = cmd;
 
-				socket.send(JSON.stringify(array));
-			}
+			socket.send(JSON.stringify(array));
+		}
 
-			function sendNotif(msg) {
-				const toastElement = document.getElementById('objectToast');
-				const toastSpan = document.getElementById('toast-msg');
-				toastSpan.textContent = msg;
-				const toastInstance = bootstrap.Toast.getOrCreateInstance(toastElement);
-				toastInstance.show();
-			}
-
-			function tracker() {
-				window.open("/tracker","osu! Tracker",`width=576,height=600,resizable=yes,scrollbars=yes`);
-			}
-
-			window.onload = connectWebSocket;
+		function sendNotif(msg) {
+			const toastElement = document.getElementById('objectToast');
+			const toastSpan = document.getElementById('toast-msg');
+			toastSpan.textContent = msg;
+			const toastInstance = bootstrap.Toast.getOrCreateInstance(toastElement);
+			toastInstance.show();
+		}
+		window.onload = connectWebSocket;
 	</script>
 </head>
-	<body>
-		<nav class="navbar navbar-expand-lg bg-body-tertiary">
-			<div class="container-fluid">
-				<a class="navbar-brand" href="/">
-					<span id="title-display">{{title}}</span>
-					<span class="badge text-bg-primary" id="version-display">{{version}}</span>
-				</a>
-				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
-					<span class="navbar-toggler-icon"></span>
-				</button>
-				<div class="collapse navbar-collapse" id="navbarTogglerDemo02">
-					<ul class="navbar-nav me-auto mb-2 mb-lg-0">
-						<li class="nav-item"><a class="nav-link active" aria-current="page" href="/">Home</a></li>
-						<li class="nav-item"><a class="nav-link" href="/settings">Settings</a></li>
-						<li class="nav-item"><a class="nav-link" href="/help">Help</a></li>
-						<li class="nav-item"><a class="nav-link" href="/info">Info</a></li>
-						<li class="nav-item"><a class="nav-link" href="/log">Log</a></li>
-					</ul>
-				</div>
+<body>
+	<nav class="navbar navbar-expand-lg bg-body-tertiary">
+		<div class="container-fluid">
+			<a class="navbar-brand" href="/">
+				<span id="title-display">{{title}}</span>
+				<span class="badge text-bg-primary" id="version-display">{{version}}</span>
+			</a>
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+				<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+					<li class="nav-item"><a class="nav-link active" aria-current="page" href="/">Home</a></li>
+					<li class="nav-item"><a class="nav-link" href="/settings">Settings</a></li>
+					<li class="nav-item"><a class="nav-link" href="/help">Help</a></li>
+					<li class="nav-item"><a class="nav-link" href="/info">Info</a></li>
+					<li class="nav-item"><a class="nav-link" href="/log">Log</a></li>
+				</ul>
 			</div>
-		</nav>
-		<div id="ws-conn-lost" class="alert alert-warning rounded-0" role="alert" hidden>
-			<span>Websocket connection got closed, reconnecting...</span>
 		</div>
-		<div class="container mt-5">
-			<h1>osu! Tracker</h1>
-			<div class="card rounded-0 mt-3" style="width: fit-content">
-				<h5 class="card-header bg-primary rounded-0">Main</h5>
-				<div class="card-body rounded-0">
-					<a href="#" class="btn btn-primary rounded-0" onclick="sendMessage('#open_ui')">Open osu! Tracker GUI</a>
-				</div>
+	</nav>
+	<div id="ws-conn-lost" class="alert alert-warning rounded-0" role="alert" hidden>
+		<span>Websocket connection got closed, reconnecting...</span>
+	</div>
+	<div class="container mt-5">
+		<h1>osu! Tracker</h1>
+		<div class="card rounded-0 mt-3" style="width: fit-content">
+			<h5 class="card-header bg-primary rounded-0">Main</h5>
+			<div class="card-body rounded-0">
+				<a href="#" class="btn btn-primary rounded-0" onclick="sendMessage('#open_ui')">Open osu! Tracker GUI</a>
+				<a href="#" class="btn btn-primary rounded-0" onclick="sendMessage('#restore_session')">Restore Session</a>
 			</div>
-			<div class="card rounded-0 mt-3" style="width: fit-content">
-				<h5 class="card-header rounded-0 bg-danger">Maintenance</h5>
-				<div class="card-body rounded-0">
-					<a href="#" class="btn btn-info rounded-0" onclick="sendMessage('#update')">Update osu! Tracker</a>
-					<a href="#" class="btn btn-warning rounded-0" onclick="sendMessage('#restart')">Restart osu! Tracker</a>
-					<a href="#" class="btn btn-danger rounded-0" onclick="sendMessage('#shutdown')">Shutdown osu! Tracker</a>
-				</div>
+		</div>
+		<div class="card rounded-0 mt-3" style="width: fit-content">
+			<h5 class="card-header rounded-0 bg-danger">Maintenance</h5>
+			<div class="card-body rounded-0">
+				<a href="#" class="btn btn-info rounded-0" onclick="sendMessage('#update')">Update osu! Tracker</a>
+				<a href="#" class="btn btn-warning rounded-0" onclick="sendMessage('#restart')">Restart osu! Tracker</a>
+				<a href="#" class="btn btn-danger rounded-0" onclick="sendMessage('#shutdown')">Shutdown osu! Tracker</a>
 			</div>
-			<h2 class="mt-5">OBS Overlays</h3>
-			<table class="table table-striped table-bordered table-hover">
-				<thead class="table-dark">
-					<tr>
-						<th>Name</th>
-						<th>Filename</th>
-						<th>URL</th>
-						<th>Creator</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td>Default</td>
-						<td>default.html</td>
-						<td><a href="/template/default">Link</a></td>
-						<td>Railgun</td>
-					</tr>
-				</tbody>
-			</table>
+		</div>
+		<h2 class="mt-5">OBS Overlays</h3>
+		<table class="table table-striped table-bordered table-hover">
+			<thead class="table-dark">
+				<tr>
+					<th>Name</th>
+					<th>Filename</th>
+					<th>URL</th>
+					<th>Creator</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>Default</td>
+					<td>default.html</td>
+					<td><a href="/template/default">Link</a></td>
+					<td>Railgun</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
 
-		</div>
-
-		<div class="toast-container bottom-0 end-0 p-3">
-			<div id="objectToast" class="toast text-bg-secondary fade hide" role="alert" aria-live="assertive" aria-atomic="true">
-				<div class="d-flex">
-					<div class="toast-body">
-						<span id="toast-msg"></span>
-					</div>
-					<button type="button" data-bs-theme="dark" class="btn-close btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+	<div class="toast-container bottom-0 end-0 p-3">
+		<div id="objectToast" class="toast text-bg-secondary fade hide" role="alert" aria-live="assertive" aria-atomic="true">
+			<div class="d-flex">
+				<div class="toast-body">
+					<span id="toast-msg"></span>
 				</div>
+				<button type="button" data-bs-theme="dark" class="btn-close btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
 			</div>
 		</div>
-	</body>
+	</div>
+</body>
 </html>

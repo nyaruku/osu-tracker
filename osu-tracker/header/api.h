@@ -1,19 +1,12 @@
 #include <cmath>
-#include <iomanip>
 #include <thread>
 #include "../header/config.h"
 
-class api {
-private: 
-	static api& instance() {
-		static api ctx;
-		return ctx;
-	}
-
+namespace api {
 	bool init_api_failed = false;
 
 	// Private Servers
-	class pServer {
+	namespace pServer {
 	public:
 		// fetch titanic api data
 		static int titanic(bool init) {

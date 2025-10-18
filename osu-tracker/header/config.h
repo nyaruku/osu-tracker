@@ -1,12 +1,7 @@
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wchanges-meaning"
-#pragma GCC diagnostic pop
-
 #pragma once
-#include <utility>
 #include <string>
+#include <cstdint>
 #include "console.h"
-#include <algorithm>
 #include <crow/mustache.h>
 
 #define FOREACH_DATA_KEY(F) \
@@ -48,8 +43,7 @@ constexpr bool str_eq(const char* a, const char* b) {
 
 #define GEN_CASE(name, idx) if (str_eq(key, #name)) return idx;
 
-class config {
-public:
+namespace config {
 	enum class gameMode {
 		osu = 0
 		,taiko = 1
@@ -71,80 +65,9 @@ public:
 			_field(int, apiInterval, 7000) \
 			_field(config::gameMode, gameMode, config::gameMode::osu) \
 			_field(config::server, server, config::server::bancho)
-
-		static application& instance() {
-			static application ctx;
-			return ctx;
-		}
-
-		#define DECLARE(type, name, default_val) type name = default_val;
-			applicationFields(DECLARE)
-		#undef DECLARE
-
-		// Convert to array
-		std::vector<std::tuple<std::string, std::string>> toArray() const {
-			std::vector<std::tuple<std::string, std::string>> result;
-			#define TO_STRING(type, name, default_val) result.emplace_back(#name, to_string(name));
-				applicationFields(TO_STRING)
-			#undef TO_STRING
-				return result;
-		}
-		std::string get(const std::string& key) const {
-			#define GET_CASE(type, name, default_val) if (key == #name) return to_string(name);
-				applicationFields(GET_CASE)
-			#undef GET_CASE
-			throw std::invalid_argument("Invalid key: " + key);
-		}
-		static void set(const std::string& key, const std::string& value) {
-			application& ctx = instance();
-			#define SET_CASE(type, name, default_val) if (key == #name) { from_string(value, ctx.name); return; }
-				applicationFields(SET_CASE)
-			#undef SET_CASE
-			throw std::invalid_argument("Invalid key: " + key);
-		}
-	private:
-		// Generic string conversion
-		template<typename T>
-		static std::string to_string(const T& val) {
-			if constexpr (std::is_enum_v<T>) {
-				return std::to_string(static_cast<int>(val));
-			}
-			else {
-				return std::to_string(val);
-			}
-		}
-
-		static std::string to_string(const std::string& val) {
-			return val;
-		}
-
-		// Parsing from string
-		template<typename T>
-		static void from_string(const std::string& str, T& out) {
-			std::istringstream ss(str);
-			ss >> out;
-		}
-
-		static void from_string(const std::string& str, std::string& out) {
-			out = str;
-		}
-
-		static void from_string(const std::string& str, config::gameMode& out) {
-			out = static_cast<config::gameMode>(std::stoi(str));
-		}
-
-		static void from_string(const std::string& str, config::server& out) {
-			out = static_cast<config::server>(std::stoi(str));
-		}
 	};
 
 	struct user {
-
-		static user& instance() {
-			static user ctx;
-			return ctx;
-		}
-
 		std::string username = "";
 		std::string avatar = "";
 
@@ -156,14 +79,14 @@ public:
 		}
 	};
 
-	enum class dataType {
-		_string = 0
-		,_int = 1
-		,_float = 2
-		,_longLong = 3
+	enum dataType {
+		d_string = 0
+		,d_int = 1
+		,d_float = 2
+		,d_longLong = 3
 	};
 
-	enum class formatType {
+	enum formatType {
 		f_string = 0
 		,f_int = 1
 		,f_decimal = 2
@@ -171,25 +94,29 @@ public:
 		,f_time = 4
 		,f_percent = 5
 	};
-#ifndef _MSC_VER
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wchanges-meaning"
-#endif
+
+	enum dataSettings : uint32_t {
+		POSITIVE = 1 << 0
+		,DISPLAY = 1 << 1
+		,SINGLE = 1 << 2
+	};
+
+	enum serverSettings : uint32_t {
+		BANCHO = 1 << 0
+		,TITANIC = 1 << 1
+	};
 
 	struct dataEntry {
-		std::string key;
-		std::string name;
+		const std::string key;
+		const std::string name;
 		int sort;
 		std::string init;
 		std::string current;
 		std::string change;
 		dataType dataType;
 		formatType formatType;
-		bool positive;
-		bool display;
-		bool single;
-		bool banchoSupport;
-		bool titanicSupport;
+		u_int32_t dataSettings;
+		u_int32_t serverSettings;
 
 		std::vector<std::tuple<std::string, std::string>> toArray() const {
 			return {
@@ -201,54 +128,47 @@ public:
 				,{"change", change}
 				,{"dataType", std::to_string(static_cast<int>(dataType))}
 				,{"formatType", std::to_string(static_cast<int>(formatType))}
-				,{"positive", ext::bool2str(positive)}
-				,{"display", ext::bool2str(display)}
-				,{"single", ext::bool2str(single)}
-				,{"banchoSupport", ext::bool2str(banchoSupport)}
-				,{"titanicSupport", ext::bool2str(titanicSupport)}
+				,{"dataSettings", std::to_string(dataSettings)}
+				,{"serverSettings", std::to_string(serverSettings)}
 			};
 		}
 	};
-#ifndef _MSC_VER
-#pragma GCC diagnostic pop
-#endif
-	
-	class data {
-	public:
-		static inline std::vector<dataEntry> arr {																				   //bancho  titanic
-			{"level",		"Level",			1, "", "",	"", dataType::_float,	formatType::f_decimal,	true,	true,	false,	true,	true}
-			,{"rankedScore","Ranked Score",		2, "", "",	"", dataType::_longLong,formatType::f_int,		true,	true,	false,	true,	true}
-			,{"totalScore",	"Total Score",		3, "", "",	"", dataType::_longLong,formatType::f_int,		true,	true,	false,	true,	true}
-			,{"ppRank",		"PP Rank",			4, "", "",	"", dataType::_int,		formatType::f_rank,		true,	true,	false,	true,	true}
-			,{"pp",			"PP",				5, "", "",	"", dataType::_float,	formatType::f_decimal,	true,	true,	false,	true,	true}
-			,{"ppv1",		"PPv1",				6, "", "",	"", dataType::_float,	formatType::f_decimal,	true,	true,	false,	false,	true}
-			,{"acc",		"Accuracy",			7, "", "",	"", dataType::_float,	formatType::f_percent,	true,	true,	false,	true,	true}
-			,{"playtime",	"Play Time",		8, "", "",	"", dataType::_longLong,formatType::f_time,		true,	true,	false,	true,	true}
-			,{"playcount",	"Play Count",		9, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
-			,{"totalHits",	"Total Hits",		10, "", "",	"", dataType::_longLong,formatType::f_int,		true,	true,	false,	false,	true}
+// positive display single
+	namespace data {
+		static inline std::vector<dataEntry> arr {
+			{"level",		"Level",			1, "", "",	"", dataType::d_float,		formatType::f_decimal,	POSITIVE | DISPLAY,	BANCHO | TITANIC}
+			,{"rankedScore","Ranked Score",		2, "", "",	"", dataType::d_longLong,	formatType::f_int,		POSITIVE | DISPLAY,	BANCHO | TITANIC}
+			,{"totalScore",	"Total Score",		3, "", "",	"", dataType::d_longLong,	formatType::f_int,		POSITIVE | DISPLAY,	BANCHO | TITANIC}
+			,{"ppRank",		"PP Rank",			4, "", "",	"", dataType::d_int,		formatType::f_rank,		POSITIVE | DISPLAY,	BANCHO | TITANIC}
+			,{"pp",			"PP",				5, "", "",	"", dataType::d_float,		formatType::f_decimal,	POSITIVE | DISPLAY,	BANCHO | TITANIC}
+			,{"ppv1",		"PPv1",				6, "", "",	"", dataType::d_float,		formatType::f_decimal,	POSITIVE | DISPLAY,	TITANIC}
+			,{"acc",		"Accuracy",			7, "", "",	"", dataType::d_float,		formatType::f_percent,	POSITIVE | DISPLAY,	BANCHO | TITANIC}
+			,{"playtime",	"Play Time",		8, "", "",	"", dataType::d_longLong,	formatType::f_time,		POSITIVE | DISPLAY,	BANCHO | TITANIC}
+			,{"playcount",	"Play Count",		9, "", "",	"", dataType::d_int,		formatType::f_int,		POSITIVE | DISPLAY,	BANCHO | TITANIC}
+			,{"totalHits",	"Total Hits",		10, "", "",	"", dataType::d_longLong,	formatType::f_int,		POSITIVE | DISPLAY,	TITANIC}
 
-			,{"silverSS",	"Rank SSH",			11, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
-			,{"goldSS",		"Rank SS",			12, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
-			,{"silverS",	"Rank SH",			13, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
-			,{"goldS",		"Rank S",			14, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
-			,{"a",			"Rank A",			15, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
-			,{"b",			"Rank B",			16, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
-			,{"c",			"Rank C",			17, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
-			,{"d",			"Rank D",			18, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
-			,{"totalSS",	"Total SS",			19, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
-			,{"totalS",		"Total S",			20, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
+			,{"silverSS",	"Rank SSH",			11, "", "",	"", dataType::d_int,		formatType::f_int,		POSITIVE | DISPLAY,	BANCHO | TITANIC}
+			,{"goldSS",		"Rank SS",			12, "", "",	"", dataType::d_int,		formatType::f_int,		POSITIVE | DISPLAY,	BANCHO | TITANIC}
+			,{"silverS",	"Rank SH",			13, "", "",	"", dataType::d_int,		formatType::f_int,		POSITIVE | DISPLAY,	BANCHO | TITANIC}
+			,{"goldS",		"Rank S",			14, "", "",	"", dataType::d_int,		formatType::f_int,		POSITIVE | DISPLAY,	BANCHO | TITANIC}
+			,{"a",			"Rank A",			15, "", "",	"", dataType::d_int,		formatType::f_int,		POSITIVE | DISPLAY,	BANCHO | TITANIC}
+			,{"b",			"Rank B",			16, "", "",	"", dataType::d_int,		formatType::f_int,		POSITIVE | DISPLAY,	BANCHO | TITANIC}
+			,{"c",			"Rank C",			17, "", "",	"", dataType::d_int,		formatType::f_int,		POSITIVE | DISPLAY,	BANCHO | TITANIC}
+			,{"d",			"Rank D",			18, "", "",	"", dataType::d_int,		formatType::f_int,		POSITIVE | DISPLAY,	BANCHO | TITANIC}
+			,{"totalSS",	"Total SS",			19, "", "",	"", dataType::d_int,		formatType::f_int,		POSITIVE | DISPLAY,	BANCHO | TITANIC}
+			,{"totalS",		"Total S",			20, "", "",	"", dataType::d_int,		formatType::f_int,		POSITIVE | DISPLAY,	BANCHO | TITANIC}
 
-			,{"clears",		"Profile Clears",	21, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
-			,{"totalClears","Total Clears",		22, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
-			,{"completion",	"Completion%",		23, "", "",	"", dataType::_float,	formatType::f_percent,	true,	true,	false,	true,	true}
-			,{"scoreRank",	"Score Rank",		24, "", "",	"", dataType::_int,		formatType::f_rank,		true,	true,	false,	true,	false}
+			,{"clears",		"Profile Clears",	21, "", "",	"", dataType::d_int,		formatType::f_int,		POSITIVE | DISPLAY,	BANCHO | TITANIC}
+			,{"totalClears","Total Clears",		22, "", "",	"", dataType::d_int,		formatType::f_int,		POSITIVE | DISPLAY,	BANCHO | TITANIC}
+			,{"completion",	"Completion%",		23, "", "",	"", dataType::d_float,		formatType::f_percent,	POSITIVE | DISPLAY,	BANCHO | TITANIC}
+			,{"scoreRank",	"Score Rank",		24, "", "",	"", dataType::d_int,		formatType::f_rank,		POSITIVE | DISPLAY,	BANCHO}
 
-			,{"targetRank",	"Target Rank",		25, "", "",	"", dataType::_int,		formatType::f_rank,		false,	true,	true,	true,	false}
-			,{"targetUser",	"Target Player",	26, "", "",	"", dataType::_string,	formatType::f_string,	false,	true,	true,	true,	false}
-			,{"targetScore","Target Score",		27, "", "",	"", dataType::_longLong,formatType::f_int,		false,	true,	true,	true,	false}
+			,{"targetRank",	"Target Rank",		25, "", "",	"", dataType::d_int,		formatType::f_rank,		DISPLAY | SINGLE,	BANCHO}
+			,{"targetUser",	"Target Player",	26, "", "",	"", dataType::d_string,		formatType::f_string,	DISPLAY | SINGLE,	BANCHO}
+			,{"targetScore","Target Score",		27, "", "",	"", dataType::d_longLong,	formatType::f_int,		DISPLAY | SINGLE,	BANCHO}
 		};
-		static inline std::vector<dataEntry> arrFormatted;
 
+		static inline std::vector<dataEntry> arrFormatted;
 
 		static constexpr int getIndex(const char* key) {
 		#define INDEX_CASE(name) GEN_CASE(name, __COUNTER__)
@@ -270,22 +190,22 @@ public:
 
 						// formatted
 						line = ext::replace(
-              line,
-              "{{" + row.key + "_init}}",
-              config::data::arrFormatted[config::data::getIndex(row.key.c_str())].init
-            );
+							line,
+							"{{" + row.key + "_init}}",
+							config::data::arrFormatted[config::data::getIndex(row.key.c_str())].init
+						);
 						
-            line = ext::replace(
-              line,
-              "{{" + row.key + "_change}}",
-              config::data::arrFormatted[config::data::getIndex(row.key.c_str())].change
-            );
+			            line = ext::replace(
+				            line,
+				            "{{" + row.key + "_change}}",
+				            config::data::arrFormatted[config::data::getIndex(row.key.c_str())].change
+			            );
 						
-            line = ext::replace(
-              line,
-              "{{" + row.key + "_current}}",
-              config::data::arrFormatted[config::data::getIndex(row.key.c_str())].current
-            );
+			            line = ext::replace(
+							line,
+							"{{" + row.key + "_current}}",
+							config::data::arrFormatted[config::data::getIndex(row.key.c_str())].current
+			            );
 					}
 					content += line + "\n";
 				}
