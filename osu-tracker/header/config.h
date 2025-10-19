@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <cstdint>
+#include <string_view>
 #include "console.h"
 #include <crow/mustache.h>
 
@@ -25,14 +26,35 @@ namespace config {
 		config::gameMode gameMode = config::gameMode::fruits;
 		config::server server = config::server::titanic;
 
+		static constexpr uint32_t hash(std::string_view str) {
+			uint32_t h = 2166136261u;
+			for (char c : str) {
+				h ^= static_cast<uint32_t>(c);
+				h *= 16777619u;
+			}
+			return h;
+		}
+
+		bool set(std::string_view key, const std::string& value) {
+			switch (hash(key)) {
+				case hash("osuId"): osuId = std::stoi(value); return true;
+				case hash("clientId"): clientId = std::stoi(value); return true;
+				case hash("clientSecret"): clientSecret = value; return true;
+				case hash("apiInterval"): apiInterval = std::stoi(value); return true;
+				case hash("gameMode"): gameMode = static_cast<config::gameMode>(std::stoi(value)); return true;
+				case hash("server"): server = static_cast<config::server>(std::stoi(value)); return true;
+				default: return false; // key not found
+			}
+		}
+
 		std::vector<std::tuple<std::string, std::string>> toArray() const {
 			return {
-				{"osuId", std::to_string(osuId)}
-				,{ "clientId", std::to_string(clientId)}
-				,{ "clientSecret", clientSecret}
-				,{ "apiInterval", std::to_string(apiInterval)}
-				,{ "gameMode", std::to_string(gameMode)}
-				,{ "server", std::to_string(server)}
+	            {"osuId", std::to_string(osuId)},
+				{"clientId", std::to_string(clientId)},
+				{"clientSecret", clientSecret},
+				{"apiInterval", std::to_string(apiInterval)},
+				{"gameMode", std::to_string(static_cast<int>(gameMode))},
+				{"server", std::to_string(static_cast<int>(server))}
 			};
 		}
 	};
@@ -82,7 +104,7 @@ namespace config {
 		bool single;
 		bool positive;
 		bool display;
-		u_int32_t serverSettings;
+		u_int32_t serverSupport;
 
 		std::vector<std::tuple<std::string, std::string>> toArray() const {
 			return {
@@ -95,7 +117,7 @@ namespace config {
 				,{"dataType", std::to_string(static_cast<int>(dataType))}
 				,{"formatType", std::to_string(static_cast<int>(formatType))}
 				,{"dataSettings", std::to_string(dataSettings)}
-				,{"serverSettings", std::to_string(serverSettings)}
+				,{"serverSettings", std::to_string(serverSupport)}
 			};
 		}
 	};
@@ -133,6 +155,15 @@ namespace config {
 
 		static inline std::vector<dataEntry> arrFormatted;
 
+		constexpr std::uint32_t hash(std::string_view str) {
+			std::uint32_t h = 2166136261u;
+			for (char c : str) {
+				h ^= static_cast<std::uint32_t>(c);
+				h *= 16777619u;
+			}
+			return h;
+		}
+
 		enum key {
 			level = 0,
 			rankedScore = 1,
@@ -162,6 +193,39 @@ namespace config {
 			targetUser = 25,
 			targetScore = 26
 		};
+
+		// no need for default
+		inline constexpr int getIndex(std::string_view key) {
+			switch (hash(key)) {
+				case hash("level"): return 0;
+				case hash("rankedScore"): return 1;
+				case hash("totalScore"): return 2;
+				case hash("ppRank"): return 3;
+				case hash("pp"): return 4;
+				case hash("ppv1"): return 5;
+				case hash("acc"): return 6;
+				case hash("playtime"): return 7;
+				case hash("playcount"): return 8;
+				case hash("totalHits"): return 9;
+				case hash("silverSS"): return 10;
+				case hash("goldSS"): return 11;
+				case hash("silverS"): return 12;
+				case hash("goldS"): return 13;
+				case hash("a"): return 14;
+				case hash("b"): return 15;
+				case hash("c"): return 16;
+				case hash("d"): return 17;
+				case hash("totalSS"): return 18;
+				case hash("totalS"): return 19;
+				case hash("clears"): return 20;
+				case hash("totalClears"): return 21;
+				case hash("completion"): return 22;
+				case hash("scoreRank"): return 23;
+				case hash("targetRank"): return 24;
+				case hash("targetUser"): return 25;
+				case hash("targetScore"): return 26;
+			}
+		}
 
 		inline constexpr int getIndex(key arrKey) {
 			return static_cast<int>(arrKey);
@@ -198,7 +262,7 @@ namespace config {
 		}
 	}
 
-	void writeConfig() {
+	inline void writeConfig() {
 		// ordered_json bc it sorts alphabetically by default
 		nlohmann::ordered_json config;
 		config::application application;
@@ -210,8 +274,6 @@ namespace config {
 			config["Main"][key] = value;
 		}
 		for (const config::dataEntry _vecData : config::data::arr) {
-			bool display = (_vecData.dataSettings & DISPLAY) != 0;
-
 			config["Display"][_vecData.key]["visible"] = _vecData.display;
 			config["Display"][_vecData.key]["sort"] = _vecData.sort;
 		}
@@ -221,24 +283,25 @@ namespace config {
 		file.close();
 	}
 
-	void readConfig() {
+	inline void readConfig() {
 		if (std::ifstream file{ "config.json" }; file.is_open()) {
 			nlohmann::ordered_json config = nlohmann::ordered_json::parse(file);
+			config::application application;
 			for (auto& main : config["Main"].items()) {
 				if (main.value().is_null()) {
-					config::application::set(main.key(), "");
+					application.set(main.key(), "");
 				}
 				else if (main.value().is_string()) {
-					config::application::set(main.key(), main.value().get<std::string>());
+					application.set(main.key(), main.value().get<std::string>());
 				}
 				else {
 					// fallback: dump to string
-					config::application::set(main.key(), main.value().dump());
+					application.set(main.key(), main.value().dump());
 				}
 			}
 			for (auto& display : config["Display"].items()) {
-				config::data::arr[config::data::getIndex(display.key().c_str())].display = display.value()["visible"].get<bool>();
-				config::data::arr[config::data::getIndex(display.key().c_str())].sort = display.value()["sort"].get<int>();
+				config::data::arr[config::data::getIndex(display.key())].display = display.value()["visible"].get<bool>();
+				config::data::arr[config::data::getIndex(display.key())].sort = display.value()["sort"].get<int>();
 			}
 			file.close();
 		}
@@ -247,11 +310,11 @@ namespace config {
 		}
 	}
 	
-	void rmConfig() {
+	inline void rmConfig() {
 		std::filesystem::remove("config.json");
 	}
 
-	void createTemplateExample() {
+	inline void createTemplateExample() {
 		std::string content;
 		for (size_t i = 0; i < config::data::arr.size(); i++) {
 			content += config::data::arr[i].key + " (raw):\n";
