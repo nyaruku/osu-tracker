@@ -1,13 +1,33 @@
 #include <cmath>
 #include <thread>
 #include "../header/config.h"
+#include "../header/ext.h"
 
 namespace api {
 	bool init_api_failed = false;
+	config::application application;
+	config::user user;
+
+	static void calcDifference() {
+		for (config::dataEntry data : config::data::arr) {
+			if (data.init.length() < 1 || data.current.length() < 1)
+				continue;
+			switch (data.dataType) {
+				case config::dataType::d_int:
+					config::data::arr[config::data::getIndex(data.key.c_str())].change = std::to_string(std::stoi(data.current) - std::stoi(data.init));
+					break;
+				case config::dataType::d_float:
+					config::data::arr[config::data::getIndex(data.key.c_str())].change = std::to_string(std::stof(data.current) - std::stof(data.init));
+					break;
+				case config::dataType::d_longLong:
+					config::data::arr[config::data::getIndex(data.key.c_str())].change = std::to_string(std::stoll(data.current) - std::stoll(data.init));
+					break;
+			}
+		}
+	}
 
 	// Private Servers
 	namespace pServer {
-	public:
 		// fetch titanic api data
 		static int titanic(bool init) {
 			console::writeLog(std::string("titanic_api(init) -> ") + ext::bool2str(init), false, 0, 0, 255);
@@ -19,7 +39,7 @@ namespace api {
 				// Thread function for the first request
 				auto fetchUsers = [&r_titanicUsers]() {
 					r_titanicUsers = cpr::Get(
-						cpr::Url{ "https://api.titanic.sh/users/" + std::to_string(config::application::instance().osuId) },
+						cpr::Url{ "https://api.titanic.sh/users/" + std::to_string(application.osuId) },
 						cpr::Header{
 							{ "Content-Type", "application/json" },
 							{ "Accept", "application/json" }
@@ -46,7 +66,7 @@ namespace api {
 				t2.join();
 				nlohmann::json _j = nlohmann::json::parse(r_titanicUsers.text);
 				nlohmann::json _j2 = nlohmann::json::parse(r_titanicStats.text);
-				static const int mode = static_cast<int>(config::application::instance().gameMode);
+				static const int mode = static_cast<int>(application.gameMode);
 				static const std::string _mode = std::to_string(mode);
 				//static const int count_graveyard = _j2["beatmap_modes"][_mode]["count_graveyard"].get<int>();
 				//static const int count_wip = _j2["beatmap_modes"][_mode]["count_wip"].get<int>();
@@ -56,10 +76,10 @@ namespace api {
 				static const int count_qualified = _j2["beatmap_modes"][_mode]["count_qualified"].get<int>();
 				static const int count_loved = _j2["beatmap_modes"][_mode]["count_loved"].get<int>();
 
-				config::user::instance().username = _j["name"].get<std::string>();
+				user.username = _j["name"].get<std::string>();
 
 				if (init) {
-					config::data::arr[config::data::getIndex("level")].init = std::to_string(getLevelFromScore(_j["stats"][mode]["tscore"].get<long long>()));
+					config::data::arr[config::data::getIndex("level")].init = std::to_string(ext::getLevelFromScore(_j["stats"][mode]["tscore"].get<long long>()));
 					config::data::arr[config::data::getIndex("rankedScore")].init = std::to_string(_j["stats"][mode]["rscore"].get<long long>());
 					config::data::arr[config::data::getIndex("totalScore")].init = std::to_string(_j["stats"][mode]["tscore"].get<long long>());
 					config::data::arr[config::data::getIndex("ppRank")].init = std::to_string(_j["stats"][mode]["rank"].get<int>());
@@ -101,7 +121,7 @@ namespace api {
 					);
 				}
 
-				config::data::arr[config::data::getIndex("level")].current	= std::to_string(getLevelFromScore(_j["stats"][mode]["tscore"].get<long long>()));
+				config::data::arr[config::data::getIndex("level")].current	= std::to_string(ext::getLevelFromScore(_j["stats"][mode]["tscore"].get<long long>()));
 				config::data::arr[config::data::getIndex("rankedScore")].current = std::to_string(_j["stats"][mode]["rscore"].get<long long>());
 				config::data::arr[config::data::getIndex("totalScore")].current = std::to_string(_j["stats"][mode]["tscore"].get<long long>());
 				config::data::arr[config::data::getIndex("ppRank")].current = std::to_string(_j["stats"][mode]["rank"].get<int>());
@@ -165,23 +185,18 @@ namespace api {
 		}	
 	};
 
-	class osu {
-	public:
-		static osu& instance() {
-			static osu ctx;
-			return ctx;
-		}
+	namespace osu {
 		std::string auth_token;
 		// auth osu api
 		static int api_auth() {
 			try {
 				nlohmann::json request;
-				std::string body = R"({"client_id":)" + std::to_string(config::application::instance().clientId) + R"(, "client_secret":")" + config::application::instance().clientSecret + R"(", "grant_type":"client_credentials", "scope":"public"})";
+				std::string body = R"({"client_id":)" + std::to_string(application.clientId) + R"(, "client_secret":")" + application.clientSecret + R"(", "grant_type":"client_credentials", "scope":"public"})";
 				cpr::Response r = cpr::Post(cpr::Url{ "https://osu.ppy.sh/oauth/token" },
 					cpr::Body{ body },
 					cpr::Header{ { "Content-Type", "application/json" } });
 				request = nlohmann::json::parse(r.text);
-				api::osu::instance().auth_token = "Bearer " + request.value("access_token", "");
+				api::osu::auth_token = "Bearer " + request.value("access_token", "");
 				request.clear();
 				console::writeLog((std::string)"api_auth() -> Status Code: " + std::to_string(r.status_code), false, 0, 255, 0);
 				return r.status_code;
@@ -217,7 +232,7 @@ namespace api {
 		static int api(bool init) {
 			try {
 				std::string mode;
-				switch (static_cast<int>(config::application::instance().gameMode)) {
+				switch (static_cast<int>(application.gameMode)) {
 					case 0:
 						mode = "osu";
 						break;
@@ -232,21 +247,21 @@ namespace api {
 						break;
 				}
 				cpr::Response r = cpr::Get(
-					cpr::Url{ "https://osu.ppy.sh/api/v2/users/" + std::to_string(config::application::instance().osuId) + "/" + mode + "?key=id"},
+					cpr::Url{ "https://osu.ppy.sh/api/v2/users/" + std::to_string(application.osuId) + "/" + mode + "?key=id"},
 					cpr::Header{
 						{ "Content-Type", "application/json" },
 						{ "Accept", "application/json" },
-						{ "Authorization", api::osu::instance().auth_token }
+						{ "Authorization", api::osu::auth_token }
 					}
 				);
 				console::writeLog((std::string)"api() -> Status Code: " + std::to_string(r.status_code), false, 0, 255, 0);
 
 				nlohmann::json _j = nlohmann::json::parse(r.text);
-				config::user::instance().username = _j["username"].get<std::string>();
+				user.username = _j["username"].get<std::string>();
 
 				if (init) {
 					// more accurate approach -> calculates level from total score
-					config::data::arr[config::data::getIndex("level")].init = std::to_string(getLevelFromScore(_j["statistics"]["total_score"].get<long long>()));
+					config::data::arr[config::data::getIndex("level")].init = std::to_string(ext::getLevelFromScore(_j["statistics"]["total_score"].get<long long>()));
 					config::data::arr[config::data::getIndex("rankedScore")].init = std::to_string(_j["statistics"]["ranked_score"].get<long long>());
 					config::data::arr[config::data::getIndex("totalScore")].init = std::to_string(_j["statistics"]["total_score"].get<long long>());
 					config::data::arr[config::data::getIndex("ppRank")].init = std::to_string(_j["statistics"]["global_rank"].get<int>());
@@ -274,7 +289,7 @@ namespace api {
 						+ std::stoi(config::data::arr[config::data::getIndex("a")].init));
 				}
 
-				config::data::arr[config::data::getIndex("level")].current = std::to_string(getLevelFromScore(_j["statistics"]["total_score"].get<long long>()));
+				config::data::arr[config::data::getIndex("level")].current = std::to_string(ext::getLevelFromScore(_j["statistics"]["total_score"].get<long long>()));
 				config::data::arr[config::data::getIndex("rankedScore")].current = std::to_string(_j["statistics"]["ranked_score"].get<long long>());
 				config::data::arr[config::data::getIndex("totalScore")].current = std::to_string(_j["statistics"]["total_score"].get<long long>());
 				config::data::arr[config::data::getIndex("ppRank")].current = std::to_string(_j["statistics"]["global_rank"].get<int>());
@@ -329,13 +344,12 @@ namespace api {
 			}
 			return -1;
 		}
-		class extended {
-		public:
+		namespace extended {
 			static void respektive_api(bool init) {
 				try {
 					nlohmann::json _user;
 					cpr::Response r_user = cpr::Get(
-						cpr::Url{ "https://score.respektive.pw/u/" + std::to_string(config::application::instance().osuId) + "?m=" + std::to_string(static_cast<int>(config::application::instance().gameMode)) },
+						cpr::Url{ "https://score.respektive.pw/u/" + std::to_string(application.osuId) + "?m=" + std::to_string(static_cast<int>(application.gameMode)) },
 						cpr::Header{
 							{ "Content-Type", "application/json" }
 						}
@@ -351,7 +365,7 @@ namespace api {
 
 					nlohmann::json _target;
 					cpr::Response r_target = cpr::Get(
-						cpr::Url{ "https://score.respektive.pw/rank/" + std::to_string(_user[0]["rank"].get<int>() - 1) + "?m=" + std::to_string(static_cast<int>(config::application::instance().gameMode)) },
+						cpr::Url{ "https://score.respektive.pw/rank/" + std::to_string(_user[0]["rank"].get<int>() - 1) + "?m=" + std::to_string(static_cast<int>(application.gameMode)) },
 						cpr::Header{
 							{ "Content-Type", "application/json" }
 						}
@@ -397,7 +411,7 @@ namespace api {
 			static void inspector_api(bool init) {
 				try {
 					cpr::Response r = cpr::Get(
-						cpr::Url{ "https://api.kirino.sh/inspector/users/stats/" + std::to_string(config::application::instance().osuId) + "?skipDailyData=true&skipOsuData=true&skipExtras=true"},
+						cpr::Url{ "https://api.kirino.sh/inspector/users/stats/" + std::to_string(application.osuId) + "?skipDailyData=true&skipOsuData=true&skipExtras=true"},
 						cpr::Header{
 							{ "Content-Type", "application/json" }
 						}
@@ -441,34 +455,6 @@ namespace api {
 		};
 	};
 
-	static void calcDifference() {
-		for (config::dataEntry data : config::data::arr) {
-			if (data.init.length() < 1 || data.current.length() < 1)
-				continue;
-			switch (data.dataType) {
-				case config::dataType::_int:
-					config::data::arr[config::data::getIndex(data.key.c_str())].change = std::to_string(std::stoi(data.current) - std::stoi(data.init));
-					break;
-				case config::dataType::_float:
-					config::data::arr[config::data::getIndex(data.key.c_str())].change = std::to_string(std::stof(data.current) - std::stof(data.init));
-					break;
-				case config::dataType::_longLong:
-					config::data::arr[config::data::getIndex(data.key.c_str())].change = std::to_string(std::stoll(data.current) - std::stoll(data.init));
-					break;
-			}
-		}
-	}
-
-	static long double scoreNeeded(int n) {
-		if (n <= 100) {
-			return (5000.0L / 3.0L) * (4.0L * n * n * n - 3.0L * n * n - n)
-				+ 1.25L * powl(1.8L, n - 60);
-		}
-		else {
-			return 26931190827.0L + 99999999999.0L * (n - 100);
-		}
-	}
-	
 	static bool download(const nlohmann::json& releaseJson) {
 		std::string target_asset = "x86-release-" + std::string(OSU_TRACKER_PLATFORM) + ".zip";
 		for (const auto& asset : releaseJson["assets"]) {
@@ -499,46 +485,20 @@ namespace api {
 		return false;
 	}
 
-public:
-	static long double getLevelFromScore(long double totalScore) {
-		if (totalScore < 0)
-			return 1;
-
-		int low = 1, high = 1500;
-		int level = 1;
-
-		while (low <= high) {
-			int mid = (low + high) / 2;
-			if (scoreNeeded(mid) <= totalScore) {
-				level = mid;
-				low = mid + 1;
-			}
-			else {
-				high = mid - 1;
-			}
-		}
-
-		long double baseScore = scoreNeeded(level);
-		long double nextScore = scoreNeeded(level + 1);
-		long double fraction = (totalScore - baseScore) / (nextScore - baseScore);
-
-		return std::round((level + fraction) * 1000.0L) / 1000.0L;
-	}
-
 	static void fetch_api_data(bool init) {
-		switch (config::application::instance().server) {
+		switch (application.server) {
 			case config::server::bancho: {
 				// bancho
 				if (api::osu::api_auth() != 200) {
 					if (init) {
-						api::instance().init_api_failed = true;
+						api::init_api_failed = true;
 					}
 					return; // dont continue when auth fails
 				}
 				else {
-					if (api::instance().init_api_failed && !init) {
+					if (api::init_api_failed && !init) {
 						// retry to init api data, since it failed to init
-						api::instance().init_api_failed = false;
+						api::init_api_failed = false;
 						init = true;
 					}
 				}
@@ -558,13 +518,13 @@ public:
 				int result = api::pServer::titanic(init);
 				if (result != 200) {
 					if (init) {
-						api::instance().init_api_failed = true;
+						api::init_api_failed = true;
 					}
 					return;
 				}
 
-				if (api::instance().init_api_failed && !init) {
-					api::instance().init_api_failed = false;
+				if (api::init_api_failed && !init) {
+					api::init_api_failed = false;
 					api::pServer::titanic(true); // intentionally re-pull with full init
 				}
 				return;

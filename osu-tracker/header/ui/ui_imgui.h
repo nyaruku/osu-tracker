@@ -79,6 +79,9 @@ int ui_main()
     // Main loop
     ImGuiInputTextFlags inputFlags = ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AutoSelectAll;
     ImGuiWindowFlags beginFlags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse;
+
+    config::user user;
+    config::application application;
     while (!glfwWindowShouldClose(window))
     {
         glfwGetFramebufferSize(window, &display_w, &display_h);
@@ -136,7 +139,7 @@ int ui_main()
 
         // Begin window
         if (ImGui::Begin(
-            config::user::instance().username.empty() ? "'No User'" : config::user::instance().username.c_str()
+            user.username.empty() ? "'No User'" : user.username.c_str()
             ,nullptr
             ,beginFlags
         )){
@@ -152,7 +155,7 @@ int ui_main()
                 i++;
                 if (!entry.display) continue;
 
-                switch (config::application::instance().server) {
+                switch (application.server) {
                     case config::server::bancho: {
                         if (!entry.banchoSupport) continue;
                         break;

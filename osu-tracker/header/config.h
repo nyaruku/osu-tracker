@@ -116,7 +116,9 @@ namespace config {
 				,{"change", change}
 				,{"dataType", std::to_string(static_cast<int>(dataType))}
 				,{"formatType", std::to_string(static_cast<int>(formatType))}
-				,{"dataSettings", std::to_string(dataSettings)}
+				,{"positive", ext::bool2str(positive)}
+				,{"display", ext::bool2str(display)}
+				,{"single", ext::bool2str(single)}
 				,{"serverSettings", std::to_string(serverSupport)}
 			};
 		}

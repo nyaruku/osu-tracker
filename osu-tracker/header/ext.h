@@ -1,7 +1,6 @@
 #pragma once
 // HELPER FUNCTIONS
-class ext {
-public:
+namespace ext {
 	bool isNumeric(const std::string& str) {
 		return std::all_of(str.begin(), str.end(), ::isdigit);
 	}
@@ -56,5 +55,39 @@ public:
 			start_pos += to.length();
 		}
 		return str;
+	}
+
+	static long double scoreNeeded(int n) {
+		if (n <= 100) {
+			return (5000.0L / 3.0L) * (4.0L * n * n * n - 3.0L * n * n - n)
+				+ 1.25L * powl(1.8L, n - 60);
+		}
+		else {
+			return 26931190827.0L + 99999999999.0L * (n - 100);
+		}
+	}
+	static long double getLevelFromScore(long double totalScore) {
+		if (totalScore < 0)
+			return 1;
+
+		int low = 1, high = 1500;
+		int level = 1;
+
+		while (low <= high) {
+			int mid = (low + high) / 2;
+			if (scoreNeeded(mid) <= totalScore) {
+				level = mid;
+				low = mid + 1;
+			}
+			else {
+				high = mid - 1;
+			}
+		}
+
+		long double baseScore = scoreNeeded(level);
+		long double nextScore = scoreNeeded(level + 1);
+		long double fraction = (totalScore - baseScore) / (nextScore - baseScore);
+
+		return std::round((level + fraction) * 1000.0L) / 1000.0L;
 	}
 };
