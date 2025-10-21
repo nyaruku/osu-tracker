@@ -6,6 +6,8 @@
 #include <crow/mustache.h>
 
 namespace config {
+
+	/* Gamemode enum */
 	enum gameMode {
 		osu = 0
 		,taiko = 1
@@ -13,11 +15,13 @@ namespace config {
 		,mania = 3
 	};
 
+	/* Server enum */
 	enum server {
 		bancho = 0
 		,titanic = 1
 	};
 
+	/* User Config Struct */
 	struct application {
 		int osuId = 0;
 		int clientId = 0;
@@ -61,6 +65,8 @@ namespace config {
 
 	struct user {
 		std::string username;
+
+		/* Unused */
 		std::string avatar;
 
 		std::vector<std::tuple<std::string, std::string>> toArray() const {
@@ -71,6 +77,7 @@ namespace config {
 		}
 	};
 
+	/* Value Type */
 	enum dataType {
 		d_string = 0
 		,d_int = 1
@@ -78,6 +85,7 @@ namespace config {
 		,d_longLong = 3
 	};
 
+	/* Format Type (for display only) */
 	enum formatType {
 		f_string = 0
 		,f_int = 1
@@ -87,11 +95,11 @@ namespace config {
 		,f_percent = 5
 	};
 
-	enum serverSettings : uint32_t {
-		BANCHO = 1 << 0
-		,TITANIC = 1 << 1
-	};
+	/* Server Support enum*/
+	enum banchoSupport { BANCHO_OFF = 0, BANCHO_ON = 1 };
+	enum titanicSupport { TITANIC_OFF = 0, TITANIC_ON = 1 };
 
+	/* Array Data Struct */
 	struct dataEntry {
 		const std::string key;
 		const std::string name;
@@ -104,7 +112,8 @@ namespace config {
 		bool single;
 		bool positive;
 		bool display;
-		u_int32_t serverSupport;
+		banchoSupport banchoSupport;
+		titanicSupport titanicSupport;
 
 		std::vector<std::tuple<std::string, std::string>> toArray() const {
 			return {
@@ -119,43 +128,46 @@ namespace config {
 				,{"positive", ext::bool2str(positive)}
 				,{"display", ext::bool2str(display)}
 				,{"single", ext::bool2str(single)}
-				,{"serverSettings", std::to_string(serverSupport)}
+				,{"banchoSupport", std::to_string(static_cast<int>(banchoSupport))}
+				,{"titanicSupport", std::to_string(static_cast<int>(titanicSupport))}
 			};
 		}
 	};
 
 	namespace data {
+		/* Array Data and Setting */
 		std::vector<dataEntry> arr {
-			{"level",		"Level",			1, "", "",	"", dataType::d_float,		formatType::f_decimal,	false, true, true,	BANCHO | TITANIC}
-			,{"rankedScore","Ranked Score",		2, "", "",	"", dataType::d_longLong,	formatType::f_int,		false, true, true,	BANCHO | TITANIC}
-			,{"totalScore",	"Total Score",		3, "", "",	"", dataType::d_longLong,	formatType::f_int,		false, true, true,	BANCHO | TITANIC}
-			,{"ppRank",		"PP Rank",			4, "", "",	"", dataType::d_int,		formatType::f_rank,		false, true, true,	BANCHO | TITANIC}
-			,{"pp",			"PP",				5, "", "",	"", dataType::d_float,		formatType::f_decimal,	false, true, true,	BANCHO | TITANIC}
-			,{"ppv1",		"PPv1",				6, "", "",	"", dataType::d_float,		formatType::f_decimal,	false, true, true,	TITANIC}
-			,{"acc",		"Accuracy",			7, "", "",	"", dataType::d_float,		formatType::f_percent,	false, true, true,	BANCHO | TITANIC}
-			,{"playtime",	"Play Time",		8, "", "",	"", dataType::d_longLong,	formatType::f_time,		false, true, true,	BANCHO | TITANIC}
-			,{"playcount",	"Play Count",		9, "", "",	"", dataType::d_int,		formatType::f_int,		false, true, true,	BANCHO | TITANIC}
-			,{"totalHits",	"Total Hits",		10, "", "",	"", dataType::d_longLong,	formatType::f_int,		false, true, true,	TITANIC}
-			,{"silverSS",	"Rank SSH",			11, "", "",	"", dataType::d_int,		formatType::f_int,		false, true, true,	BANCHO | TITANIC}
-			,{"goldSS",		"Rank SS",			12, "", "",	"", dataType::d_int,		formatType::f_int,		false, true, true,	BANCHO | TITANIC}
-			,{"silverS",	"Rank SH",			13, "", "",	"", dataType::d_int,		formatType::f_int,		false, true, true,	BANCHO | TITANIC}
-			,{"goldS",		"Rank S",			14, "", "",	"", dataType::d_int,		formatType::f_int,		false, true, true,	BANCHO | TITANIC}
-			,{"a",			"Rank A",			15, "", "",	"", dataType::d_int,		formatType::f_int,		false, true, true,	BANCHO | TITANIC}
-			,{"b",			"Rank B",			16, "", "",	"", dataType::d_int,		formatType::f_int,		false, true, true,	BANCHO | TITANIC}
-			,{"c",			"Rank C",			17, "", "",	"", dataType::d_int,		formatType::f_int,		false, true, true,	BANCHO | TITANIC}
-			,{"d",			"Rank D",			18, "", "",	"", dataType::d_int,		formatType::f_int,		false, true, true,	BANCHO | TITANIC}
-			,{"totalSS",	"Total SS",			19, "", "",	"", dataType::d_int,		formatType::f_int,		false, true, true,	BANCHO | TITANIC}
-			,{"totalS",		"Total S",			20, "", "",	"", dataType::d_int,		formatType::f_int,		false, true, true,	BANCHO | TITANIC}
-			,{"clears",		"Profile Clears",	21, "", "",	"", dataType::d_int,		formatType::f_int,		false, true, true,	BANCHO | TITANIC}
-			,{"totalClears","Total Clears",		22, "", "",	"", dataType::d_int,		formatType::f_int,		false, true, true,	BANCHO | TITANIC}
-			,{"completion",	"Completion%",		23, "", "",	"", dataType::d_float,		formatType::f_percent,	false, true, true,	BANCHO | TITANIC}
-			,{"scoreRank",	"Score Rank",		24, "", "",	"", dataType::d_int,		formatType::f_rank,		false, true, true,	BANCHO}
-			,{"targetRank",	"Target Rank",		25, "", "",	"", dataType::d_int,		formatType::f_rank,		true,  true, true,	BANCHO}
-			,{"targetUser",	"Target Player",	26, "", "",	"", dataType::d_string,		formatType::f_string,	true,  true, true,	BANCHO}
-			,{"targetScore","Target Score",		27, "", "",	"", dataType::d_longLong,	formatType::f_int,		true,  true, true,	BANCHO}
+			{"level",		"Level",			1, "", "",	"", dataType::d_float,		formatType::f_decimal,	false, true, true,	banchoSupport::BANCHO_ON,	titanicSupport::TITANIC_ON}
+			,{"rankedScore","Ranked Score",		2, "", "",	"", dataType::d_longLong,	formatType::f_int,		false, true, true,	banchoSupport::BANCHO_ON,	titanicSupport::TITANIC_ON}
+			,{"totalScore",	"Total Score",		3, "", "",	"", dataType::d_longLong,	formatType::f_int,		false, true, true,	banchoSupport::BANCHO_ON,	titanicSupport::TITANIC_ON}
+			,{"ppRank",		"PP Rank",			4, "", "",	"", dataType::d_int,		formatType::f_rank,		false, true, true,	banchoSupport::BANCHO_ON,	titanicSupport::TITANIC_ON}
+			,{"pp",			"PP",				5, "", "",	"", dataType::d_float,		formatType::f_decimal,	false, true, true,	banchoSupport::BANCHO_ON,	titanicSupport::TITANIC_ON}
+			,{"ppv1",		"PPv1",				6, "", "",	"", dataType::d_float,		formatType::f_decimal,	false, true, true,	banchoSupport::BANCHO_OFF,	titanicSupport::TITANIC_ON}
+			,{"acc",		"Accuracy",			7, "", "",	"", dataType::d_float,		formatType::f_percent,	false, true, true,	banchoSupport::BANCHO_ON,	titanicSupport::TITANIC_ON}
+			,{"playtime",	"Play Time",		8, "", "",	"", dataType::d_longLong,	formatType::f_time,		false, true, true,	banchoSupport::BANCHO_ON,	titanicSupport::TITANIC_ON}
+			,{"playcount",	"Play Count",		9, "", "",	"", dataType::d_int,		formatType::f_int,		false, true, true,	banchoSupport::BANCHO_ON,	titanicSupport::TITANIC_ON}
+			,{"totalHits",	"Total Hits",		10, "", "",	"", dataType::d_longLong,	formatType::f_int,		false, true, true,	banchoSupport::BANCHO_OFF,	titanicSupport::TITANIC_ON}
+			,{"silverSS",	"Rank SSH",			11, "", "",	"", dataType::d_int,		formatType::f_int,		false, true, true,	banchoSupport::BANCHO_ON,	titanicSupport::TITANIC_ON}
+			,{"goldSS",		"Rank SS",			12, "", "",	"", dataType::d_int,		formatType::f_int,		false, true, true,	banchoSupport::BANCHO_ON,	titanicSupport::TITANIC_ON}
+			,{"silverS",	"Rank SH",			13, "", "",	"", dataType::d_int,		formatType::f_int,		false, true, true,	banchoSupport::BANCHO_ON,	titanicSupport::TITANIC_ON}
+			,{"goldS",		"Rank S",			14, "", "",	"", dataType::d_int,		formatType::f_int,		false, true, true,	banchoSupport::BANCHO_ON,	titanicSupport::TITANIC_ON}
+			,{"a",			"Rank A",			15, "", "",	"", dataType::d_int,		formatType::f_int,		false, true, true,	banchoSupport::BANCHO_ON,	titanicSupport::TITANIC_ON}
+			,{"b",			"Rank B",			16, "", "",	"", dataType::d_int,		formatType::f_int,		false, true, true,	banchoSupport::BANCHO_ON,	titanicSupport::TITANIC_ON}
+			,{"c",			"Rank C",			17, "", "",	"", dataType::d_int,		formatType::f_int,		false, true, true,	banchoSupport::BANCHO_ON,	titanicSupport::TITANIC_ON}
+			,{"d",			"Rank D",			18, "", "",	"", dataType::d_int,		formatType::f_int,		false, true, true,	banchoSupport::BANCHO_ON,	titanicSupport::TITANIC_ON}
+			,{"totalSS",	"Total SS",			19, "", "",	"", dataType::d_int,		formatType::f_int,		false, true, true,	banchoSupport::BANCHO_ON,	titanicSupport::TITANIC_ON}
+			,{"totalS",		"Total S",			20, "", "",	"", dataType::d_int,		formatType::f_int,		false, true, true,	banchoSupport::BANCHO_ON,	titanicSupport::TITANIC_ON}
+			,{"clears",		"Profile Clears",	21, "", "",	"", dataType::d_int,		formatType::f_int,		false, true, true,	banchoSupport::BANCHO_ON,	titanicSupport::TITANIC_ON}
+			,{"totalClears","Total Clears",		22, "", "",	"", dataType::d_int,		formatType::f_int,		false, true, true,	banchoSupport::BANCHO_ON,	titanicSupport::TITANIC_ON}
+			,{"completion",	"Completion%",		23, "", "",	"", dataType::d_float,		formatType::f_percent,	false, true, true,	banchoSupport::BANCHO_ON,	titanicSupport::TITANIC_ON}
+			,{"scoreRank",	"Score Rank",		24, "", "",	"", dataType::d_int,		formatType::f_rank,		false, true, true,	banchoSupport::BANCHO_ON,	titanicSupport::TITANIC_OFF}
+			,{"targetRank",	"Target Rank",		25, "", "",	"", dataType::d_int,		formatType::f_rank,		true,  true, true,	banchoSupport::BANCHO_ON,	titanicSupport::TITANIC_OFF}
+			,{"targetUser",	"Target Player",	26, "", "",	"", dataType::d_string,		formatType::f_string,	true,  true, true,	banchoSupport::BANCHO_ON,	titanicSupport::TITANIC_OFF}
+			,{"targetScore","Target Score",		27, "", "",	"", dataType::d_longLong,	formatType::f_int,		true,  true, true,	banchoSupport::BANCHO_ON,	titanicSupport::TITANIC_OFF}
 		};
 
-		static inline std::vector<dataEntry> arrFormatted;
+		/* Copy of above but with formatted values by formatType */
+		std::vector<dataEntry> arrFormatted;
 
 		constexpr std::uint32_t hash(std::string_view str) {
 			std::uint32_t h = 2166136261u;
@@ -234,7 +246,8 @@ namespace config {
 		}
 	};
 
-	static void writeStats() {
+	/* Stats writer, nothing more than a mustache renderer */
+	void writeStats() {
 		for (auto const& dir_entry : std::filesystem::directory_iterator{ "tracker_txt/template" }) {
 			std::string content;
 			if (std::ifstream file{ dir_entry.path() }; file.is_open()) {
@@ -264,7 +277,8 @@ namespace config {
 		}
 	}
 
-	inline void writeConfig() {
+	/* Config Writer */
+	void writeConfig() {
 		// ordered_json bc it sorts alphabetically by default
 		nlohmann::ordered_json config;
 		config::application application;
@@ -285,7 +299,8 @@ namespace config {
 		file.close();
 	}
 
-	inline void readConfig() {
+	/* Config Reader */
+	void readConfig() {
 		if (std::ifstream file{ "config.json" }; file.is_open()) {
 			nlohmann::ordered_json config = nlohmann::ordered_json::parse(file);
 			config::application application;
