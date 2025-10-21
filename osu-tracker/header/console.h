@@ -1,11 +1,6 @@
 #pragma once
-class console {	
-public:
-	static console& instance() {
-		static console ctx;
-		return ctx;
-	}
-	std::deque<std::string> vec_log;
+namespace console {
+	inline std::deque<std::string> vec_log;
 	// ansi console color codes
 	enum conCol {
 		f_black = 30,
@@ -47,14 +42,14 @@ public:
 	}
 
 	static inline std::string getLogAtIndex(int i) {
-		return console::instance().vec_log[i];
+		return console::vec_log[i];
 	}
 
 	static inline std::string getLastLog() {
-		return console::instance().vec_log.back();
+		return console::vec_log.back();
 	}
 	
-	static void writeLog(std::string msg, bool alwaysPrint = false, int r = 255, int g = 255, int b = 255) {
+	static void writeLog(std::string msg, const bool alwaysPrint = false, int r = 255, int g = 255, int b = 255) {
 		time_t currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 		std::tm* timeInfo = localtime(&currentTime);
 		char dateBuffer[20];
@@ -63,9 +58,9 @@ public:
 		strftime(timeBuffer, sizeof(timeBuffer), "%H:%M:%S", timeInfo);
 		std::stringstream ss;
 		ss << (std::string)dateBuffer + " " + timeBuffer << " " << "[osu-tracker] " << msg;
-		console::instance().vec_log.push_back(ss.str());
-		while(console::instance().vec_log.size() > 250) {
-			console::instance().vec_log.pop_front();
+		console::vec_log.push_back(ss.str());
+		while(console::vec_log.size() > 250) {
+			console::vec_log.pop_front();
 		}
 		#if RELEASE_BUILD
 			if(!alwaysPrint) // Dont print on release if not explicity
