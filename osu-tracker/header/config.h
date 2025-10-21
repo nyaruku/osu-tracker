@@ -39,15 +39,25 @@ namespace config {
 			return h;
 		}
 
-		bool set(std::string_view key, const std::string& value) {
+		void set(const std::string_view key, const std::string& value) {
 			switch (hash(key)) {
-				case hash("osuId"): osuId = std::stoi(value); return true;
-				case hash("clientId"): clientId = std::stoi(value); return true;
-				case hash("clientSecret"): clientSecret = value; return true;
-				case hash("apiInterval"): apiInterval = std::stoi(value); return true;
-				case hash("gameMode"): gameMode = static_cast<config::gameMode>(std::stoi(value)); return true;
-				case hash("server"): server = static_cast<config::server>(std::stoi(value)); return true;
-				default: return false; // key not found
+				case hash("osuId"): osuId = std::stoi(value); return;
+				case hash("clientId"): clientId = std::stoi(value); return;
+				case hash("clientSecret"): clientSecret = value; return;
+				case hash("apiInterval"): apiInterval = std::stoi(value); return;
+				case hash("gameMode"): gameMode = static_cast<config::gameMode>(std::stoi(value)); return;
+				case hash("server"): server = static_cast<config::server>(std::stoi(value)); return;
+			}
+		}
+
+		std::string get(const std::string_view key) {
+			switch (hash(key)) {
+				case hash("osuId"): return std::to_string(osuId);
+				case hash("clientId"): return std::to_string(clientId);
+				case hash("clientSecret"): return clientSecret;
+				case hash("apiInterval"): return std::to_string(apiInterval);
+				case hash("gameMode"): return std::to_string(static_cast<int>(gameMode));
+				case hash("server"): return std::to_string(static_cast<int>(server));
 			}
 		}
 
