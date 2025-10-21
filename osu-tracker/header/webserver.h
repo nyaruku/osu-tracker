@@ -256,7 +256,7 @@ namespace webserver {
 						bool resetSession = false;
 						if 
 							(
-							j["msg"]["applicationConfig"][0]["value"] != application.get("osuId")
+							j["msg"]["applicationConfig"][0]["value"] != application.("osuId")
 							|| j["msg"]["applicationConfig"][1]["value"] != config::application::instance().get("clientId")
 							|| j["msg"]["applicationConfig"][2]["value"] != config::application::instance().get("clientSecret")
 							|| j["msg"]["applicationConfig"][4]["value"] != config::application::instance().get("gameMode")
