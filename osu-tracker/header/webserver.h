@@ -102,12 +102,11 @@ public:
 		}
 		std::stringstream ss;
 		ss << (std::string)dateBuffer + " " + timeBuffer << " [" << logLevel <<"] " << message;
-		console::instance().vec_log.push_back(ss.str());
+		console::vec_log.push_back(ss.str());
 	}
 };
 
-class webserver {
-private:
+namespace webserver {
 	bool shutdown_webServer = false;
 	using json = nlohmann::json;
 	inline static crow::SimpleApp app;
@@ -123,37 +122,33 @@ private:
 		_j["msg"] = msg;
 		return _j;
 	}
-public:
-	std::thread uiThread;
 
-	static void startUiThread() {
-		stopUiThread();
-		console::writeLog("Check if UI Thread is joinable (to run UI)", false, 255, 255, 0);
-		if (!instance().uiThread.joinable()) {
-			console::writeLog("Running UI Thread...", false, 255, 255, 0);
-			instance().uiThread = std::thread(ui::open);
-		}
-		else {
-			console::writeLog("UI Thread is running.", false, 255, 255, 0);
-		}
-	}
+	std::thread uiThread;
 
 	static void stopUiThread() {
 		console::writeLog("Check if UI Thread is joinable (to close UI)", false, 255, 255, 0);
-		if (instance().uiThread.joinable()) {
+		if (uiThread.joinable()) {
 			console::writeLog("UI Thread is joinable", false, 255, 255, 0);
 			ui::close();
-			instance().uiThread.join();
+			uiThread.join();
 		}
 		else {
 			console::writeLog("UI Thread is not joinable", false, 255, 255, 0);
 		}
 	}
 
-	static webserver& instance() {
-		static webserver ctx;
-		return ctx;
+	static void startUiThread() {
+		stopUiThread();
+		console::writeLog("Check if UI Thread is joinable (to run UI)", false, 255, 255, 0);
+		if (!uiThread.joinable()) {
+			console::writeLog("Running UI Thread...", false, 255, 255, 0);
+			uiThread = std::thread(ui::open);
+		}
+		else {
+			console::writeLog("UI Thread is running.", false, 255, 255, 0);
+		}
 	}
+
 
 	int performUpdateCheck() {
 		console::writeLog("-------------------------------------------------------------", true, 255, 255, 255);
@@ -176,7 +171,7 @@ public:
 
 	static void shutdown(bool restart = false) {
 		console::writeLog("Web Server termination initiated...", false, 255, 255, 0);
-		instance().shutdown_webServer = !restart;
+		shutdown_webServer = !restart;
 		app.stop();
 	}
 
@@ -186,7 +181,10 @@ public:
 		return false - restart
 	*/
 	static bool start(bool skipInit = false)
-	{	
+	{
+		config::user user;
+		config::application application;
+
 		// Skip Initialization -> crash
 		CustomLogger logger;
 		crow::logger::setHandler(&logger);
@@ -225,13 +223,13 @@ public:
 					if (cmd == "#open_ui")
 						startUiThread();
 					if (cmd == "#count") {
-						instance().counter++;
-						conn.send_text(instance().sendToast(std::to_string(instance().counter)).dump());
+						counter++;
+						conn.send_text(sendToast(std::to_string(counter)).dump());
 					}
 					if (cmd == "#update") {
-						if (instance().performUpdateCheck() == 0)
+						if (performUpdateCheck() == 0)
 							shutdown(false);
-						conn.send_text(instance().sendToast((std::string)"No updates found.").dump());
+						conn.send_text(sendToast((std::string)"No updates found.").dump());
 					}
 				}
 			});
@@ -258,7 +256,7 @@ public:
 						bool resetSession = false;
 						if 
 							(
-							j["msg"]["applicationConfig"][0]["value"] != config::application::instance().get("osuId")
+							j["msg"]["applicationConfig"][0]["value"] != application.get("osuId")
 							|| j["msg"]["applicationConfig"][1]["value"] != config::application::instance().get("clientId")
 							|| j["msg"]["applicationConfig"][2]["value"] != config::application::instance().get("clientSecret")
 							|| j["msg"]["applicationConfig"][4]["value"] != config::application::instance().get("gameMode")

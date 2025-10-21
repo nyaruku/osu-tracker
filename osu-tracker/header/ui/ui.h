@@ -85,21 +85,10 @@ std::string formatPlaytime(const std::string& secondsStr, bool showPlus = false)
 	return str;
 }
 
-class ui {
-private:
-	static void fetchApiData(bool init) {
-		while (fetch) {	
-			api::fetch_api_data(init);
-			updateFormat();
-			config::writeStats();
+namespace ui {
+	config::user user;
+	config::application application;
 
-			std::this_thread::sleep_for(
-				std::chrono::milliseconds(config::application::instance().apiInterval)
-			);
-		}
-	}
-
-public:
 	static void updateFormat() {
 		config::data::arrFormatted = config::data::arr;
 
@@ -110,7 +99,7 @@ public:
 				data.change = "";
 				continue;
 			}
-			switch (config::application::instance().server) {
+			switch (application.server) {
 				case config::server::bancho:
 					if (!data.banchoSupport)
 						continue;
@@ -131,7 +120,7 @@ public:
 				noCurrent = true;
 			}
 			switch (data.dataType) {
-				case config::dataType::_int: {
+				case config::dataType::d_int: {
 					switch (data.formatType) {
 						case config::formatType::f_int: {
 							data.init = formatNumber(data.init);
@@ -172,7 +161,7 @@ public:
 					}
 					break;
 				}
-				case config::dataType::_longLong: {
+				case config::dataType::d_longLong: {
 					switch (data.formatType) {
 						case config::formatType::f_int: {
 							data.init = formatNumber(data.init);
@@ -212,7 +201,7 @@ public:
 					}
 					break;
 				}
-				case config::dataType::_float: {
+				case config::dataType::d_float: {
 					switch (data.formatType) {
 						case config::formatType::f_decimal: {
 							data.init = formatFloat(data.init);
@@ -244,6 +233,17 @@ public:
 					break;
 				}
 			}
+		}
+	}
+	static void fetchApiData(bool init) {
+		while (fetch) {
+			api::fetch_api_data(init);
+			updateFormat();
+			config::writeStats();
+
+			std::this_thread::sleep_for(
+				std::chrono::milliseconds(application.apiInterval)
+			);
 		}
 	}
 	static inline std::atomic<bool> isOpen;

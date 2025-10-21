@@ -290,7 +290,7 @@ int ui_main()
                 {
                     ImGui::Columns(2, nullptr, false);
                     ImGui::Text("Username"); ImGui::NextColumn();
-                    ImGui::Text("%s", config::user::instance().username.c_str()); ImGui::NextColumn();
+                    ImGui::Text("%s", user.username.c_str()); ImGui::NextColumn();
 
                     ImGui::Text("Entries"); ImGui::NextColumn();
                     ImGui::Text("%d", (int)config::data::arr.size()); ImGui::NextColumn();
