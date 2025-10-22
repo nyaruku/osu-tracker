@@ -86,20 +86,17 @@ std::string formatPlaytime(const std::string& secondsStr, bool showPlus = false)
 }
 
 namespace ui {
-	config::user user;
-	config::application application;
-
 	static void updateFormat() {
 		config::data::arrFormatted = config::data::arr;
 
-		for (config::dataEntry& data : config::data::arrFormatted) {
+		for (auto& data : config::data::arrFormatted) {
 
-			if (data.init == "" && !data.single) {
+			if (data.init.empty() && !data.single) {
 				data.init = "";
 				data.change = "";
 				continue;
 			}
-			switch (application.server) {
+			switch (config::application.server) {
 				case config::server::bancho:
 					if (!data.banchoSupport)
 						continue;
@@ -116,7 +113,7 @@ namespace ui {
 				noDiff = true;
 			}
 			bool noCurrent = false;
-			if (data.current == "") {
+			if (data.current.empty()) {
 				noCurrent = true;
 			}
 			switch (data.dataType) {
@@ -242,7 +239,7 @@ namespace ui {
 			config::writeStats();
 
 			std::this_thread::sleep_for(
-				std::chrono::milliseconds(application.apiInterval)
+				std::chrono::milliseconds(config::application.apiInterval)
 			);
 		}
 	}

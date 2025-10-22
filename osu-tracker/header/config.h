@@ -22,13 +22,13 @@ namespace config {
 	};
 
 	/* User Config Struct */
-	struct application {
+	struct _application {
 		int osuId = 0;
 		int clientId = 0;
 		std::string clientSecret;
 		int apiInterval = 7000;
-		config::gameMode gameMode = config::gameMode::fruits;
-		config::server server = config::server::titanic;
+		config::gameMode gameMode = config::gameMode::osu;
+		config::server server = config::server::bancho;
 
 		static constexpr uint32_t hash(std::string_view str) {
 			uint32_t h = 2166136261u;
@@ -61,7 +61,7 @@ namespace config {
 			}
 		}
 
-		std::vector<std::tuple<std::string, std::string>> toArray() const {
+		std::vector<std::tuple<std::string, std::string>> toArray() {
 			return {
 	            {"osuId", std::to_string(osuId)},
 				{"clientId", std::to_string(clientId)},
@@ -72,8 +72,9 @@ namespace config {
 			};
 		}
 	};
+	inline _application application;
 
-	struct user {
+	struct _user {
 		std::string username;
 
 		/* Unused */
@@ -86,6 +87,8 @@ namespace config {
 			};
 		}
 	};
+
+	inline _user user;
 
 	/* Value Type */
 	enum dataType {
@@ -111,8 +114,8 @@ namespace config {
 
 	/* Array Data Struct */
 	struct dataEntry {
-		const std::string key;
-		const std::string name;
+		std::string key;
+		std::string name;
 		int sort;
 		std::string init;
 		std::string current;
@@ -291,7 +294,6 @@ namespace config {
 	void writeConfig() {
 		// ordered_json bc it sorts alphabetically by default
 		nlohmann::ordered_json config;
-		config::application application;
 		for (const auto& [key, value] : application.toArray()) {
 			if (std::empty(value)) {
 				config["Main"][key] = nullptr;
@@ -313,7 +315,6 @@ namespace config {
 	void readConfig() {
 		if (std::ifstream file{ "config.json" }; file.is_open()) {
 			nlohmann::ordered_json config = nlohmann::ordered_json::parse(file);
-			config::application application;
 			for (auto& main : config["Main"].items()) {
 				if (main.value().is_null()) {
 					application.set(main.key(), "");

@@ -1,7 +1,3 @@
-// suppress warnings bc they spam output
-#pragma warning( disable : 4305)
-#pragma warning( disable : 4566)
-
 #include <iostream>
 #include <vector>
 #include <string>
@@ -41,7 +37,7 @@ int main(int argc, char* argv[]) {
 	console::writeLog((std::string)"Release Type: " + (OSU_TRACKER_RELEASE_TYPE), true, 111, 163, 247);
 	console::writeLog((std::string)"Build: " + OSU_TRACKER_CMAKE_BUILD_TYPE, true, 111, 163, 247);
 	
-	if (webserver::instance().performUpdateCheck() == 0) {
+	if (webserver::performUpdateCheck() == 0) {
 		return 0;
 	}
 	bool run = true;

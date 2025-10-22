@@ -80,8 +80,6 @@ int ui_main()
     ImGuiInputTextFlags inputFlags = ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_AutoSelectAll;
     ImGuiWindowFlags beginFlags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse;
 
-    config::user user;
-    config::application application;
     while (!glfwWindowShouldClose(window))
     {
         glfwGetFramebufferSize(window, &display_w, &display_h);
@@ -139,7 +137,7 @@ int ui_main()
 
         // Begin window
         if (ImGui::Begin(
-            user.username.empty() ? "'No User'" : user.username.c_str()
+            config::user.username.empty() ? "'No User'" : config::user.username.c_str()
             ,nullptr
             ,beginFlags
         )){
@@ -155,7 +153,7 @@ int ui_main()
                 i++;
                 if (!entry.display) continue;
 
-                switch (application.server) {
+                switch (config::application.server) {
                     case config::server::bancho: {
                         if (!entry.banchoSupport) continue;
                         break;
@@ -290,7 +288,7 @@ int ui_main()
                 {
                     ImGui::Columns(2, nullptr, false);
                     ImGui::Text("Username"); ImGui::NextColumn();
-                    ImGui::Text("%s", user.username.c_str()); ImGui::NextColumn();
+                    ImGui::Text("%s", config::user.username.c_str()); ImGui::NextColumn();
 
                     ImGui::Text("Entries"); ImGui::NextColumn();
                     ImGui::Text("%d", (int)config::data::arr.size()); ImGui::NextColumn();

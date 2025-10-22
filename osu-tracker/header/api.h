@@ -5,22 +5,20 @@
 
 namespace api {
 	bool init_api_failed = false;
-	config::application application;
-	config::user user;
 
 	static void calcDifference() {
-		for (config::dataEntry data : config::data::arr) {
+		for (const config::dataEntry& data : config::data::arr) {
 			if (data.init.length() < 1 || data.current.length() < 1)
 				continue;
 			switch (data.dataType) {
 				case config::dataType::d_int:
-					config::data::arr[config::data::getIndex(data.key.c_str())].change = std::to_string(std::stoi(data.current) - std::stoi(data.init));
+					config::data::arr[config::data::getIndex(data.key)].change = std::to_string(std::stoi(data.current) - std::stoi(data.init));
 					break;
 				case config::dataType::d_float:
-					config::data::arr[config::data::getIndex(data.key.c_str())].change = std::to_string(std::stof(data.current) - std::stof(data.init));
+					config::data::arr[config::data::getIndex(data.key)].change = std::to_string(std::stof(data.current) - std::stof(data.init));
 					break;
 				case config::dataType::d_longLong:
-					config::data::arr[config::data::getIndex(data.key.c_str())].change = std::to_string(std::stoll(data.current) - std::stoll(data.init));
+					config::data::arr[config::data::getIndex(data.key)].change = std::to_string(std::stoll(data.current) - std::stoll(data.init));
 					break;
 			}
 		}
@@ -39,7 +37,7 @@ namespace api {
 				// Thread function for the first request
 				auto fetchUsers = [&r_titanicUsers]() {
 					r_titanicUsers = cpr::Get(
-						cpr::Url{ "https://api.titanic.sh/users/" + std::to_string(application.osuId) },
+						cpr::Url{ "https://api.titanic.sh/users/" + std::to_string(config::application.osuId) },
 						cpr::Header{
 							{ "Content-Type", "application/json" },
 							{ "Accept", "application/json" }
@@ -66,7 +64,7 @@ namespace api {
 				t2.join();
 				nlohmann::json _j = nlohmann::json::parse(r_titanicUsers.text);
 				nlohmann::json _j2 = nlohmann::json::parse(r_titanicStats.text);
-				static const int mode = static_cast<int>(application.gameMode);
+				static const int mode = static_cast<int>(config::application.gameMode);
 				static const std::string _mode = std::to_string(mode);
 				//static const int count_graveyard = _j2["beatmap_modes"][_mode]["count_graveyard"].get<int>();
 				//static const int count_wip = _j2["beatmap_modes"][_mode]["count_wip"].get<int>();
@@ -76,7 +74,7 @@ namespace api {
 				static const int count_qualified = _j2["beatmap_modes"][_mode]["count_qualified"].get<int>();
 				static const int count_loved = _j2["beatmap_modes"][_mode]["count_loved"].get<int>();
 
-				user.username = _j["name"].get<std::string>();
+				config::user.username = _j["name"].get<std::string>();
 
 				if (init) {
 					config::data::arr[config::data::getIndex("level")].init = std::to_string(ext::getLevelFromScore(_j["stats"][mode]["tscore"].get<long long>()));
@@ -191,7 +189,7 @@ namespace api {
 		static int api_auth() {
 			try {
 				nlohmann::json request;
-				std::string body = R"({"client_id":)" + std::to_string(application.clientId) + R"(, "client_secret":")" + application.clientSecret + R"(", "grant_type":"client_credentials", "scope":"public"})";
+				std::string body = R"({"client_id":)" + std::to_string(config::application.clientId) + R"(, "client_secret":")" + config::application.clientSecret + R"(", "grant_type":"client_credentials", "scope":"public"})";
 				cpr::Response r = cpr::Post(cpr::Url{ "https://osu.ppy.sh/oauth/token" },
 					cpr::Body{ body },
 					cpr::Header{ { "Content-Type", "application/json" } });
@@ -232,7 +230,7 @@ namespace api {
 		static int api(bool init) {
 			try {
 				std::string mode;
-				switch (static_cast<int>(application.gameMode)) {
+				switch (static_cast<int>(config::application.gameMode)) {
 					case 0:
 						mode = "osu";
 						break;
@@ -247,7 +245,7 @@ namespace api {
 						break;
 				}
 				cpr::Response r = cpr::Get(
-					cpr::Url{ "https://osu.ppy.sh/api/v2/users/" + std::to_string(application.osuId) + "/" + mode + "?key=id"},
+					cpr::Url{ "https://osu.ppy.sh/api/v2/users/" + std::to_string(config::application.osuId) + "/" + mode + "?key=id"},
 					cpr::Header{
 						{ "Content-Type", "application/json" },
 						{ "Accept", "application/json" },
@@ -257,7 +255,7 @@ namespace api {
 				console::writeLog((std::string)"api() -> Status Code: " + std::to_string(r.status_code), false, 0, 255, 0);
 
 				nlohmann::json _j = nlohmann::json::parse(r.text);
-				user.username = _j["username"].get<std::string>();
+				config::user.username = _j["username"].get<std::string>();
 
 				if (init) {
 					// more accurate approach -> calculates level from total score
@@ -349,7 +347,7 @@ namespace api {
 				try {
 					nlohmann::json _user;
 					cpr::Response r_user = cpr::Get(
-						cpr::Url{ "https://score.respektive.pw/u/" + std::to_string(application.osuId) + "?m=" + std::to_string(static_cast<int>(application.gameMode)) },
+						cpr::Url{ "https://score.respektive.pw/u/" + std::to_string(config::application.osuId) + "?m=" + std::to_string(static_cast<int>(config::application.gameMode)) },
 						cpr::Header{
 							{ "Content-Type", "application/json" }
 						}
@@ -365,7 +363,7 @@ namespace api {
 
 					nlohmann::json _target;
 					cpr::Response r_target = cpr::Get(
-						cpr::Url{ "https://score.respektive.pw/rank/" + std::to_string(_user[0]["rank"].get<int>() - 1) + "?m=" + std::to_string(static_cast<int>(application.gameMode)) },
+						cpr::Url{ "https://score.respektive.pw/rank/" + std::to_string(_user[0]["rank"].get<int>() - 1) + "?m=" + std::to_string(static_cast<int>(config::application.gameMode)) },
 						cpr::Header{
 							{ "Content-Type", "application/json" }
 						}
@@ -411,7 +409,7 @@ namespace api {
 			static void inspector_api(bool init) {
 				try {
 					cpr::Response r = cpr::Get(
-						cpr::Url{ "https://api.kirino.sh/inspector/users/stats/" + std::to_string(application.osuId) + "?skipDailyData=true&skipOsuData=true&skipExtras=true"},
+						cpr::Url{ "https://api.kirino.sh/inspector/users/stats/" + std::to_string(config::application.osuId) + "?skipDailyData=true&skipOsuData=true&skipExtras=true"},
 						cpr::Header{
 							{ "Content-Type", "application/json" }
 						}
@@ -486,7 +484,7 @@ namespace api {
 	}
 
 	static void fetch_api_data(bool init) {
-		switch (application.server) {
+		switch (config::application.server) {
 			case config::server::bancho: {
 				// bancho
 				if (api::osu::api_auth() != 200) {

@@ -182,9 +182,6 @@ namespace webserver {
 	*/
 	static bool start(bool skipInit = false)
 	{
-		config::user user;
-		config::application application;
-
 		// Skip Initialization -> crash
 		CustomLogger logger;
 		crow::logger::setHandler(&logger);
@@ -254,24 +251,24 @@ namespace webserver {
 				if (cmd[0] == '#') {
 					if (cmd == "#saveSettings") {
 						bool resetSession = false;
-						if 
+						if
 							(
-							j["msg"]["applicationConfig"][0]["value"] != application.("osuId")
-							|| j["msg"]["applicationConfig"][1]["value"] != config::application::instance().get("clientId")
-							|| j["msg"]["applicationConfig"][2]["value"] != config::application::instance().get("clientSecret")
-							|| j["msg"]["applicationConfig"][4]["value"] != config::application::instance().get("gameMode")
-							|| j["msg"]["applicationConfig"][5]["value"] != config::application::instance().get("server")
-							) 
+								j["msg"]["applicationConfig"][0]["value"] != config::application.get("osuId")
+								|| j["msg"]["applicationConfig"][1]["value"] != config::application.get("clientId")
+								|| j["msg"]["applicationConfig"][2]["value"] != config::application.get("clientSecret")
+								|| j["msg"]["applicationConfig"][4]["value"] != config::application.get("gameMode")
+								|| j["msg"]["applicationConfig"][5]["value"] != config::application.get("server")
+							)
 						{
 							// reset tracker data
 							resetSession = true;
 						}
 						for (const auto& item : j["msg"]["applicationConfig"]) {
-							config::application::set(item["key"], item["value"]);
+							config::application.set(static_cast<std::string>(item["key"]), item["value"]);
 						}
 						// server independent
 						for (const auto& item : j["msg"]["trackerConfig"]) {
-							config::data::arr[config::data::getIndex(item["key"].get<std::string>().c_str())].display = item["value"];
+							config::data::arr[config::data::getIndex(item["key"].get<std::string>())].display = item["value"];
 						}
 						if (resetSession) {
 							console::writeLog("Stopping API Fetch Thread (may take some seconds, depending on interval)", true, 255, 255, 0);
@@ -299,8 +296,8 @@ namespace webserver {
 				std::lock_guard<std::mutex> _(ws_mutex);
 				clients_settings.insert(&conn);
 				nlohmann::json _j;
-				for (size_t t = 0; t < console::instance().vec_log.size(); t++) {
-					_j[t] = console::instance().vec_log[t];
+				for (size_t t = 0; t < console::vec_log.size(); t++) {
+					_j[t] = console::vec_log[t];
 				}
 				conn.send_text(_j.dump());
 			})
@@ -325,7 +322,7 @@ namespace webserver {
 					j[row.key + "_current_raw"] = row.current;
 
 					// formatted
-					int idx = config::data::getIndex(row.key.c_str());
+					int idx = config::data::getIndex(row.key);
 					if (idx >= 0 && idx < static_cast<int>(config::data::arrFormatted.size()) &&
 						config::data::arrFormatted[idx].key == row.key)
 					{
@@ -358,7 +355,7 @@ namespace webserver {
 						stats[row.key + "_change_raw"] = row.change;
 						stats[row.key + "_current_raw"] = row.current;
 
-						const auto& f = config::data::arrFormatted[config::data::getIndex(row.key.c_str())];
+						const auto& f = config::data::arrFormatted[config::data::getIndex(row.key)];
 						stats[row.key + "_init"] = f.init;
 						stats[row.key + "_change"] = f.change;
 						stats[row.key + "_current"] = f.current;
@@ -392,40 +389,40 @@ namespace webserver {
 
 				// config
 				ctx["osu_id_name"] = "osu! User ID";
-				ctx["osu_id_val"] = config::application::instance().get("osuId");
+				ctx["osu_id_val"] = config::application.get("osuId");
 				ctx["osu_id_desc"] = "Your osu! user id.";
 
 				ctx["client_id_name"] = "Client ID";
-				ctx["client_id_val"] = config::application::instance().get("clientId");
+				ctx["client_id_val"] = config::application.get("clientId");
 				ctx["client_id_desc"] = "osu! API V2 Client ID.";
 
 				ctx["client_secret_name"] = "Client Secret";
-				ctx["client_secret_val"] = config::application::instance().get("clientSecret");
+				ctx["client_secret_val"] = config::application.get("clientSecret");
 				ctx["client_secret_desc"] = "osu! API V2 Client Secret ( DO NOT SHARE )!";
 
 				ctx["api_refreshInterval_name"] = "API Refresh Interval";
-				ctx["api_refreshInterval_val"] = config::application::instance().get("apiInterval");
+				ctx["api_refreshInterval_val"] = config::application.get("apiInterval");
 				ctx["api_refreshInterval_desc"] = "Time in (ms) till api fetches again in the loop.";
 
 				ctx["gameMode_name"] = "Game Mode";
-				ctx["gameMode_val_" + std::to_string(static_cast<int>(config::application::instance().gameMode))] = "selected";
+				ctx["gameMode_val_" + std::to_string(static_cast<int>(config::application.gameMode))] = "selected";
 				ctx["gameMode_desc"] = "Game Mode to track.";
 
 				ctx["server_name"] = "Server";
-				ctx["server_val_" + std::to_string(static_cast<int>(config::application::instance().server))] = "selected";
+				ctx["server_val_" + std::to_string(static_cast<int>(config::application.server))] = "selected";
 				ctx["server_desc"] = "Which Server you want to track, bancho or a private server.";
 
 
 				// bootstrap: "display: none" class
 				// hide settings not related to private server
-				switch (config::application::instance().server) {
+				switch (config::application.server) {
 					case config::server::titanic:
 						ctx["hide_on_privateServer"] = "d-none";
 						break;
 				}
 
 				std::vector<crow::json::wvalue> elements;
-				switch (config::application::instance().server) {
+				switch (config::application.server) {
 				case config::server::bancho:
 					ctx["tracker_config_name"] = "Bancho Tracker Config";
 					for (const config::dataEntry _vecData : config::data::arr) {
@@ -586,6 +583,6 @@ namespace webserver {
 		console::writeLog("#####################", true, 255, 255, 0);
 		app.bindaddr(OSU_TRACKER_WEBSERVER_IP).port(OSU_TRACKER_WEBSERVER_PORT).signal_clear().run(); // blocking
 		console::writeLog("Web Server Terminated", true , 255, 0, 0);
-		return instance().shutdown_webServer;
+		return shutdown_webServer;
 	}
 };
