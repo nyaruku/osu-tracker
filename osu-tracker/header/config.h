@@ -260,7 +260,7 @@ namespace config {
 	};
 
 	/* Stats writer, nothing more than a mustache renderer */
-	void writeStats() {
+	inline void writeStats() {
 		for (auto const& dir_entry : std::filesystem::directory_iterator{ "tracker_txt/template" }) {
 			std::string content;
 			if (std::ifstream file{ dir_entry.path() }; file.is_open()) {
@@ -290,8 +290,16 @@ namespace config {
 		}
 	}
 
+	struct overlayStorage {
+		std::string title;
+		std::string filename;
+		std::string path;
+		std::string creator;	};
+		std::string osuLink;
+	};
+
 	/* Config Writer */
-	void writeConfig() {
+	inline void writeConfig() {
 		// ordered_json bc it sorts alphabetically by default
 		nlohmann::ordered_json config;
 		for (const auto& [key, value] : application.toArray()) {
@@ -312,7 +320,7 @@ namespace config {
 	}
 
 	/* Config Reader */
-	void readConfig() {
+	inline void readConfig() {
 		if (std::ifstream file{ "config.json" }; file.is_open()) {
 			nlohmann::ordered_json config = nlohmann::ordered_json::parse(file);
 			for (auto& main : config["Main"].items()) {

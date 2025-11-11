@@ -28,9 +28,6 @@
 					if (data["cmd"] == "toast"){
 						sendNotif(data["msg"]);
 					}
-					if (data["cmd"] == "reload") {
-						reload();
-					}
 				}else{
 					for (const key in data) {
 						const el = document.getElementById(`${key}-display`);
