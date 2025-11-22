@@ -72,6 +72,7 @@ namespace config {
 			};
 		}
 	};
+
 	inline _application application;
 
 	struct _user {
@@ -298,8 +299,28 @@ namespace config {
 		std::string osuLink;
 	};
 
+	inline void createTemplateExample() {
+		std::string content;
+		for (config::dataEntry entry : config::data::arr) {
+			content += entry.key + " (raw):\n";
+	 		content += "init: {{" + entry.key + "_init_raw}}\n";
+   			content += "change: {{" + entry.key + "_change_raw}}\n";
+   			content += "current: {{" + entry.key + "_current_raw}}\n";
+			content += entry.key + " (formatted):\n";
+    		content += "init: {{" + entry.key + "_init}}\n";
+    		content += "change: {{" + entry.key + "_change}}\n";
+    		content += "current: {{" + entry.key + "_current}}\n";
+			content += "\n";
+		}
+		std::ofstream file;
+		file.open("tracker_txt/template/example.txt");
+		file << content;
+		file.close();
+		file.clear();
+	}
+
 	/* Config Writer */
-	inline void writeConfig() {
+	inline void write() {
 		// ordered_json bc it sorts alphabetically by default
 		nlohmann::ordered_json config;
 		for (const auto& [key, value] : application.toArray()) {
@@ -320,19 +341,19 @@ namespace config {
 	}
 
 	/* Config Reader */
-	inline void readConfig() {
+	inline void read() {
 		if (std::ifstream file{ "config.json" }; file.is_open()) {
 			nlohmann::ordered_json config = nlohmann::ordered_json::parse(file);
 			for (auto& main : config["Main"].items()) {
 				if (main.value().is_null()) {
-					application.set(main.key(), "");
+					config::application.set(main.key(), "");
 				}
 				else if (main.value().is_string()) {
-					application.set(main.key(), main.value().get<std::string>());
+					config::application.set(main.key(), main.value().get<std::string>());
 				}
 				else {
 					// fallback: dump to string
-					application.set(main.key(), main.value().dump());
+					config::application.set(main.key(), main.value().dump());
 				}
 			}
 			for (auto& display : config["Display"].items()) {
@@ -345,28 +366,8 @@ namespace config {
 			console::writeLog("Error reading config file", true, 255, 0, 0);
 		}
 	}
-	
-	inline void rmConfig() {
-		std::filesystem::remove("config.json");
-	}
 
-	inline void createTemplateExample() {
-		std::string content;
-		for (size_t i = 0; i < config::data::arr.size(); i++) {
-			content += config::data::arr[i].key + " (raw):\n";
-	 		content += "init: {{" + config::data::arr[i].key + "_init_raw}}\n";
-   			content += "change: {{" + config::data::arr[i].key + "_change_raw}}\n";
-   			content += "current: {{" + config::data::arr[i].key + "_current_raw}}\n";
-			content += config::data::arr[i].key + " (formatted):\n";
-    		content += "init: {{" + config::data::arr[i].key + "_init}}\n";
-    		content += "change: {{" + config::data::arr[i].key + "_change}}\n";
-    		content += "current: {{" + config::data::arr[i].key + "_current}}\n";
-			content += "\n";
-		}
-		std::ofstream file;
-		file.open("tracker_txt/template/example.txt");
-		file << content;
-		file.close();
-		file.clear();
+	inline void remove() {
+		std::filesystem::remove("config.json");
 	}
 };
