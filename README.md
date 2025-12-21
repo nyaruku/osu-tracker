@@ -1,3 +1,6 @@
+> [!WARNING]
+> Very Work In Progress
+
 [![Build osu-tracker](https://github.com/nyaruku/osu-tracker/actions/workflows/cmake-multi-platform.yml/badge.svg?branch=master&style=flat)](https://github.com/nyaruku/osu-tracker/actions/workflows/cmake-multi-platform.yml)
 
 # osu-tracker
