@@ -1,6 +1,5 @@
 #pragma once
 namespace console {
-	inline std::deque<std::string> vec_log;
 	// ansi console color codes
 	enum conCol {
 		f_black = 30,
@@ -58,12 +57,8 @@ namespace console {
 		strftime(timeBuffer, sizeof(timeBuffer), "%H:%M:%S", timeInfo);
 		std::stringstream ss;
 		ss << (std::string)dateBuffer + " " + timeBuffer << " " << "[osu-tracker] " << msg;
-		console::vec_log.push_back(ss.str());
-		while(console::vec_log.size() > 250) {
-			console::vec_log.pop_front();
-		}
 		#if RELEASE_BUILD
-			if(!alwaysPrint) // Dont print on release if not explicity
+			if(!alwaysPrint) // Don't print on release if not explicit
 				return;
 		#endif
 		setColorRGB_f(100, 100, 100);
