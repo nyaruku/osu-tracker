@@ -1,0 +1,103 @@
+<h1 class="mb-2">Settings</h1>
+
+<button type="button" class="btn btn-primary" onclick="saveSettings()">Save All Settings</button>
+<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#warningSettingsReset">Reset all Settings</button>
+<br />
+<div class="form-text mb-5">Changing: User ID, API Credentials or Game Mode, will reset your Session.</div>
+
+<button type="button" class="btn btn-primary mb-5" onclick="sendMessage('#resetSession')">Reset current Session</button>
+
+<!-- Modal -->
+<div class="modal fade" id="warningSettingsReset" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">Warning</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <span>Are you sure, you want to reset all settings ?</span><br />
+                <span>- You will lose all current tracker stats.</span><br />
+                <span>- Web Server will restart.</span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onclick="resetSettings()">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Application Config -->
+<h5>Application Config</h5>
+<div class="was-validated">
+    <div class="mb-2">
+        <div class="input-group input-group-sm rounded-0">
+            <span class="input-group-text rounded-0" id="inputGroup-sizing-sm">{{osu_id_name}}</span>
+            <input id="osu_id_key" type="number" class="form-control rounded-0" aria-describedby="inputGroup-sizing-sm" value="{{osu_id_val}}" required>
+            <div class="invalid-feedback">Please enter your osu! ID</div>
+        </div>
+        <div class="form-text">{{osu_id_desc}}</div>
+    </div>
+    <div class="mb-2 rounded-0 {{hide_on_privateServer}}">
+        <div class="input-group input-group-sm rounded-0">
+            <span class="input-group-text rounded-0" id="inputGroup-sizing-sm">{{client_id_name}}</span>
+            <input id="client_id_key" type="number" class="form-control rounded-0" aria-describedby="inputGroup-sizing-sm" value="{{client_id_val}}" required>
+            <div class="invalid-feedback">Please enter a Client ID.</div>
+        </div>
+        <div class="form-text">{{client_id_desc}}</div>
+    </div>
+    <div class="mb-2 rounded-0 {{hide_on_privateServer}}">
+        <div class="input-group input-group-sm rounded-0">
+            <span class="input-group-text rounded-0" id="inputGroup-sizing-sm">{{client_secret_name}}</span>
+            <input id="client_secret_key" type="password" class="form-control rounded-0" aria-describedby="inputGroup-sizing-sm" value="{{client_secret_val}}" required>
+            <div class="invalid-feedback">Please enter a Client Secret.</div>
+        </div>
+        <div class="form-text">{{client_secret_desc}}</div>
+    </div>
+    <div class="mb-2">
+        <div class="input-group input-group-sm rounded-0">
+            <span class="input-group-text rounded-0" id="inputGroup-sizing-sm">{{api_refreshInterval_name}}</span>
+            <input id="api_refreshInterval_key" type="number" class="form-control rounded-0" aria-describedby="inputGroup-sizing-sm" min="5000" value="{{api_refreshInterval_val}}" required>
+            <div class="invalid-feedback">Please enter a Refresh Interval in (ms).</div>
+        </div>
+        <div class="form-text">{{api_refreshInterval_desc}}</div>
+    </div>
+    <div class="mb-2">
+        <div class="input-group input-group-sm rounded-0">
+            <span class="input-group-text rounded-0" id="inputGroup-sizing-sm">{{gameMode_name}}</span>
+            <select id="gameMode_key" class="form-select form-select-sm rounded-0">
+                <option value="0" {{gameMode_val_0}}>Standard</option>
+                <option value="1" {{gameMode_val_1}}>Taiko</option>
+                <option value="2" {{gameMode_val_2}}>Catch</option>
+                <option value="3" {{gameMode_val_3}}>Mania</option>
+            </select>
+        </div>
+        <div class="form-text">{{gameMode_desc}}</div>
+    </div>
+    <div class="mb-2">
+        <div class="input-group input-group-sm rounded-0">
+            <span class="input-group-text rounded-0" id="inputGroup-sizing-sm">{{server_name}}</span>
+            <select id="server_key" class="form-select form-select-sm rounded-0">
+                <option value="0" {{server_val_0}}>Bancho</option>
+                <option value="1" {{server_val_1}}>Titanic</option>
+            </select>
+        </div>
+        <div class="form-text">{{server_desc}}</div>
+    </div>
+</div>
+<div class="alert alert-info {{hide_on_privateServer}}" role="alert">
+    You can get a "Client ID" and "Client Secret" by creating an OAuth Application in your: <a href="https://osu.ppy.sh/home/account/edit" target="_blank">osu! Account Settings</a>
+</div>
+
+<!-- Tracker Config-->
+<h5 class="mt-5">{{tracker_config_name}}</h5>
+<h6>Refresh the page if you don't see config for your server.</h6>
+<div id="tracker-config-container" class="d-flex flex-wrap gap-1 mb-5">
+    {{#trackerConfig}}
+    <div class="col-auto flex-fill trackerToggle">
+        <input id="{{id}}" class="btn-check" type="checkbox" {{checked}}>
+        <label class="btn btn-outline-primary text-nowrap w-100" for="{{id}}">{{label}}</label>
+    </div>
+    {{/trackerConfig}}
+</div>

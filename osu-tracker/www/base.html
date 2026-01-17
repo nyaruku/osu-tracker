@@ -28,6 +28,9 @@
                     if (data["cmd"] == "toast"){
                         sendNotif(data["msg"]);
                     }
+                    if (data["cmd"] == "reload") {
+                        reload();
+                    }
                 }else{
                     for (const key in data) {
                         const el = document.getElementById(`${key}-display`);
@@ -47,10 +50,11 @@
             };
         }
 
-        function sendMessage(cmd) {
+        function sendMessage(cmd, msg) {
             // Object created
             let array = {};
             array["cmd"] = cmd;
+            array["msg"] = msg;
 
             socket.send(JSON.stringify(array));
         }
@@ -62,6 +66,53 @@
             const toastInstance = bootstrap.Toast.getOrCreateInstance(toastElement);
             toastInstance.show();
         }
+
+        function resetSettings() {
+            sendMessage('#resetSettings');
+            window.location.reload();
+        }
+
+        function saveSettings() {
+            const config = {
+                cmd: "#saveSettings",
+                applicationConfig: [],
+                trackerConfig: []
+            };
+            // Get values from Application Config inputs
+            const osuId = document.getElementById('osu_id_key').value;
+            const clientId = document.getElementById('client_id_key').value;
+            const clientSecret = document.getElementById('client_secret_key').value;
+            const apiRefreshInterval = document.getElementById('api_refreshInterval_key').value;
+            const gameMode = document.getElementById('gameMode_key').value;
+            const server = document.getElementById('server_key').value;
+            if (apiRefreshInterval == "" || apiRefreshInterval < 5000) {
+                sendNotif("Invalid API Refresh Interval has been set.");
+                return;
+            }
+
+            // Add Application Config values to the array
+            config.applicationConfig.push({ key: 'osuId', value: osuId });
+            config.applicationConfig.push({ key: 'clientId', value: clientId });
+            config.applicationConfig.push({ key: 'clientSecret', value: clientSecret });
+            config.applicationConfig.push({ key: 'apiInterval', value: apiRefreshInterval });
+            config.applicationConfig.push({ key: 'gameMode', value: gameMode });
+            config.applicationConfig.push({ key: 'server', value: server });
+
+            // Get values from Tracker Config checkboxes
+            const trackerConfigContainer = document.getElementById('tracker-config-container');
+            const checkboxes = trackerConfigContainer.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach((checkbox) => {
+                config.trackerConfig.push({
+                    key: checkbox.id,
+                    value: checkbox.checked
+                });
+            });
+
+            sendMessage("#saveSettings", config);
+            sendNotif("Saved Settings., please reload this page, to update settings.")
+
+        };
+
         window.onload = connectWebSocket;
     </script>
 </head>
