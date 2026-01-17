@@ -6,7 +6,7 @@
 #include <filesystem>
 #include <unordered_set>
 #include <mutex>
-#include "config.h"
+#include "../config.h"
 #include "ui/ui.h"
 
 class CustomLogger : public crow::ILogHandler {
