@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark">
+<head>
+    <title>osu! Tracker Overlay</title>
+    <link rel="icon" type="image/x-icon" href="../static/favicon.ico">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap Includes -->
+    <link rel="stylesheet" href="../static/bootstrap/bootstrap.min.css">
+    <script src="../static/bootstrap/jquery-3.7.1.min.js"></script>
+    <script src="../static/bootstrap/bootstrap.min.js"></script>
+
+    <!-- Personal Includes -->
+    <link rel="stylesheet" href="../static/index.css">
+    <script type="text/javascript" src="../static/index.js"></script>
+
+    <style>
+        :root {
+          /* Size of viewport in %*/
+          --viewportWidth: 1920px;
+          --viewportHeight: 1080px;
+          --resScale: 80;
+          
+          --fontScale: 1.2rem;
+          --fontWeight: bold;
+          
+          /* Font Colors */
+          --colorBase: rgb(255,255,255);
+          --colorLabel: var(--colorBase);
+          --colorCurrent: rgb(100,255,100);
+          --colorChange: rgb(150,150,255);
+          
+          /* Background Color of Overlay*/
+          --backgroundOverlay: #0d0d10;
+          --backgroundSidebar: var(--backgroundOverlay);
+          --backgroundBottomBar: var(--backgroundOverlay);
+          
+          --ranksImageHeight: 68px;
+
+          /* Glow (drop-shadow) for Rank Images*/
+          --glowOpacity: 0.66;
+          --glowSize: 6px;
+          --glowSSH:  rgba(255,255,255,var(--glowOpacity));
+          --glowSS:   rgba(255,255,0,var(--glowOpacity));
+          --glowSH:   rgba(255,255,255,var(--glowOpacity));
+          --glowS:    rgba(255,255,0,var(--glowOpacity));
+          --glowA:    rgba(0,255,0,var(--glowOpacity));
+          --glowB:    rgba(50,50,255,var(--glowOpacity));
+          --glowC:    rgba(255,50,255,var(--glowOpacity));
+          --glowD:    rgba(255,50,50,var(--glowOpacity));
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            width: var(--viewportWidth);
+            height: var(--viewportHeight);
+            background: transparent;
+            color: var(--colorBase);
+            font-family: sans-serif;
+			font-size: var(--fontScale);
+			font-weight: var(--fontWeight);
+        }
+		.current {
+			color: var(--colorCurrent);
+		}
+		.change {
+			color: var(--colorChange);
+		}
+
+		/* sidebar */
+        #sidebar {
+			background-color: var(--backgroundSidebar);
+            position: absolute;
+            top: 0; right: 0;
+            width: calc(1920px - (19.20px * var(--resScale)));
+						height: 100%;
+        }
+        #sidebar .stat {
+            margin-bottom: 6px;
+        }
+
+		/* bottom-bar */
+        #bottom-bar {
+            height: calc(1080px - (10.80px * var(--resScale)));
+            background-color: var(--backgroundBottomBar);
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        #bottom-bar .ranks-row {
+            display: flex;
+        }
+        #bottom-bar .ranks-row img {
+            width: auto;
+            height: var(--ranksImageHeight);
+        }
+        #bottom-bar .next {
+            text-align: right;
+        }
+
+		/* RANKS */
+        .rankss, .ranks {
+	  		filter: drop-shadow(0px 0px 6px var(--glowSS));
+        }
+        .rankssh, .ranksh {
+			filter: drop-shadow(0px 0px 6px var(--glowSSH));
+		}
+        .ranka {
+	  		filter: drop-shadow(0px 0px 6px var(--glowA));
+        }
+		.rankb {
+	  		filter: drop-shadow(0px 0px 6px var(--glowB));
+        }
+	  	.rankc {
+	  		filter: drop-shadow(0px 0px 6px var(--glowC));
+        }
+        .rankd {
+	  		filter: drop-shadow(0px 0px 6px var(--glowD));
+        }
+
+
+		.progress-bar.pulse {
+			position: relative;
+			overflow: hidden;
+			transition: width 0.4s ease; /* smooth width changes */
+			background-color: #0d6efd; /* Bootstrap primary color */
+		}
+
+		/* Sweeping pulse effect */
+		.progress-bar.pulse::after {
+			content: "";
+			position: absolute;
+			top: 0;
+			left: -50%;       /* start off left */
+			width: 50%;       /* width of the sweep */
+			height: 100%;
+			background: linear-gradient(
+					90deg,
+					rgba(255,255,255,0.0) 0%,
+					rgba(255,255,255,0.3) 50%,
+					rgba(255,255,255,0.0) 100%
+			);
+			animation: sweep-ltr 1.2s linear infinite;
+		}
+
+		@keyframes sweep-ltr {
+			0%   { left: -50%; }
+			100% { left: 100%; }
+		}
+
+
+
+    </style>
+
+    <script>
+        let socket;
+
+        function connectWebSocket() {
+            socket = new WebSocket("ws://{{hostname}}:{{port}}/ws/overlay-data/");
+          
+            socket.onopen = () => {
+                console.log("WebSocket connected");
+
+                // Send request every second
+                setInterval(() => {
+                    if (socket.readyState === WebSocket.OPEN) {
+                        socket.send("");
+                    }
+                }, 3000);
+            };
+            let level_min = 0;
+            let level_max = 0;
+            let level_value = 0;
+            let level_percent = 0;
+            socket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+
+                // Iterate all key-value pairs from server
+                for (const key in data) {
+                    // Update elements with class name matching key
+					switch (key) {
+						case "level_current":
+							level_value = parseFloat(data[key]);
+							level_min = Math.floor(level_value);
+							level_max = Math.ceil(level_value);
+							level_percent = ((level_value - level_min) / (level_max - level_min)) * 100;
+							const bar = document.querySelector(".progress-bar");
+							if (bar) {
+								bar.style.width = level_percent.toFixed(1) + "%";
+								bar.setAttribute("aria-valuenow", level_value.toFixed(3));
+								bar.setAttribute("aria-valuemin", level_min);
+								bar.setAttribute("aria-valuemax", level_max);
+								bar.textContent = `${level_percent.toFixed(1)}%`;
+							}
+							const levelCurrent = document.querySelector(".level-current");
+							const levelNext = document.querySelector(".level-next");
+							if (levelCurrent) levelCurrent.textContent = level_min;
+							if (levelNext) levelNext.textContent = level_max;
+							break;
+						default:
+							const elements = document.getElementsByClassName(key);
+							for (const el of elements) {
+								el.textContent = data[key];
+							}
+							break;
+					}
+                }
+            };
+
+            socket.onclose = () => {
+                console.log("WebSocket disconnected. Retrying...");
+                setTimeout(connectWebSocket, 1000);
+            };
+        }
+
+        window.onload = connectWebSocket;
+    </script>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <div id="sidebar" class="rounded-0 p-2">
+        <div class="stat">
+            <span class="label">Score Rank: </span><span class="scoreRank_current current"></span>
+        </div>
+        <div class="stat">
+            <span class="label">Ranked Score: </span><span class="rankedScore_current current"></span>
+            <br>
+            <span class="rankedScore_change change"></span>
+        </div>
+        <div class="stat">
+            <span class="label">Total Score: </span><span class="totalScore_current current"></span>
+            <br>
+            <span class="totalScore_change change"></span>
+        </div>
+        <div class="stat">
+            <span class="label">Clears: </span><span class="clears_current current"></span>
+            <br>
+            <span class="clears_change change"></span>
+        </div>
+        <div class="stat">
+            <span class="label">Playcount: </span><span class="playcount_current current"></span>
+            <br>
+            <span class="playcount_change change"></span>
+        </div>
+		<div class="stat mt-3">
+			<div class="level-wrapper position-relative">
+				<!-- Level labels -->
+				<div class="d-flex justify-content-between">
+					<span class="level-current fs-6">0</span>
+					<span class="level-next current fs-6">0</span>
+				</div>
+
+				<!-- Progress bar -->
+				<div class="progress">
+					<div class="progress-bar pulse" style="width: 0%">0%</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+    <!-- Bottom bar -->
+    <div id="bottom-bar" class="rounded-0 p-2">
+        <div class="ranks-row gap-2">
+			<!-- Gold SS -->
+			<div class="rank-container d-flex align-items-center gap-2">
+				<img class="rankss" src="../static/images/gold_ss.png">
+				<div class="d-flex flex-column">
+						<span class="goldSS_current">100.000</span>
+						<span class="goldSS_change change">+100.000</span>
+				</div>
+			</div>
+
+			<!-- Silver SS -->
+			<div class="rank-container d-flex align-items-center gap-2">
+				<img class="rankssh" src="../static/images/silver_ss.png">
+				<div class="d-flex flex-column">
+						<span class="silverSS_current">100.000</span>
+						<span class="silverSS_change change">+100.000</span>
+				</div>
+			</div>
+
+			<!-- Gold S -->
+			<div class="rank-container d-flex align-items-center gap-2">
+				<img class="ranks" src="../static/images/gold_s.png">
+				<div class="d-flex flex-column">
+						<span class="goldS_current">100.000</span>
+						<span class="goldS_change change">+100.000</span>
+				</div>
+			</div>
+
+			<!-- Silver S -->
+			<div class="rank-container d-flex align-items-center gap-2">
+				<img class="ranksh" src="../static/images/silver_s.png">
+				<div class="d-flex flex-column">
+						<span class="silverS_current">100.000</span>
+						<span class="silverS_change change">+100.000</span>
+				</div>
+			</div>
+
+			<!-- A -->
+			<div class="rank-container d-flex align-items-center gap-2">
+				<img class="ranka" src="../static/images/a.png">
+				<div class="d-flex flex-column">
+						<span class="a_current">100.000</span>
+						<span class="a_change change">+100.000</span>
+				</div>
+			</div>
+
+			<!-- B -->
+			<div class="rank-container d-flex align-items-center gap-2">
+				<img class="rankb" src="../static/images/b.png">
+				<div class="d-flex flex-column">
+						<span class="b_current">100.000</span>
+						<span class="b_change change">+100.000</span>
+				</div>
+			</div>
+
+			<!-- C -->
+			<div class="rank-container d-flex align-items-center gap-2">
+				<img class="rankc" src="../static/images/c.png">
+				<div class="d-flex flex-column">
+						<span class="c_current">100.000</span>
+						<span class="c_change change">+100.000</span>
+				</div>
+			</div>
+
+			<!-- D -->
+			<div class="rank-container d-flex align-items-center gap-2">
+				<img class="rankd" src="../static/images/d.png">
+				<div class="d-flex flex-column">
+					<span class="d_current">100.000</span>
+					<span class="d_change change">+100.000</span>
+				</div>
+			</div>
+		</div>
+
+        <div class="next">
+            <div>
+                <span class="label">Next Rank: </span>
+                <span class="targetRank_current current"></span> ~ <span class="targetScore_current current">5.000.000</span>
+            </div>
+            <div>
+                <span class="label">Next Player: </span><span class="targetUser_current current">Username</span>
+            </div>
+			<div>
+                <span class="label">Completion: </span>
+                <span class="completion_current current">10,000%</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
