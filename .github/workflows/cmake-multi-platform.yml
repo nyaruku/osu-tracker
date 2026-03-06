@@ -55,14 +55,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          path: .
 
       - name: Initialize submodules
         run: git submodule update --init --recursive
 
       - name: List files in osu-tracker directory
-        run: ls -R ${{ github.workspace }}/osu-tracker
+        run: ls -R ${{ github.workspace }}
 
       - name: Install dependencies on Linux
         if: runner.os == 'Linux'
@@ -88,14 +86,14 @@ jobs:
         if: runner.os == 'Linux'
         uses: lukka/run-cmake@v10.8
         with:
-          cmakeListsTxtPath: '/home/runner/work/osu-tracker/osu-tracker/src/CMakeLists.txt'
+          cmakeListsTxtPath: ${{ github.workspace }}/src/CMakeLists.txt
           configurePreset: '${{ matrix.preset }}'
 
       - name: Configure-Windows
         if: runner.os == 'Windows'
         uses: lukka/run-cmake@v10.8
         with:
-          cmakeListsTxtPath: 'D:\a\osu-tracker\osu-tracker\src\CMakeLists.txt'
+          cmakeListsTxtPath: ${{ github.workspace }}/src/CMakeLists.txt
           configurePreset: '${{ matrix.preset }}'
         env:
           VCPKG_ROOT:
@@ -104,14 +102,14 @@ jobs:
         if: runner.os == 'Linux'
         uses: lukka/run-cmake@v10.8
         with:
-          cmakeListsTxtPath: '/home/runner/work/osu-tracker/osu-tracker/src/CMakeLists.txt'
+          cmakeListsTxtPath: ${{ github.workspace }}/src/CMakeLists.txt
           buildPreset: '${{ matrix.preset }}'
 
       - name: Build-Windows
         if: runner.os == 'Windows'
         uses: lukka/run-cmake@v10.8
         with:
-          cmakeListsTxtPath: 'D:\a\osu-tracker\osu-tracker\src\CMakeLists.txt'
+          cmakeListsTxtPath: ${{ github.workspace }}/src/CMakeLists.txt
           buildPreset: '${{ matrix.preset }}'
         env:
           VCPKG_ROOT:
@@ -119,12 +117,15 @@ jobs:
       - name: Zip Linux Release Artifact
         if: runner.os == 'Linux'
         run: |
-          cd /home/runner/work/osu-tracker/osu-tracker/src/out/build/x86-release-linux
-          zip -r /home/runner/work/osu-tracker/osu-tracker/src/out/x86-release-linux.zip osu-tracker
+          cd ${{ github.workspace }}/src/out/build/x86-release-linux
+          zip -r ${{ github.workspace }}/src/out/x86-release-linux.zip osu-tracker
 
       - name: Zip Windows Release Artifact
         if: runner.os == 'Windows'
-        run: powershell -Command "Compress-Archive -Path 'D:\a\osu-tracker\osu-tracker\src\out\build\x86-release-windows\osu-tracker*' -DestinationPath 'D:\a\osu-tracker\osu-tracker\src\out\x86-release-windows.zip'"
+        run: |
+          Compress-Archive `
+            -Path "${{ github.workspace }}\src\out\build\x86-release-windows\osu-tracker*" `
+            -DestinationPath "${{ github.workspace }}\src\out\x86-release-windows.zip"
 
       - name: Upload Linux Release Artifact
         if: runner.os == 'Linux'
