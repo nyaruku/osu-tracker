@@ -14,9 +14,6 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        working-directory: osu-tracker
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
@@ -93,7 +90,7 @@ jobs:
         with:
           cmakeListsTxtPath: '/home/runner/work/osu-tracker/osu-tracker/src/CMakeLists.txt'
           configurePreset: '${{ matrix.preset }}'
-      
+
       - name: Configure-Windows
         if: runner.os == 'Windows'
         uses: lukka/run-cmake@v10.8
@@ -102,7 +99,7 @@ jobs:
           configurePreset: '${{ matrix.preset }}'
         env:
           VCPKG_ROOT:
-      
+
       - name: Build-Linux
         if: runner.os == 'Linux'
         uses: lukka/run-cmake@v10.8
