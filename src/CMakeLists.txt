@@ -121,7 +121,7 @@ set(PROJECT_SOURCES
 
 add_executable(update update.cpp lib/miniz.c)
 if (WIN32)
-  add_executable(osu-tracker main.cpp ${PROJECT_SOURCES} res/resources.rc)
+  add_executable(osu-tracker main.cpp ${PROJECT_SOURCES} Resources/Icons/resources.rc)
 
   target_compile_definitions(osu-tracker PRIVATE 
     OSU_TRACKER_PLATFORM="windows" 
