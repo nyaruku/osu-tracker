@@ -3,12 +3,12 @@
 #include <string>
 #include <json.hpp>
 #include <cpr/cpr.h>
-#include <Domain/Controller/Core/external.h>
-#include <Domain/Controller/api.h>
-#include <Domain/Controller/Core/console.h>
-#include <Domain/Controller/Core/config.h>
-#include <Domain/Controller/Web/WebHandler.h>
-#include <Domain/Controller/ui.h>
+#include <Controller/api.h>
+#include <Controller/Core/external.h>
+#include <Controller/Core/console.h>
+#include <Controller/Core/config.h>
+#include <Controller/Web/WebHandler.h>
+#include <Controller/ui.h>
 
 #ifdef _WIN32
 	void enableVirtualTerminalProcessing() {
@@ -21,6 +21,15 @@
 #endif
 
 int main(int argc, char* argv[]) {
+	bool simulate = false;
+	for (int i = 1; i < argc; ++i) {
+		std::string arg = argv[i];
+		if (arg == "--simulate" || arg == "-s")
+			simulate = true;
+		else
+			console::writeLog("Unknown argument: " + arg, true, 255, 100, 100);
+	}
+
 	#ifdef _WIN32
 		enableVirtualTerminalProcessing();
 	#endif
@@ -40,8 +49,11 @@ int main(int argc, char* argv[]) {
 	if (Web::WebHandler::performUpdateCheck() == 0) {
 		return 0;
 	}
+
 	bool run = true;
-	bool skipInit = false;	
+	bool skipInit = false;
+	config::data::initDefaults();
+
 	while (run) {
 		if (!std::filesystem::exists("config.json")) {
 			console::writeLog("Config file not found");
@@ -52,13 +64,16 @@ int main(int argc, char* argv[]) {
 			console::writeLog("Config file found");
 			config::read();
 		}
-		if (!std::filesystem::exists("tracker_txt/template")) {
-	        if (!std::filesystem::create_directory("tracker_txt/template")) {
-				console::writeLog("Failed to create tracker_txt/template", true, 255, 0, 0);
+		#ifdef DEBUG_BUILD
+			config::readEnv();
+		#endif
+		if (!std::filesystem::exists("Txt/template")) {
+	        if (!std::filesystem::create_directory("Txt/template")) {
+				console::writeLog("Failed to create Txt/template", true, 255, 0, 0);
 			}
 		}
-		api::fetch_api_data(true);
-		ui::startFetchThread();
+		api::simulateMode = simulate;
+		ui::startFetchThread(true);
 	    config::createTemplateExample();
 		Web::WebHandler::startUiThread();
 		#if OSU_TRACKER_WEBSERVER_ENABLE == 1
