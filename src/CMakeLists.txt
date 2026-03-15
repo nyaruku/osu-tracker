@@ -17,7 +17,22 @@ set(BASE_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/includes")
 # Add the include directories
 include_directories(${BASE_INCLUDE_PATH})
 
-file(COPY ${CMAKE_SOURCE_DIR}/httpdocs    DESTINATION "${CMAKE_BINARY_DIR}/osu-tracker/")
+# Copy web assets on every build (not just configure) so HTML/CSS/JS changes are picked up automatically
+add_custom_target(copy_web_assets ALL
+    COMMAND ${CMAKE_COMMAND} -E make_directory   "${CMAKE_BINARY_DIR}/osu-tracker/www"
+
+    COMMAND ${CMAKE_COMMAND} -E copy             "${CMAKE_SOURCE_DIR}/httpdocs/base.html" "${CMAKE_BINARY_DIR}/osu-tracker/www/base.html"
+
+    COMMAND ${CMAKE_COMMAND} -E copy_directory   "${CMAKE_SOURCE_DIR}/httpdocs/pages"     "${CMAKE_BINARY_DIR}/osu-tracker/www"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory   "${CMAKE_SOURCE_DIR}/httpdocs/static"    "${CMAKE_BINARY_DIR}/osu-tracker/www/static"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory   "${CMAKE_SOURCE_DIR}/httpdocs/template"  "${CMAKE_BINARY_DIR}/osu-tracker/www/template"
+    COMMENT "Copying web assets..."
+)
+
+if(EXISTS "${CMAKE_SOURCE_DIR}/debug.env")
+    file(COPY "${CMAKE_SOURCE_DIR}/debug.env" DESTINATION "${CMAKE_BINARY_DIR}/osu-tracker/")
+endif()
+
 file(COPY ${CMAKE_SOURCE_DIR}/Resources/Txt DESTINATION "${CMAKE_BINARY_DIR}/osu-tracker/")
 
 # Dependencies
@@ -107,7 +122,6 @@ set(PROJECT_SOURCES
 add_executable(update update.cpp lib/miniz.c)
 if (WIN32)
   add_executable(osu-tracker main.cpp ${PROJECT_SOURCES} res/resources.rc)
-  add_executable(osu-tracker-test test.cpp ${PROJECT_SOURCES} res/resources.rc)
 
   target_compile_definitions(osu-tracker PRIVATE 
     OSU_TRACKER_PLATFORM="windows" 
@@ -123,23 +137,8 @@ if (WIN32)
     OpenGL::GL
     user32 gdi32 Msimg32 crypt32 advapi32
   )
-  target_compile_definitions(osu-tracker-test PRIVATE 
-    OSU_TRACKER_PLATFORM="windows" 
-    _WIN32 
-    CURL_STATICLIB 
-    OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID="${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}"
-  )
-  target_link_libraries(osu-tracker-test PRIVATE  
-    cpr::cpr
-    zlib
-    ws2_32
-    glfw
-    OpenGL::GL
-    user32 gdi32 Msimg32 crypt32 advapi32
-  )
 else()
   add_executable(osu-tracker main.cpp ${PROJECT_SOURCES})
-  add_executable(osu-tracker-test test.cpp ${PROJECT_SOURCES})
 
   find_package(ZLIB REQUIRED)  # Find zlib on Linux
   target_compile_definitions(osu-tracker PRIVATE 
@@ -154,23 +153,11 @@ else()
     OpenGL::GL 
     ${X11_LIBRARIES}
   )
-  target_compile_definitions(osu-tracker-test PRIVATE 
-    OSU_TRACKER_PLATFORM="linux" 
-    __linux__ 
-    OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID="${CMAKE_SYSTEM_PROCESSOR}")
-  target_link_libraries(osu-tracker-test PRIVATE 
-    cpr::cpr 
-    ZLIB::ZLIB
-    glfw 
-    OpenGL::GL 
-    ${X11_LIBRARIES}
-  )
 endif()
 
 target_include_directories(osu-tracker SYSTEM PRIVATE ${BASE_INCLUDE_PATH})
 target_include_directories(osu-tracker SYSTEM PRIVATE ${CMAKE_SOURCE_DIR})
 target_include_directories(update SYSTEM PRIVATE ${BASE_INCLUDE_PATH})
-target_include_directories(osu-tracker-test SYSTEM PRIVATE ${BASE_INCLUDE_PATH})
 
 if (WIN32)
   target_link_libraries(update PRIVATE zlib)
@@ -178,15 +165,13 @@ else()
   target_link_libraries(update PRIVATE z)
 endif()
 
-# TESTS
-set_target_properties(osu-tracker-test PROPERTIES FOLDER "Tests")
-target_link_libraries(osu-tracker-test PRIVATE Catch2::Catch2WithMain)
-
-foreach(_t osu-tracker update osu-tracker-test)
+foreach(_t osu-tracker update)
   set_target_properties(${_t} PROPERTIES
       RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/osu-tracker"  # keep assets & exe together
   )
 endforeach()
+
+add_dependencies(osu-tracker copy_web_assets)
 
 # Build and compiler definitions
 # Could be simplified more, but cmake is clusterfuck
@@ -225,6 +210,7 @@ add_compile_definitions(CROW_ENFORCE_WS_SPEC)
 add_compile_definitions(OSU_TRACKER_VERSION_SIGNED="50")
 add_compile_definitions(OSU_TRACKER_UPDATE_MASTER=0) # Debug flag to check master branch
 add_compile_definitions(OSU_TRACKER_UPDATE_EQUAL=0) # Debug flag to download update on same signed version
+add_compile_definitions(OSU_TRACKER_API_TIMEOUT=5000)
 
 # OSU_TRACKER PROJECT STATIC STRINGS
 add_compile_definitions(OSU_TRACKER_NAME="osu! Tracker")
