@@ -1,103 +1,143 @@
-<h1 class="mb-2">Settings</h1>
+<h1 class="page-title fw-bold text-white mb-4">Settings</h1>
 
-<button type="button" class="btn btn-primary" onclick="saveSettings()">Save All Settings</button>
-<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#warningSettingsReset">Reset all Settings</button>
-<br />
-<div class="form-text mb-5">Changing: User ID, API Credentials or Game Mode, will reset your Session.</div>
+<!-- Action buttons -->
+<div class="d-flex flex-wrap gap-2 mb-2">
+    <button type="button" class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+    <button type="button" class="btn btn-outline-secondary" onclick="sendMessage('#resetSession')">Reset Session</button>
+    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#warningSettingsReset">Reset all Settings</button>
+</div>
+<p class="form-text mb-4">Changing User ID, API credentials or Game Mode will automatically reset your session.</p>
 
-<button type="button" class="btn btn-primary mb-5" onclick="sendMessage('#resetSession')">Reset current Session</button>
-
-<!-- Modal -->
+<!-- Reset Settings Modal -->
 <div class="modal fade" id="warningSettingsReset" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5">Warning</h1>
+                <h5 class="modal-title">Reset all Settings?</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <span>Are you sure, you want to reset all settings ?</span><br />
-                <span>- You will lose all current tracker stats.</span><br />
-                <span>- Web Server will restart.</span>
+            <div class="modal-body text-secondary">
+                <p class="mb-1">This will:</p>
+                <ul class="mb-0">
+                    <li>Delete all saved settings</li>
+                    <li>Clear all tracker stats</li>
+                    <li>Restart the web server</li>
+                </ul>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onclick="resetSettings()">Yes</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onclick="resetSettings()">Reset</button>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Application Config -->
-<h5>Application Config</h5>
-<div class="was-validated">
-    <div class="mb-2">
-        <div class="input-group input-group-sm rounded-0">
-            <span class="input-group-text rounded-0" id="inputGroup-sizing-sm">{{osu_id_name}}</span>
-            <input id="osu_id_key" type="number" class="form-control rounded-0" aria-describedby="inputGroup-sizing-sm" value="{{osu_id_val}}" required>
-            <div class="invalid-feedback">Please enter your osu! ID</div>
+<div class="row">
+    <div class="col-12 col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header">Application Config</div>
+            <div class="card-body d-flex flex-column gap-3">
+                <div>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">{{bancho_id_name}}</span>
+                        <input id="bancho_id_key" type="number" class="form-control" value="{{bancho_id_val}}">
+                    </div>
+                    <div class="form-text">{{bancho_id_desc}}</div>
+                </div>
+                <div>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">{{titanic_id_name}}</span>
+                        <input id="titanic_id_key" type="number" class="form-control" value="{{titanic_id_val}}">
+                    </div>
+                    <div class="form-text">{{titanic_id_desc}}</div>
+                </div>
+                <div class="{{hide_on_privateServer}}">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">{{client_id_name}}</span>
+                        <input id="client_id_key" type="number" class="form-control" value="{{client_id_val}}" required>
+                    </div>
+                    <div class="form-text">{{client_id_desc}}</div>
+                </div>
+                <div class="{{hide_on_privateServer}}">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">{{client_secret_name}}</span>
+                        <input id="client_secret_key" type="password" class="form-control" value="{{client_secret_val}}" required>
+                    </div>
+                    <div class="form-text">{{client_secret_desc}}</div>
+                </div>
+                <div>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">{{api_refreshInterval_name}}</span>
+                        <input id="api_refreshInterval_key" type="number" class="form-control" min="5000" value="{{api_refreshInterval_val}}" required>
+                    </div>
+                    <div class="form-text">{{api_refreshInterval_desc}}</div>
+                </div>
+                <div>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">{{gameMode_name}}</span>
+                        <select id="gameMode_key" class="form-select">
+                            <option value="0" {{gameMode_val_0}}>Standard</option>
+                            <option value="1" {{gameMode_val_1}}>Taiko</option>
+                            <option value="2" {{gameMode_val_2}}>Catch</option>
+                            <option value="3" {{gameMode_val_3}}>Mania</option>
+                        </select>
+                    </div>
+                    <div class="form-text">{{gameMode_desc}}</div>
+                </div>
+                <div>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">{{server_name}}</span>
+                        <select id="server_key" class="form-select">
+                            <option value="0" {{server_val_0}}>Bancho</option>
+                            <option value="1" {{server_val_1}}>Titanic</option>
+                        </select>
+                    </div>
+                    <div class="form-text">{{server_desc}}</div>
+                </div>
+            </div>
         </div>
-        <div class="form-text">{{osu_id_desc}}</div>
-    </div>
-    <div class="mb-2 rounded-0 {{hide_on_privateServer}}">
-        <div class="input-group input-group-sm rounded-0">
-            <span class="input-group-text rounded-0" id="inputGroup-sizing-sm">{{client_id_name}}</span>
-            <input id="client_id_key" type="number" class="form-control rounded-0" aria-describedby="inputGroup-sizing-sm" value="{{client_id_val}}" required>
-            <div class="invalid-feedback">Please enter a Client ID.</div>
+
+        <div class="alert alert-info {{hide_on_privateServer}}" role="alert">
+            Get a <strong>Client ID</strong> and <strong>Client Secret</strong> by creating an OAuth Application in your
+            <a href="https://osu.ppy.sh/home/account/edit" target="_blank">osu! Account Settings</a>.
         </div>
-        <div class="form-text">{{client_id_desc}}</div>
     </div>
-    <div class="mb-2 rounded-0 {{hide_on_privateServer}}">
-        <div class="input-group input-group-sm rounded-0">
-            <span class="input-group-text rounded-0" id="inputGroup-sizing-sm">{{client_secret_name}}</span>
-            <input id="client_secret_key" type="password" class="form-control rounded-0" aria-describedby="inputGroup-sizing-sm" value="{{client_secret_val}}" required>
-            <div class="invalid-feedback">Please enter a Client Secret.</div>
-        </div>
-        <div class="form-text">{{client_secret_desc}}</div>
-    </div>
-    <div class="mb-2">
-        <div class="input-group input-group-sm rounded-0">
-            <span class="input-group-text rounded-0" id="inputGroup-sizing-sm">{{api_refreshInterval_name}}</span>
-            <input id="api_refreshInterval_key" type="number" class="form-control rounded-0" aria-describedby="inputGroup-sizing-sm" min="5000" value="{{api_refreshInterval_val}}" required>
-            <div class="invalid-feedback">Please enter a Refresh Interval in (ms).</div>
-        </div>
-        <div class="form-text">{{api_refreshInterval_desc}}</div>
-    </div>
-    <div class="mb-2">
-        <div class="input-group input-group-sm rounded-0">
-            <span class="input-group-text rounded-0" id="inputGroup-sizing-sm">{{gameMode_name}}</span>
-            <select id="gameMode_key" class="form-select form-select-sm rounded-0">
-                <option value="0" {{gameMode_val_0}}>Standard</option>
-                <option value="1" {{gameMode_val_1}}>Taiko</option>
-                <option value="2" {{gameMode_val_2}}>Catch</option>
-                <option value="3" {{gameMode_val_3}}>Mania</option>
-            </select>
-        </div>
-        <div class="form-text">{{gameMode_desc}}</div>
-    </div>
-    <div class="mb-2">
-        <div class="input-group input-group-sm rounded-0">
-            <span class="input-group-text rounded-0" id="inputGroup-sizing-sm">{{server_name}}</span>
-            <select id="server_key" class="form-select form-select-sm rounded-0">
-                <option value="0" {{server_val_0}}>Bancho</option>
-                <option value="1" {{server_val_1}}>Titanic</option>
-            </select>
-        </div>
-        <div class="form-text">{{server_desc}}</div>
-    </div>
-</div>
-<div class="alert alert-info {{hide_on_privateServer}}" role="alert">
-    You can get a "Client ID" and "Client Secret" by creating an OAuth Application in your: <a href="https://osu.ppy.sh/home/account/edit" target="_blank">osu! Account Settings</a>
 </div>
 
-<!-- Tracker Config-->
-<h5 class="mt-5">{{tracker_config_name}}</h5>
-<h6>Refresh the page if you don't see config for your server.</h6>
-<div id="tracker-config-container" class="d-flex flex-wrap gap-1 mb-5">
+<!-- Tracker Config -->
+<p class="fw-semibold text-uppercase text-secondary mt-4">{{tracker_config_name}}</p>
+<p class="form-text mb-3">Toggle fields on/off and drag to reorder. Changes are saved with <strong>Save Settings</strong>.</p>
+<div id="tracker-config-container" class="d-flex flex-column gap-1 mb-5">
     {{#trackerConfig}}
-    <div class="col-auto flex-fill trackerToggle">
-        <input id="{{id}}" class="btn-check" type="checkbox" {{checked}}>
-        <label class="btn btn-outline-primary text-nowrap w-100" for="{{id}}">{{label}}</label>
+    <div class="d-flex align-items-center gap-2 px-3 py-2 rounded border border-secondary-subtle bg-body-secondary tracker-row"
+         draggable="true" data-key="{{id}}">
+        <span class="text-secondary" title="Drag to reorder" style="cursor:grab;user-select:none;font-size:1.1rem">&#9776;</span>
+        <input id="chk_{{id}}" class="form-check-input flex-shrink-0" type="checkbox" autocomplete="off"{{checked}}>
+        <label class="form-check-label flex-grow-1 mb-0" for="chk_{{id}}">{{label}}</label>
+        {{#bancho}}<span class="badge text-bg-primary">Bancho</span>{{/bancho}}
+        {{#titanic}}<span class="badge badge-titanic">Titanic</span>{{/titanic}}
     </div>
     {{/trackerConfig}}
 </div>
+
+<script>
+(function () {
+    const c = document.getElementById('tracker-config-container');
+    let src = null;
+    c.addEventListener('dragstart', e => {
+        src = e.target.closest('.tracker-row');
+        if (src) src.style.opacity = '0.4';
+        e.dataTransfer.effectAllowed = 'move';
+    });
+    c.addEventListener('dragend', () => { if (src) src.style.opacity = ''; src = null; });
+    c.addEventListener('dragover', e => {
+        e.preventDefault();
+        const target = e.target.closest('.tracker-row');
+        if (!target || target === src) return;
+        const r = target.getBoundingClientRect();
+        c.insertBefore(src, e.clientY < r.top + r.height / 2 ? target : target.nextSibling);
+    });
+})();
+</script>
+

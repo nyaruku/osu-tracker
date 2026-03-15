@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html data-bs-theme="dark">
 <head>
-    <title>{{route_title}}</title>
+    <title>{{title}}</title>
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -18,7 +18,7 @@
         let socket;
 
         function connectWebSocket() {
-            socket = new WebSocket("ws://{{tracker_hostname}}:{{tracker_port}}/ws/main/");
+            socket = new WebSocket("ws://{{hostname}}:{{port}}/ws/main/");
 
             socket.onmessage = (event) => {
                 const el = document.getElementById(`ws-conn-lost`);
@@ -60,11 +60,21 @@
         }
 
         function sendNotif(msg) {
-            const toastElement = document.getElementById('objectToast');
-            const toastSpan = document.getElementById('toast-msg');
-            toastSpan.textContent = msg;
-            const toastInstance = bootstrap.Toast.getOrCreateInstance(toastElement);
-            toastInstance.show();
+            const container = document.getElementById('toast-container');
+            const el = document.createElement('div');
+            el.className = 'toast align-items-center';
+            el.setAttribute('role', 'alert');
+            el.setAttribute('aria-live', 'assertive');
+            el.setAttribute('aria-atomic', 'true');
+            el.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${msg}</div>
+                    <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>`;
+            container.appendChild(el);
+            const instance = new bootstrap.Toast(el, { delay: 3000 });
+            el.addEventListener('hidden.bs.toast', () => el.remove());
+            instance.show();
         }
 
         function resetSettings() {
@@ -79,7 +89,8 @@
                 trackerConfig: []
             };
             // Get values from Application Config inputs
-            const osuId = document.getElementById('osu_id_key').value;
+            const banchoId = document.getElementById('bancho_id_key').value;
+            const titanicId = document.getElementById('titanic_id_key').value;
             const clientId = document.getElementById('client_id_key').value;
             const clientSecret = document.getElementById('client_secret_key').value;
             const apiRefreshInterval = document.getElementById('api_refreshInterval_key').value;
@@ -91,25 +102,27 @@
             }
 
             // Add Application Config values to the array
-            config.applicationConfig.push({ key: 'osuId', value: osuId });
+            config.applicationConfig.push({ key: 'banchoId',  value: banchoId });
+            config.applicationConfig.push({ key: 'titanicId', value: titanicId });
             config.applicationConfig.push({ key: 'clientId', value: clientId });
             config.applicationConfig.push({ key: 'clientSecret', value: clientSecret });
             config.applicationConfig.push({ key: 'apiInterval', value: apiRefreshInterval });
             config.applicationConfig.push({ key: 'gameMode', value: gameMode });
             config.applicationConfig.push({ key: 'server', value: server });
 
-            // Get values from Tracker Config checkboxes
-            const trackerConfigContainer = document.getElementById('tracker-config-container');
-            const checkboxes = trackerConfigContainer.querySelectorAll('input[type="checkbox"]');
-            checkboxes.forEach((checkbox) => {
-                config.trackerConfig.push({
-                    key: checkbox.id,
-                    value: checkbox.checked
+            // Tracker Config
+            const trackerContainer = document.getElementById('tracker-config-container');
+            if (trackerContainer) {
+                trackerContainer.querySelectorAll('[data-key]').forEach((row, idx) => {
+                    config.trackerConfig.push({
+                        key:     row.dataset.key,
+                        display: row.querySelector('input[type="checkbox"]').checked,
+                        sort:    idx + 1
+                    });
                 });
-            });
+            }
 
             sendMessage("#saveSettings", config);
-            sendNotif("Saved Settings., please reload this page, to update settings.")
 
         };
 
@@ -117,44 +130,36 @@
     </script>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/">
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container-lg">
+            <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/">
                 <span id="title-display">osu! Tracker</span>
-                <span class="badge text-bg-primary" id="version-display">{{tracker_version}}</span>
+                <span class="badge text-bg-primary fw-normal" id="version-display">{{version}}</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="/">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/settings">Settings</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/help">Help</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/info">Info</a></li>
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-1">
+                    <li class="nav-item"><a class="nav-link {{nav_index_active}}"    href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link {{nav_settings_active}}" href="/settings">Settings</a></li>
+                    <li class="nav-item"><a class="nav-link {{nav_help_active}}"     href="/help">Help</a></li>
+                    <li class="nav-item"><a class="nav-link {{nav_info_active}}"     href="/info">Info</a></li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <div id="ws-conn-lost" class="alert alert-warning rounded-0" role="alert" hidden>
-        <span>Websocket connection got closed, reconnecting...</span>
+    <div id="ws-conn-lost" class="alert mb-0" role="alert" hidden>
+        WebSocket connection lost - reconnecting...
     </div>
 
-    <div class="container mt-5">
+    <div class="container-lg py-4 py-lg-5">
         <!-- Route Content -->
-        {{route_content}}
+        {{{route_content}}}
     </div>
 
-    <div class="toast-container bottom-0 end-0 p-3">
-        <div id="objectToast" class="toast text-bg-secondary fade hide" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body">
-                    <span id="toast-msg"></span>
-                </div>
-                <button type="button" data-bs-theme="dark" class="btn-close btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
+    <div id="toast-container" class="toast-container bottom-0 end-0 p-3 d-flex flex-column gap-2">
     </div>
 </body>
 </html>

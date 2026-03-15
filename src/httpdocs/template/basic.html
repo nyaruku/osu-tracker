@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html data-bs-theme="dark">
 <head>
-    <title>osu! Tracker Overlay</title>
+    <meta name="type"    content="overlay">
+    <meta name="title"   content="Basic">
+    <meta name="creator" content="Railgun">
     <link rel="icon" type="image/x-icon" href="../static/favicon.ico">
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -74,7 +76,7 @@
             position: absolute;
             top: 0; right: 0;
             width: calc(1920px - (19.20px * var(--resScale)));
-						height: 100%;
+			height: 100%;
         }
         #sidebar .stat {
             margin-bottom: 6px;
@@ -123,8 +125,8 @@
 		.progress-bar.pulse {
 			position: relative;
 			overflow: hidden;
-			transition: width 0.4s ease; /* smooth width changes */
-			background-color: #0d6efd; /* Bootstrap primary color */
+			transition: width 0.4s ease;
+			background-color: #0d6efd;
 		}
 
 		/* Sweeping pulse effect */
@@ -132,8 +134,8 @@
 			content: "";
 			position: absolute;
 			top: 0;
-			left: -50%;       /* start off left */
-			width: 50%;       /* width of the sweep */
+			left: -50%;
+			width: 50%;
 			height: 100%;
 			background: linear-gradient(
 					90deg,
@@ -148,9 +150,6 @@
 			0%   { left: -50%; }
 			100% { left: 100%; }
 		}
-
-
-
     </style>
 
     <script>
