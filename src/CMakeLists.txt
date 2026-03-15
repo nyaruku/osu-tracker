@@ -207,8 +207,8 @@ add_compile_definitions(OSU_TRACKER_API_TIMEOUT=5000)
 
 # OSU_TRACKER PROJECT STATIC STRINGS
 add_compile_definitions(OSU_TRACKER_NAME="osu! Tracker")
-add_compile_definitions(OSU_TRACKER_VERSION="v0.6.0")
-add_compile_definitions(OSU_TRACKER_TITLE="osu! Tracker v0.6.0")
+add_compile_definitions(OSU_TRACKER_VERSION="v0.5.0")
+add_compile_definitions(OSU_TRACKER_TITLE="osu! Tracker v0.5.0")
 add_compile_definitions(OSU_TRACKER_RELEASE_TYPE="Beta")
 
 # CMAKE Info
