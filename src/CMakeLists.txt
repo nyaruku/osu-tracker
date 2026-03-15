@@ -71,13 +71,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(cpr)
 
-FetchContent_Declare(
-  Catch2
-  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-  GIT_TAG v3.5.2
-)
-FetchContent_MakeAvailable(Catch2)
-
 # Unix like already have zlib most of the time
 if (WIN32)
   set(ZLIB_USE_STATIC_LIBS "ON")
