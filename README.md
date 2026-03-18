@@ -20,29 +20,6 @@ A web server based osu! stats/session tracker
 - Score Inspector API by Amayakase
 - Score Rank API by Respektive
 
-
-## How to build from source:
-- Windows
-  - Visual Studio (Recommended)
-- Linux
-  - Make sure u have these installed:
-    - cmake
-    - libcurl4-openssl-dev (provides lib files for linking) | (curl is enough, if u are using arch)
-    - ninja (generator)
-  - Use bash scripts
-    - "release.sh" , "debug.sh"
-    - Usage
-      
-      Configure
-      ```sh
-      ./release.sh configure
-      ```
-      
-      Build
-      ```sh
-      ./release.sh build
-      ```
-
 ## TODO:
 - Save Sessions
 - Compare overall stats between sessions
