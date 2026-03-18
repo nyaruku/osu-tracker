@@ -18,7 +18,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
         build_type: [release]
-        architecture: [x86]  # Only target x86 (32-bit)
+        architecture: [x86]
         c_compiler: [gcc, cl]
         cpp_compiler: [g++, cl]
         include:
@@ -59,9 +59,6 @@ jobs:
       - name: Initialize submodules
         run: git submodule update --init --recursive
 
-      - name: List files in osu-tracker directory
-        run: ls -R ${{ github.workspace }}
-
       - name: Install dependencies on Linux
         if: runner.os == 'Linux'
         run: |
@@ -76,40 +73,25 @@ jobs:
         uses: TheMrMilchmann/setup-msvc-dev@v3
         with:
           arch: x86
+
       - name: Install Meson and Ninja on Windows
         if: runner.os == 'Windows'
         run: |
           python -m pip install --upgrade pip
           pip install meson==1.3.2 ninja==1.11.1
 
-      - name: Configure-Linux
-        if: runner.os == 'Linux'
+      - name: Configure
         uses: lukka/run-cmake@v10.8
         with:
-          cmakeListsTxtPath: ${{ github.workspace }}/src/CMakeLists.txt
-          configurePreset: '${{ matrix.preset }}'
-
-      - name: Configure-Windows
-        if: runner.os == 'Windows'
-        uses: lukka/run-cmake@v10.8
-        with:
-          cmakeListsTxtPath: ${{ github.workspace }}/src/CMakeLists.txt
+          cmakeListsTxtPath: ${{ github.workspace }}/CMakeLists.txt
           configurePreset: '${{ matrix.preset }}'
         env:
           VCPKG_ROOT:
 
-      - name: Build-Linux
-        if: runner.os == 'Linux'
+      - name: Build
         uses: lukka/run-cmake@v10.8
         with:
-          cmakeListsTxtPath: ${{ github.workspace }}/src/CMakeLists.txt
-          buildPreset: '${{ matrix.preset }}'
-
-      - name: Build-Windows
-        if: runner.os == 'Windows'
-        uses: lukka/run-cmake@v10.8
-        with:
-          cmakeListsTxtPath: ${{ github.workspace }}/src/CMakeLists.txt
+          cmakeListsTxtPath: ${{ github.workspace }}/CMakeLists.txt
           buildPreset: '${{ matrix.preset }}'
         env:
           VCPKG_ROOT:
@@ -117,29 +99,29 @@ jobs:
       - name: Zip Linux Release Artifact
         if: runner.os == 'Linux'
         run: |
-          cd ${{ github.workspace }}/src/out/build/x86-release-linux
-          zip -r ${{ github.workspace }}/src/out/x86-release-linux.zip osu-tracker
+          cd ${{ github.workspace }}/out/build/x86-release-linux
+          zip -r ${{ github.workspace }}/out/x86-release-linux.zip osu-tracker
 
       - name: Zip Windows Release Artifact
         if: runner.os == 'Windows'
         run: |
           Compress-Archive `
-            -Path "${{ github.workspace }}\src\out\build\x86-release-windows\osu-tracker*" `
-            -DestinationPath "${{ github.workspace }}\src\out\x86-release-windows.zip"
+            -Path "${{ github.workspace }}\out\build\x86-release-windows\osu-tracker" `
+            -DestinationPath "${{ github.workspace }}\out\x86-release-windows.zip"
 
       - name: Upload Linux Release Artifact
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v4
         with:
           name: x86-release-linux
-          path: '/home/runner/work/osu-tracker/osu-tracker/src/out/x86-release-linux.zip'
+          path: ${{ github.workspace }}/out/x86-release-linux.zip
 
       - name: Upload Windows Release Artifact
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v4
         with:
           name: x86-release-windows
-          path: 'D:/a/osu-tracker/osu-tracker/src/out/x86-release-windows.zip'
+          path: ${{ github.workspace }}/out/x86-release-windows.zip
 
   release:
     name: Create Release
