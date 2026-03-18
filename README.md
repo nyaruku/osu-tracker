@@ -13,7 +13,7 @@ A web server based osu! stats/session tracker
 ## Bug Reporting / Questions / Suggestions
 - Open Issue or submit PR
 - Join my Discord Server and just ask me:
-- https://discord.gg/amj5vBjTQU
+- https://discord.gg/QNCmZBqwBQ
 
 ## Credits
 - osu! API by osu!
