@@ -8,6 +8,9 @@
 #include <thread>
 #include <chrono>
 #include <GLFW/glfw3.h>
+#ifndef GL_SHADING_LANGUAGE_VERSION
+#define GL_SHADING_LANGUAGE_VERSION 0x8B8C
+#endif
 #include <Core/Config.h>
 #include <Resources/Fonts/droid_sans.h>
 
