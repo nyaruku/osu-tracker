@@ -86,8 +86,8 @@ target_compile_definitions(osu-tracker PRIVATE
 
     # Project strings
     OSU_TRACKER_NAME="osu! Tracker"
-    OSU_TRACKER_VERSION="v0.5.0"
-    OSU_TRACKER_TITLE="osu! Tracker v0.5.0"
+    OSU_TRACKER_VERSION="v0.5.1"
+    OSU_TRACKER_TITLE="osu! Tracker v0.5.1"
     OSU_TRACKER_RELEASE_TYPE="Beta"
 
     # CMake info
