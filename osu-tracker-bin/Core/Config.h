@@ -130,44 +130,38 @@ namespace Core::Config {
 	namespace data {
 
 		inline std::vector<dataEntry> arr {
-			// key                  name                      sort  init cur chg  dataType              formatType             single  pos   disp   bancho titanic
-			{"level",               "Level",                     1,  "","","",  dataType::d_float,    formatType::f_decimal,  false, true,  true,  true,  true }, //  0
-			{"scoreRank",           "Score Rank",                2,  "","","",  dataType::d_int,      formatType::f_rank,     false, true,  true,  true,  true }, //  1
-			{"ppRank",              "PP Rank",                   3,  "","","",  dataType::d_int,      formatType::f_rank,     false, true,  true,  true,  true }, //  2
-			{"ppv1Rank",            "PPv1 Rank",                 4,  "","","",  dataType::d_int,      formatType::f_rank,     false, true,  true,  false, true }, //  3
-			{"countryRank",         "Country Rank",              5,  "","","",  dataType::d_int,      formatType::f_rank,     false, true,  true,  false, true }, //  4
-
-			{"pp",                  "PP",                        6,  "","","",  dataType::d_float,    formatType::f_decimal,  false, true,  true,  true,  true }, //  5
-			{"ppv1",                "PPv1",                      7,  "","","",  dataType::d_float,    formatType::f_decimal,  false, true,  true,  false, true }, //  6
-			{"acc",                 "Accuracy",                  8,  "","","",  dataType::d_float,    formatType::f_percent,  false, true,  true,  true,  true }, //  7
-
-			{"playtime",            "Play Time",                 9,  "","","",  dataType::d_longLong, formatType::f_time,     false, true,  true,  true,  true }, //  8
-			{"playcount",           "Play Count",               10,  "","","",  dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true }, //  9
-			{"maxCombo",            "Max Combo",                11,  "","","",  dataType::d_int,      formatType::f_int,      false, true,  true,  false, true }, // 10
-			{"totalHits",           "Total Hits",               12,  "","","",  dataType::d_longLong, formatType::f_int,      false, true,  true,  true,  true }, // 11
-			{"replayViews",         "Replay Views",             13,  "","","",  dataType::d_int,      formatType::f_int,      false, true,  true,  false, true }, // 12
-
-			{"rankedScore",         "Ranked Score",             14,  "","","",  dataType::d_longLong, formatType::f_int,      false, true,  true,  true,  true }, // 13
-			{"totalScore",          "Total Score",              15,  "","","",  dataType::d_longLong, formatType::f_int,      false, true,  true,  true,  true }, // 14
-
-			{"clears",              "Profile Clears",           16,  "","","",  dataType::d_int,      formatType::f_int,      false, true,  true,  true,  false },
-			{"totalClears",         "Total Clears",             17,  "","","",  dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true }, // 16
-
-			{"silverSS",            "Rank SSH",                 18,  "","","",  dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true }, // 17
-			{"goldSS",              "Rank SS",                  19,  "","","",  dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true }, // 18
-			{"silverS",             "Rank SH",                  20,  "","","",  dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true }, // 19
-			{"goldS",               "Rank S",                   21,  "","","",  dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true }, // 20
-			{"a",                   "Rank A",                   22,  "","","",  dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true }, // 21
-			{"b",                   "Rank B",                   23,  "","","",  dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true }, // 22
-			{"c",                   "Rank C",                   24,  "","","",  dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true }, // 23
-			{"d",                   "Rank D",                   25,  "","","",  dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true }, // 24
-			{"totalSS",             "Total SS",                 26,  "","","",  dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true }, // 25
-			{"totalS",              "Total S",                  27,  "","","",  dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true }, // 26
-
-			{"targetRank",          "Target Rank",              28,  "","","",  dataType::d_int,      formatType::f_rank,     true,  true,  true,  true,  false}, // 27
-			{"targetUser",          "Target Player",            29,  "","","",  dataType::d_string,   formatType::f_string,   true,  true,  true,  true,  false}, // 28
-			{"targetScore",         "Target Score",             30,  "","","",  dataType::d_longLong, formatType::f_int,      true,  true,  true,  true,  false}, // 29
-			{"completion",          "Completion%",              31,  "","","",  dataType::d_float,    formatType::f_percent,  false, true,  true,  true,  true }, // 30
+			// key           name              sort                                                       single  pos   disp   bancho titanic
+			{"level",       "Level",           1, "","","", dataType::d_float,    formatType::f_decimal,  false, true,  true,  true,  true },
+			{"scoreRank",   "Score Rank",      2, "","","", dataType::d_int,      formatType::f_rank,     false, true,  true,  true,  true },
+			{"ppRank",      "PP Rank",         3, "","","", dataType::d_int,      formatType::f_rank,     false, true,  true,  true,  true },
+			{"ppv1Rank",    "PPv1 Rank",       4, "","","", dataType::d_int,      formatType::f_rank,     false, true,  true,  false, true },
+			{"countryRank", "Country Rank",    5, "","","", dataType::d_int,      formatType::f_rank,     false, true,  true,  true,  true },
+			{"pp",          "PP",              6, "","","", dataType::d_float,    formatType::f_decimal,  false, true,  true,  true,  true },
+			{"ppv1",        "PPv1",            7, "","","", dataType::d_float,    formatType::f_decimal,  false, true,  true,  false, true },
+			{"acc",         "Accuracy",        8, "","","", dataType::d_float,    formatType::f_percent,  false, true,  true,  true,  true },
+			{"playtime",    "Play Time",       9, "","","", dataType::d_longLong, formatType::f_time,     false, true,  true,  true,  true },
+			{"playcount",   "Play Count",     10, "","","", dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true },
+			{"maxCombo",    "Max Combo",      11, "","","", dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true },
+			{"totalHits",   "Total Hits",     12, "","","", dataType::d_longLong, formatType::f_int,      false, true,  true,  true,  true },
+			{"replayViews", "Replay Views",   13, "","","", dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true },
+			{"rankedScore", "Ranked Score",   14, "","","", dataType::d_longLong, formatType::f_int,      false, true,  true,  true,  true },
+			{"totalScore",  "Total Score",    15, "","","", dataType::d_longLong, formatType::f_int,      false, true,  true,  true,  true },
+			{"clears",      "Profile Clears", 16, "","","", dataType::d_int,      formatType::f_int,      false, true,  true,  true,  false},
+			{"totalClears", "Total Clears",   17, "","","", dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true },
+			{"silverSS",    "Rank SSH",       18, "","","", dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true },
+			{"goldSS",      "Rank SS",        19, "","","", dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true },
+			{"silverS",     "Rank SH",        20, "","","", dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true },
+			{"goldS",       "Rank S",         21, "","","", dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true },
+			{"a",           "Rank A",         22, "","","", dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true },
+			{"b",           "Rank B",         23, "","","", dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true },
+			{"c",           "Rank C",         24, "","","", dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true },
+			{"d",           "Rank D",         25, "","","", dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true },
+			{"totalSS",     "Total SS",       26, "","","", dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true },
+			{"totalS",      "Total S",        27, "","","", dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true },
+			{"targetRank",  "Target Rank",    28, "","","", dataType::d_int,      formatType::f_rank,     true,  true,  true,  true,  false},
+			{"targetUser",  "Target Player",  29, "","","", dataType::d_string,   formatType::f_string,   true,  true,  true,  true,  false},
+			{"targetScore", "Target Score",   30, "","","", dataType::d_longLong, formatType::f_int,      true,  true,  true,  true,  false},
+			{"completion",  "Completion%",    31, "","","", dataType::d_float,    formatType::f_percent,  false, true,  true,  true,  true },
 		};
 
 		// Formatted copy of arr - written by fetchThread, read by web routes and imgui.

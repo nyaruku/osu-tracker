@@ -80,15 +80,15 @@ namespace Api::Bancho {
             }
 
             // Bancho returns null (not 0) for rank/pp/etc. when a user has no plays in a mode.
-            auto nsInt   = [&](const nlohmann::json& j, const char* k, int       d = 0   ) {
+            auto nsInt = [&](const nlohmann::json& j, const char* k, int d = 0) {
                 const auto it = j.find(k);
-                return (it != j.end() && !it->is_null()) ? it->get<int>()       : d;
+                return (it != j.end() && !it->is_null()) ? it->get<int>() : d;
             };
-            auto nsFloat = [&](const nlohmann::json& j, const char* k, float     d = 0.f ) {
+            auto nsFloat = [&](const nlohmann::json& j, const char* k, float d = 0.f) {
                 const auto it = j.find(k);
-                return (it != j.end() && !it->is_null()) ? it->get<float>()     : d;
+                return (it != j.end() && !it->is_null()) ? it->get<float>() : d;
             };
-            auto nsLL    = [&](const nlohmann::json& j, const char* k, long long d = 0LL ) {
+            auto nsLL = [&](const nlohmann::json& j, const char* k, long long d = 0LL) {
                 const auto it = j.find(k);
                 return (it != j.end() && !it->is_null()) ? it->get<long long>() : d;
             };
@@ -97,10 +97,13 @@ namespace Api::Bancho {
             Helpers::setField("rankedScore", std::to_string(nsLL  (st, "ranked_score")),  init);
             Helpers::setField("totalScore",  std::to_string(nsLL  (st, "total_score")),   init);
             Helpers::setField("ppRank",      std::to_string(nsInt  (st, "global_rank")),  init);
+            Helpers::setField("countryRank", std::to_string(nsInt  (st, "country_rank")), init);
             Helpers::setField("pp",          std::to_string(nsFloat(st, "pp")),           init);
             Helpers::setField("acc",         std::to_string(nsFloat(st, "hit_accuracy")), init);
             Helpers::setField("playtime",    std::to_string(nsLL  (st, "play_time")),     init);
             Helpers::setField("playcount",   std::to_string(nsInt  (st, "play_count")),   init);
+            Helpers::setField("maxCombo",    std::to_string(nsInt  (st, "maximum_combo")),init);
+            Helpers::setField("replayViews", std::to_string(nsInt  (st, "replays_watched_by_others")),init);
             Helpers::setField("totalHits",   std::to_string(nsLL  (st, "total_hits")),    init);
             Helpers::setField("silverSS",    std::to_string(nsInt  (gc, "ssh")),          init);
             Helpers::setField("goldSS",      std::to_string(nsInt  (gc, "ss")),           init);

@@ -98,7 +98,10 @@ namespace Api::PrivateServer::Titanic {
 
             Helpers::setField("totalSS",     std::to_string(Helpers::getIntField("silverSS") + Helpers::getIntField("goldSS")), init);
             Helpers::setField("totalS",      std::to_string(Helpers::getIntField("silverS")  + Helpers::getIntField("goldS")),  init);
+
+            Helpers::setField("clears",      std::to_string(Helpers::getIntField("totalSS")  + Helpers::getIntField("totalS") + Helpers::getIntField("a")), init);
             Helpers::setField("totalClears", std::to_string(Helpers::getIntField("clears") + Helpers::getIntField("b") + Helpers::getIntField("c") + Helpers::getIntField("d")), init);
+
             Helpers::setField("completion",  std::to_string((static_cast<float>(Helpers::getIntField("totalClears")) / static_cast<float>(completionDenom)) * 100), init);
 
             Helpers::calcDifference();
@@ -110,5 +113,4 @@ namespace Api::PrivateServer::Titanic {
         catch (...)                                { Core::Console::writeLog("titanic_api() -> Unknown",                        true, 255, 0, 0); }
         return -1;
     }
-
 }
