@@ -150,7 +150,7 @@ namespace Core::Config {
 			{"rankedScore",         "Ranked Score",             14,  "","","",  dataType::d_longLong, formatType::f_int,      false, true,  true,  true,  true }, // 13
 			{"totalScore",          "Total Score",              15,  "","","",  dataType::d_longLong, formatType::f_int,      false, true,  true,  true,  true }, // 14
 
-			{"clears",              "Profile Clears",           16,  "","","",  dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true }, // 15
+			{"clears",              "Profile Clears",           16,  "","","",  dataType::d_int,      formatType::f_int,      false, true,  true,  true,  false },
 			{"totalClears",         "Total Clears",             17,  "","","",  dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true }, // 16
 
 			{"silverSS",            "Rank SSH",                 18,  "","","",  dataType::d_int,      formatType::f_int,      false, true,  true,  true,  true }, // 17
