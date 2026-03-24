@@ -168,10 +168,13 @@ int ui_main()
                 const float settingsW = 70.0f;
                 const float comboW    = (availW - settingsW - spcX * 2.0f) / 2.0f;
 
-                static bool pendingSwitch    = false;
-                static int  switchFetchCount = -1;
-                if (pendingSwitch && Core::Session::fetchCount.load() > switchFetchCount)
-                    pendingSwitch = false;
+                static bool pendingSwitch = false;
+                static bool sawReset      = false;
+                if (pendingSwitch) {
+                    int fc = Core::Session::fetchCount.load();
+                    if (!sawReset && fc == 0) sawReset = true;
+                    if (sawReset  && fc >= 1) { pendingSwitch = false; sawReset = false; }
+                }
 
                 static const char* srvItems[] = { "Bancho", "Titanic" };
                 int srvIdx = (int)Core::Config::application.server;
@@ -180,8 +183,8 @@ int ui_main()
                     Core::Config::application.server = (Core::Config::server)srvIdx;
                     Core::Config::write();
                     Core::Session::restartFetch();
-                    pendingSwitch    = true;
-                    switchFetchCount = Core::Session::fetchCount.load();
+                    pendingSwitch = true;
+                    sawReset      = false;
                 }
 
                 ImGui::SameLine();
@@ -193,8 +196,8 @@ int ui_main()
                     Core::Config::application.gameMode = (Core::Config::gameMode)modeIdx;
                     Core::Config::write();
                     Core::Session::restartFetch();
-                    pendingSwitch    = true;
-                    switchFetchCount = Core::Session::fetchCount.load();
+                    pendingSwitch = true;
+                    sawReset      = false;
                 }
 
                 ImGui::SameLine();
