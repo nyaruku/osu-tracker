@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="type"    content="overlay">
+    <meta name="title"   content="Basic Small">
+    <meta name="creator" content="Respektive">
+    <link rel="icon" type="image/x-icon" href="../static/favicon.ico">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&display=swap">
+
+    <link rel="stylesheet" href="../static/bootstrap/bootstrap.min.css">
+    <script src="../static/bootstrap/jquery-3.7.1.min.js"></script>
+    <script src="../static/bootstrap/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" href="../static/index.css">
+    <script type="text/javascript" src="../static/index.js"></script>
+
+    <style>
+        :root {
+            --colorBase:    rgb(255, 255, 255);
+            --colorChange:  rgb(100, 255, 100);
+            --textShadow:   0 0 2px black, 0 0 2px black, 0 0 2px black;
+            --fontSize:     38px;
+            --imgHeight:    42px;
+
+            --glowOpacity: 0.66;
+            --glowSS:  rgba(255, 255,   0, 0.66);
+            --glowS:   rgba(255, 255,   0, 0.66);
+            --glowA:   rgba(  0, 255,   0, 0.66);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 8px;
+            background: transparent;
+            color: var(--colorBase);
+            font-family: 'Comfortaa', sans-serif;
+            font-size: var(--fontSize);
+            font-weight: 700;
+            text-shadow: var(--textShadow);
+        }
+
+		.change {
+            color: var(--colorChange);
+        }
+
+        .grade-entry img {
+            height: var(--imgHeight);
+            width: auto;
+        }
+
+        .rankss {
+            filter: drop-shadow(0 0 6px var(--glowSS));
+        }
+        .ranks {
+            filter: drop-shadow(0 0 6px var(--glowS));
+        }
+        .ranka {
+            filter: drop-shadow(0 0 6px var(--glowA));
+        }
+    </style>
+
+    <script>
+        let socket;
+
+        function connectWebSocket() {
+            socket = new WebSocket("ws://{{hostname}}:{{port}}/ws/overlay-data/");
+
+            socket.onopen = () => {
+                console.log("WebSocket connected");
+                setInterval(() => {
+                    if (socket.readyState === WebSocket.OPEN) {
+                        socket.send("");
+                    }
+                }, 3000);
+            };
+            socket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                for (const key in data) {
+                    switch (key) {
+                        default:
+                            const elements = document.getElementsByClassName(key);
+                            for (const el of elements) {
+                                el.textContent = data[key];
+                            }
+                            break;
+                    }
+                }
+            };
+            socket.onclose = () => {
+                console.log("WebSocket disconnected. Retrying...");
+                setTimeout(connectWebSocket, 1000);
+            };
+        }
+        window.onload = connectWebSocket;
+    </script>
+</head>
+
+<body>
+    <p class="m-0">Ranked Score: <span class="rankedScore_current"></span></p>
+    <p class="m-0">Gained Score: <span class="rankedScore_change change"></span></p>
+    <p class="m-0">Clears: <span class="clears_change"></span></p>
+
+    <div class="d-flex align-items-center gap-3 mt-1">
+        <div class="grade-entry d-flex align-items-center gap-2">
+            <img class="rankss" src="../static/images/gold_ss.png">
+            <span class="totalSS_change"></span>
+        </div>
+        <div class="grade-entry d-flex align-items-center gap-2">
+            <img class="ranks" src="../static/images/gold_s.png">
+            <span class="totalS_change"></span>
+        </div>
+        <div class="grade-entry d-flex align-items-center gap-2">
+            <img class="ranka" src="../static/images/a.png">
+            <span class="a_change"></span>
+        </div>
+    </div>
+</body>
+</html>
