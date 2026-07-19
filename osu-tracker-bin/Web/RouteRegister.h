@@ -11,16 +11,16 @@
 
 namespace Web::RouteRegister {
 
-	inline void registerAll(crow::SimpleApp& app) {
-		// Pages
-		Web::Routes::Pages::registerIndex(app);
-		Web::Routes::Pages::registerSettings(app);
-		Web::Routes::Pages::registerInfo(app);
-		Web::Routes::Pages::registerHelp(app);
-		Web::Routes::Pages::registerTemplate(app);
+    inline void registerAll(crow::SimpleApp& app) {
+        // Pages
+        Web::Routes::Pages::registerIndex(app);
+        Web::Routes::Pages::registerSettings(app);
+        Web::Routes::Pages::registerInfo(app);
+        Web::Routes::Pages::registerHelp(app);
+        Web::Routes::Pages::registerTemplate(app);
 
-		// WebSockets
-		Web::Routes::WebSockets::registerMain(app);
-		Web::Routes::WebSockets::registerOverlayData(app);
-	}
+        // WebSockets
+        Web::Routes::WebSockets::registerMain(app);
+        Web::Routes::WebSockets::registerOverlayData(app);
+    }
 }
